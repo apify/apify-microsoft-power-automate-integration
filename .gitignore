@@ -1,0 +1,63 @@
+# Local development files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Build outputs
+bin/
+obj/
+out/
+dist/
+
+# Dependency directories
+node_modules/
+packages/
+jspm_packages/
+
+# IDE and editor files
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+Thumbs.db
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Testing
+coverage/
+.nyc_output/
+
+# Power Automate specific
+*.msapp
+*.msappx
+*.zip
+*.msapp.source
+*.pbix
+
+# Certificates and secrets
+*.pfx
+*.p12
+*.key
+*.pem
+*.cert
+*.crt
+
+# Temporary files
+*.tmp
+*.temp
+temp/

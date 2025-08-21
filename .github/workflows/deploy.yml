@@ -1,0 +1,58 @@
+name: Deploy Connector
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'src/**'
+      - '.github/workflows/deploy.yml'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '8.0.x'
+    
+    - name: Install Power Platform CLI
+      run: dotnet tool install -g Microsoft.PowerApps.CLI.Tool
+    
+    - name: Create auth profile
+      env:
+        POWER_PLATFORM_ENVIRONMENT_URL: ${{ secrets.POWER_PLATFORM_ENVIRONMENT_URL }}
+        POWER_PLATFORM_CLIENT_ID: ${{ secrets.POWER_PLATFORM_CLIENT_ID }}
+        POWER_PLATFORM_CLIENT_SECRET: ${{ secrets.POWER_PLATFORM_CLIENT_SECRET }}
+        POWER_PLATFORM_TENANT_ID: ${{ secrets.POWER_PLATFORM_TENANT_ID }}
+      run: |
+        # Create service principal auth profile
+        pac auth create --environment $POWER_PLATFORM_ENVIRONMENT_URL \
+          --applicationId $POWER_PLATFORM_CLIENT_ID \
+          --clientSecret $POWER_PLATFORM_CLIENT_SECRET \
+          --tenantId $POWER_PLATFORM_TENANT_ID
+      continue-on-error: true
+    
+    - name: Update connector
+      env:
+        CONNECTOR_ID: ${{ secrets.CONNECTOR_ID }}
+      run: |
+        # Check if CONNECTOR_ID is set
+        if [ -z "$CONNECTOR_ID" ]; then
+          echo "Warning: CONNECTOR_ID is not set. Cannot update connector."
+          echo "If this is the first deployment, you need to create the connector manually first."
+          echo "After creating the connector, set the CONNECTOR_ID secret in your GitHub repository."
+          exit 0
+        fi
+        
+        # Update the connector
+        pac connector update \
+          --connector-id $CONNECTOR_ID \
+          --api-definition-file ./src/swagger.json \
+          --api-properties-file ./src/apiProperties.json \
+          --icon-file ./src/icon.png \
+          --script-file ./src/scripts.cs
+      continue-on-error: true

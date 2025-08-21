@@ -1,0 +1,113 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Apify",
+    "description": "Connect to Apify to run web scraping and automation tasks, extract data from websites, and process the results in your flows.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Apify Support",
+      "url": "https://apify.com/contact",
+      "email": "support@apify.com"
+    }
+  },
+  "host": "api.apify.com",
+  "basePath": "/v2",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "securityDefinitions": {
+    "API Key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "Authorization"
+    },
+    "OAuth2": {
+      "type": "oauth2",
+      "flow": "implicit",
+      "authorizationUrl": "https://console.apify.com/authorize/oauth",
+      "tokenUrl": "https://console-backend.apify.com/oauth/apps/token",
+      "scopes": {
+        "read": "Grants read access",
+        "write": "Grants write access",
+        "admin": "Grants read and write access to administrative information"
+      }
+    }
+  },
+  "security": [
+    {
+      "API Key": []
+    }
+  ],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://apify.com"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://apify.com/privacy-policy"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Data;AI"
+    }
+  ],
+  "paths": {},
+  "definitions": {
+    "ErrorResponse": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "description": "Error type"
+            },
+            "message": {
+              "type": "string",
+              "description": "Error message"
+            }
+          }
+        }
+      }
+    }
+  },
+  "parameters": {},
+  "responses": {
+    "ErrorResponse": {
+      "description": "Error response",
+      "schema": {
+        "$ref": "#/definitions/ErrorResponse"
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Actors",
+      "description": "Operations related to Apify Actors"
+    },
+    {
+      "name": "Tasks",
+      "description": "Operations related to Apify Tasks"
+    },
+    {
+      "name": "Datasets",
+      "description": "Operations related to Apify Datasets"
+    },
+    {
+      "name": "KeyValueStores",
+      "description": "Operations related to Apify Key-Value Stores"
+    },
+    {
+      "name": "Scraping",
+      "description": "Operations related to web scraping"
+    }
+  ]
+}

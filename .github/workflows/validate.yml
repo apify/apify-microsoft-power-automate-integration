@@ -1,0 +1,42 @@
+name: Validate Connector
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'src/**'
+      - '.github/workflows/validate.yml'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Validate connector files
+      run: |
+        # Check required files exist
+        for file in swagger.json apiProperties.json scripts.cs icon.png; do
+          if [ ! -f "./src/$file" ]; then
+            echo "Error: $file file not found"
+            exit 1
+          fi
+        done
+        
+        # Validate JSON files in one step
+        echo "Validating swagger.json..."
+        jq -e '.swagger and .info and .info.title and .info.version and .host and .basePath' ./src/swagger.json > /dev/null || { echo "Error: swagger.json is invalid or missing required fields"; exit 1; }
+        
+        echo "Validating apiProperties.json..."
+        jq -e '.properties and .properties.connectionParameters' ./src/apiProperties.json > /dev/null || { echo "Error: apiProperties.json is invalid or missing required fields"; exit 1; }
+        
+        # Check script contains required class
+        echo "Validating scripts.cs..."
+        grep -q "public class Script : ScriptBase" ./src/scripts.cs || { echo "Error: scripts.cs does not contain the required Script class"; exit 1; }
+        
+        # Validate icon is PNG
+        echo "Validating icon.png..."
+        file ./src/icon.png | grep -q "PNG image data" || { echo "Error: icon.png is not a valid PNG file"; exit 1; }
+        
+        echo "All connector files validated successfully"

@@ -1,0 +1,60 @@
+{
+  "properties": {
+    "connectionParameters": {
+      "authentication": {
+        "type": "oauthSetting",
+        "oAuthSettings": {
+          "identityProvider": "oauth2",
+          "clientId": "{{clientId}}",
+          "clientSecret": "{{clientSecret}}",
+          "scopes": ["read", "write"],
+          "redirectMode": "Global",
+          "redirectUrl": "https://global.consent.azure-apim.net/redirect",
+          "properties": {
+            "IsFirstParty": "False"
+          }
+        }
+      },
+      "api_key": {
+        "type": "securestring",
+        "uiDefinition": {
+          "displayName": "API Key",
+          "description": "The API Key for this API",
+          "tooltip": "Provide your API Key. You can find it in Apify Console under Integrations.",
+          "constraints": {
+            "tabIndex": 2,
+            "clearText": false,
+            "required": "true"
+          }
+        }
+      }
+    },
+    "iconBrandColor": "#2D2E83",
+    "capabilities": [],
+    "publisher": "Apify",
+    "stackOwner": "Apify",
+    "policyTemplateInstances": [
+      {
+        "templateId": "setheader",
+        "title": "API Key Authentication",
+        "parameters": {
+          "x-ms-apimTemplateParameter.name": "Authorization",
+          "x-ms-apimTemplateParameter.value": "Bearer @connectionProperty('api_key')",
+          "x-ms-apimTemplateParameter.existsAction": "override"
+        }
+      },
+      {
+        "templateId": "setheader",
+        "title": "Integration Platform Header",
+        "parameters": {
+          "x-ms-apimTemplateParameter.name": "x-apify-integration-platform",
+          "x-ms-apimTemplateParameter.value": "power-automate",
+          "x-ms-apimTemplateParameter.existsAction": "override"
+        }
+      }
+    ],
+    "description": "Connect to Apify to run web scraping and automation tasks, extract data from websites, and process the results in your flows.",
+    "displayName": "Apify",
+    "iconUrl": "https://apify.com/img/favicon.svg"
+  }
+}
