@@ -6,15 +6,9 @@ using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Microsoft.PowerPlatform.Connectors.CustomCode.Runtime;
 
 public class Script : ScriptBase
 {
-    // This method is called when the connector is initialized
-    public override void OnInit()
-    {
-        // Add initialization logic here
-    }
 
     // This method is called before each operation
     public override async Task<HttpResponseMessage> ExecuteAsync()

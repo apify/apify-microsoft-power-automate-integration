@@ -54,36 +54,29 @@ The Power Platform CLI (pac) is required for development and deployment of the c
 To verify the installation:
 
 ```bash
-# Check if pac is installed
+# Check if pac is installed and the version (second row)
 pac
-
-# Check the version
-pac --version
 ```
 
 ## Development Setup
 
 ### Authentication Setup
 
-Before working with the connector, you need to authenticate with your Power Platform environment:
+Authenticate with the Power Platform CLI to create a saved profile that stores credentials and selects the environment for subsequent `pac` commands:
 
-1. **Create an authentication profile**:
-   ```bash
-   pac auth create --environment <Your-Environment-ID-or-URL>
-   ```
-   - This will open a browser window for you to log in
-   - You need the Environment ID or URL from your Power Automate environment
-   - Special access rights may be required; contact your tenant administrator if needed
+```bash
+# Create a profile for a specific environment (use --deviceCode for CLI auth)
+pac auth create --environment "<ENV_ID-or-URL>"
 
-2. **List available authentication profiles**:
-   ```bash
-   pac auth list
-   ```
+# Manage profiles
+pac auth list
+pac auth select --profile "<profileName>"
+```
 
-3. **Switch between profiles** (if you have multiple):
-   ```bash
-   pac auth select --index <profile-index>
-   ```
+- **Important:** Omitting `--environment` can leave no active environment set and cause later `pac` commands to fail.
+- **Find ENV_ID:** copy it from the Maker portal URL, e.g. `https://make.powerapps.com/environments/<ENV_ID>/...` (the `<ENV_ID>` segment is your Environment ID).
+
+Verify connectivity with `pac connector list`.
 
 ### Clone Repository
 
@@ -151,7 +144,7 @@ pac connector create \
   --api-definition-file ./src/swagger.json \
   --api-properties-file ./src/apiProperties.json \
   --icon-file ./src/icon.png \
-  --script-file ./src/scripts.cs \
+  --script-file ./src/scripts.csx \
   --solution-unique-name <your_solution_unique_name>
 ```
 
@@ -165,7 +158,7 @@ pac connector update \
   --api-definition-file ./src/swagger.json \
   --api-properties-file ./src/apiProperties.json \
   --icon-file ./src/icon.png \
-  --script-file ./src/scripts.cs
+  --script-file ./src/scripts.csx
 ```
 
 ## Testing
@@ -180,12 +173,12 @@ pac connector update \
 The repository includes GitHub Actions workflows for:
 
 1. **Validation**: Validates the connector files on every pull request
-2. **Deployment**: Deploys the connector to the development environment on merge to main branch
+2. **Todo: Deployment**: Deploys the connector to the development environment on merge to main branch
 
 ### Workflow Files
 
 - `.github/workflows/validate.yml`: Validates the connector files
-- `.github/workflows/deploy.yml`: Deploys the connector to the development environment
+- todo: `.github/workflows/deploy.yml`: Deploys the connector to the development environment
 
 ## Troubleshooting
 

@@ -1,60 +1,92 @@
 {
-  "properties": {
-    "connectionParameters": {
-      "authentication": {
-        "type": "oauthSetting",
-        "oAuthSettings": {
-          "identityProvider": "oauth2",
-          "clientId": "{{clientId}}",
-          "clientSecret": "{{clientSecret}}",
-          "scopes": ["read", "write"],
-          "redirectMode": "Global",
-          "redirectUrl": "https://global.consent.azure-apim.net/redirect",
-          "properties": {
-            "IsFirstParty": "False"
-          }
-        }
-      },
-      "api_key": {
-        "type": "securestring",
-        "uiDefinition": {
-          "displayName": "API Key",
-          "description": "The API Key for this API",
-          "tooltip": "Provide your API Key. You can find it in Apify Console under Integrations.",
-          "constraints": {
-            "tabIndex": 2,
-            "clearText": false,
-            "required": "true"
-          }
-        }
-      }
+  "connectionParameterSets": {
+    "uiDefinition": {
+      "displayName": "Authentication Type",
+      "description": "Type of authentication to be used."
     },
-    "iconBrandColor": "#2D2E83",
-    "capabilities": [],
-    "publisher": "Apify",
-    "stackOwner": "Apify",
-    "policyTemplateInstances": [
+    "values": [
       {
-        "templateId": "setheader",
-        "title": "API Key Authentication",
+        "name": "aad-auth",
+        "uiDefinition": {
+          "displayName": "Use default shared application",
+          "description": "Log in using the standard Apify app."
+        },
         "parameters": {
-          "x-ms-apimTemplateParameter.name": "Authorization",
-          "x-ms-apimTemplateParameter.value": "Bearer @connectionProperty('api_key')",
-          "x-ms-apimTemplateParameter.existsAction": "override"
+          "token": {
+            "oAuthSettings": {
+              "clientId": "APIFY_AAD_APPLICATION_ID_HERE",
+              "customParameters": {
+                "loginUri": {
+                  "value": "https://api.apify.com"
+                },
+                "resourceUri": {
+                  "value": "https://api.apify.com"
+                },
+                "tenantId": {
+                  "value": "common"
+                }
+              },
+              "identityProvider": "aad",
+              "properties": {
+                "IsFirstParty": "False"
+              },
+              "redirectMode": "GlobalPerConnector",
+              "scopes": [
+                "apify_api offline_access"
+              ]
+            },
+            "type": "oauthSetting"
+          }
         }
       },
       {
-        "templateId": "setheader",
-        "title": "Integration Platform Header",
+        "name": "api-auth",
+        "uiDefinition": {
+          "displayName": "Use Apify API Key",
+          "description": "Log in using Apify's API Key."
+        },
         "parameters": {
-          "x-ms-apimTemplateParameter.name": "x-apify-integration-platform",
-          "x-ms-apimTemplateParameter.value": "power-automate",
-          "x-ms-apimTemplateParameter.existsAction": "override"
+          "api_key": {
+            "type": "securestring",
+            "uiDefinition": {
+              "constraints": {
+                "clearText": false,
+                "required": "true",
+                "tabIndex": 3
+              },
+              "schema": {
+                "description": "Enter your API Key for Apify",
+                "type": "securestring"
+              },
+              "displayName": "API Key generated in Apify Console"
+            }
+          },
+          "environment": {
+            "type": "string",
+            "uiDefinition": {
+              "displayName": "Environment",
+              "schema": {
+                "description": "The API environment to use; either production or sandbox",
+                "type": "string"
+              },
+              "tooltip": "Select an API environment to use",
+              "constraints": {
+                "required": "true",
+                "allowedValues": [
+                  {
+                    "text": "Sandbox",
+                    "value": "https://api.apify.com/v2"
+                  },
+                  {
+                    "text": "Production",
+                    "value": "https://api.apify.com/v2"
+                  }
+                ]
+              }
+            }
+          }
         }
       }
-    ],
-    "description": "Connect to Apify to run web scraping and automation tasks, extract data from websites, and process the results in your flows.",
-    "displayName": "Apify",
-    "iconUrl": "https://apify.com/img/favicon.svg"
+    ]
   }
 }

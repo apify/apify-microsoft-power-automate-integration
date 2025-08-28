@@ -25,18 +25,7 @@
     "API Key": {
       "type": "apiKey",
       "in": "header",
-      "name": "Authorization"
-    },
-    "OAuth2": {
-      "type": "oauth2",
-      "flow": "implicit",
-      "authorizationUrl": "https://console.apify.com/authorize/oauth",
-      "tokenUrl": "https://console-backend.apify.com/oauth/apps/token",
-      "scopes": {
-        "read": "Grants read access",
-        "write": "Grants write access",
-        "admin": "Grants read and write access to administrative information"
-      }
+      "name": "Apify-Api-Key"
     }
   },
   "security": [
@@ -55,7 +44,7 @@
     },
     {
       "propertyName": "Categories",
-      "propertyValue": "Data;AI"
+      "propertyValue": "Scraping;Data;AI"
     }
   ],
   "paths": {},
