@@ -29,7 +29,7 @@ jobs:
         jq -e '.swagger and .info and .info.title and .info.version and .host and .basePath' ./src/swagger.json > /dev/null || { echo "Error: swagger.json is invalid or missing required fields"; exit 1; }
         
         echo "Validating apiProperties.json..."
-        jq -e '.properties and .properties.connectionParameters' ./src/apiProperties.json > /dev/null || { echo "Error: apiProperties.json is invalid or missing required fields"; exit 1; }
+        jq -e '.connectionParameterSets and .connectionParameterSets.uiDefinition and .connectionParameterSets.values' ./src/apiProperties.json > /dev/null || { echo "Error: apiProperties.json is invalid or missing required fields"; exit 1; }
         
         # Check script contains required class
         echo "Validating scripts.csx..."
