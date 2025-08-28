@@ -17,7 +17,7 @@ jobs:
     - name: Validate connector files
       run: |
         # Check required files exist
-        for file in swagger.json apiProperties.json scripts.cs icon.png; do
+        for file in swagger.json apiProperties.json scripts.csx icon.png; do
           if [ ! -f "./src/$file" ]; then
             echo "Error: $file file not found"
             exit 1
@@ -32,8 +32,8 @@ jobs:
         jq -e '.properties and .properties.connectionParameters' ./src/apiProperties.json > /dev/null || { echo "Error: apiProperties.json is invalid or missing required fields"; exit 1; }
         
         # Check script contains required class
-        echo "Validating scripts.cs..."
-        grep -q "public class Script : ScriptBase" ./src/scripts.cs || { echo "Error: scripts.cs does not contain the required Script class"; exit 1; }
+        echo "Validating scripts.csx..."
+        grep -q "public class Script : ScriptBase" ./src/scripts.csx || { echo "Error: scripts.csx   does not contain the required Script class"; exit 1; }
         
         # Validate icon is PNG
         echo "Validating icon.png..."
