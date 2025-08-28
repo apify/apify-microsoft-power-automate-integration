@@ -8,6 +8,10 @@
       "name": "Apify Support",
       "url": "https://apify.com/contact",
       "email": "support@apify.com"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
     }
   },
   "host": "api.apify.com",
@@ -25,7 +29,8 @@
     "API Key": {
       "type": "apiKey",
       "in": "header",
-      "name": "Apify-Api-Key"
+      "name": "Authorization",
+      "description": "API Key for authenticating with the Apify API"
     }
   },
   "security": [
@@ -44,10 +49,34 @@
     },
     {
       "propertyName": "Categories",
-      "propertyValue": "Scraping;Data;AI"
+      "propertyValue": "Data;AI"
     }
   ],
-  "paths": {},
+  "paths": {
+    "/dummy": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Default response",
+            "schema": {
+              "type": "object"
+            }
+          },
+          "default": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        },
+        "summary": "Dummy endpoint",
+        "description": "This is a placeholder endpoint. The actual operations will be implemented in future PRs.",
+        "operationId": "DummyEndpoint",
+        "x-ms-visibility": "internal",
+        "x-ms-summary": "Dummy Endpoint",
+        "tags": [
+          "Actors"
+        ]
+      }
+    }
+  },
   "definitions": {
     "ErrorResponse": {
       "type": "object",
@@ -57,11 +86,13 @@
           "properties": {
             "type": {
               "type": "string",
-              "description": "Error type"
+              "description": "Error type",
+              "x-ms-summary": "Error Type"
             },
             "message": {
               "type": "string",
-              "description": "Error message"
+              "description": "Error message",
+              "x-ms-summary": "Error Message"
             }
           }
         }

@@ -89,15 +89,14 @@ cd apify-microsoft-power-automate-integration
 
 ```
 .
-├── src/
-│   ├── swagger.json        # OpenAPI definition of the connector
-│   ├── apiProperties.json  # Connector properties and metadata
-│   ├── scripts.cs          # Custom connector scripts
-│   └── icon.png            # Connector icon
+├── apiDefinition.swagger.json  # OpenAPI definition of the connector
+├── apiProperties.json          # Connector properties and metadata
+├── scripts.csx                 # Custom connector scripts
+├── icon.png                    # Connector icon
 ├── .github/
-│   └── workflows/          # CI/CD pipeline configurations
-├── .gitignore              # Git ignore file
-└── README.md               # Documentation
+│   └── workflows/              # CI/CD pipeline configurations
+├── .gitignore                  # Git ignore file
+└── README.md                   # Documentation
 ```
 
 ## Development Workflow
@@ -123,10 +122,10 @@ cd apify-microsoft-power-automate-integration
    ```bash
    pac connector update \
      --connector-id <Your-Connector-ID> \
-     --api-definition-file ./src/swagger.json \
-     --api-properties-file ./src/apiProperties.json \
-     --icon-file ./src/icon.png \
-     --script-file ./src/scripts.cs
+        --api-definition-file ./apiDefinition.swagger.json \
+   --api-properties-file ./apiProperties.json \
+   --icon-file ./icon.png \
+   --script-file ./scripts.csx
    ```
 
 4. **Iterate**
@@ -141,10 +140,10 @@ To create a new connector in your Power Automate environment:
 
 ```bash
 pac connector create \
-  --api-definition-file ./src/swagger.json \
-  --api-properties-file ./src/apiProperties.json \
-  --icon-file ./src/icon.png \
-  --script-file ./src/scripts.csx \
+     --api-definition-file ./apiDefinition.swagger.json \
+   --api-properties-file ./apiProperties.json \
+   --icon-file ./icon.png \
+   --script-file ./scripts.csxx \
   --solution-unique-name <your_solution_unique_name>
 ```
 
@@ -155,10 +154,10 @@ To update an existing connector:
 ```bash
 pac connector update \
   --connector-id <Your-Connector-ID> \
-  --api-definition-file ./src/swagger.json \
-  --api-properties-file ./src/apiProperties.json \
-  --icon-file ./src/icon.png \
-  --script-file ./src/scripts.csx
+     --api-definition-file ./apiDefinition.swagger.json \
+   --api-properties-file ./apiProperties.json \
+   --icon-file ./icon.png \
+   --script-file ./scripts.csxx
 ```
 
 ## Testing

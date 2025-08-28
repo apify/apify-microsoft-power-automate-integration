@@ -1,0 +1,119 @@
+{
+  "properties": {
+    "capabilities": [
+      "actions"
+    ],
+    "connectionParameters": {
+      "api_key": {
+        "type": "securestring",
+        "uiDefinition": {
+          "displayName": "API Key",
+          "description": "The API Key for your Apify account",
+          "tooltip": "Provide your Apify API Key",
+          "constraints": {
+            "tabIndex": 2,
+            "clearText": false,
+            "required": "true"
+          }
+        }
+      }
+    },
+    "iconBrandColor": "#0098FF",
+    "policyTemplateInstances": [
+      {
+        "templateId": "setheader",
+        "title": "Set API Key Header",
+        "parameters": {
+          "x-ms-apimTemplateParameter.name": "Apify-Api-Key",
+          "x-ms-apimTemplateParameter.value": "@decodeBase64(triggerOutputs().authentication.api_key)",
+          "x-ms-apimTemplateParameter.existsAction": "override",
+          "x-ms-apimTemplate-policySection": "Request",
+          "x-ms-apimTemplate-operationName": [
+            "RunActor",
+            "RunTask",
+            "GetDatasetItems",
+            "GetKeyValueStoreRecord",
+            "ScrapeSingleUrl"
+          ]
+        }
+      }
+    ]
+  },
+  "connectionParameterSets": {
+    "uiDefinition": {
+      "displayName": "Authentication Type",
+      "description": "Type of authentication to be used."
+    },
+    "values": [
+      {
+        "name": "api-auth",
+        "uiDefinition": {
+          "displayName": "Use Apify API Key",
+          "description": "Log in using Apify's API Key."
+        },
+        "parameters": {
+          "api_key": {
+            "type": "securestring",
+            "uiDefinition": {
+              "displayName": "API Key",
+              "description": "Enter your API Key for Apify",
+              "tooltip": "Find your API key in the Apify Console",
+              "constraints": {
+                "required": "true",
+                "clearText": false,
+                "tabIndex": 2
+              },
+              "schema": {
+                "type": "securestring",
+                "description": "Enter your API Key for Apify"
+              }
+            }
+          },
+          "environment": {
+            "type": "string",
+            "uiDefinition": {
+              "displayName": "Environment",
+              "description": "The API environment to use",
+              "tooltip": "Select an API environment to use",
+              "constraints": {
+                "required": "true",
+                "allowedValues": [
+                  {
+                    "text": "Production",
+                    "value": "https://api.apify.com/v2"
+                  },
+                  {
+                    "text": "Enterprise (custom domain)",
+                    "value": "custom"
+                  }
+                ],
+                "tabIndex": 3
+              },
+              "schema": {
+                "type": "string",
+                "description": "The API environment to use; either production or custom domain"
+              }
+            }
+          },
+          "custom_domain": {
+            "type": "string",
+            "uiDefinition": {
+              "displayName": "Custom Domain",
+              "description": "Enter your custom Apify API domain (for Enterprise customers only)",
+              "tooltip": "Example: https://api.your-domain.apify.com/v2",
+              "constraints": {
+                "required": "false",
+                "tabIndex": 4
+              },
+              "schema": {
+                "type": "string",
+                "description": "Custom Apify API domain for Enterprise customers"
+              },
+              "visibility": "environment == 'custom'"
+            }
+          }
+        }
+      }
+    ]
+  }
+}
