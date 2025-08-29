@@ -25,12 +25,6 @@
   "produces": [
     "application/json"
   ],
-  "x-ms-policy": [
-    {
-    "type": "set-header",
-    "header": "x-apify-integration-platform",
-    "value": "power-automate"
-  }],
   "securityDefinitions": {
     "api_key": {
       "type": "apiKey",
@@ -61,6 +55,11 @@
   "paths": {
     "/users/me": {
       "get": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/IntegrationPlatformHeader"
+          }
+        ],
         "responses": {
           "200": {
             "description": "User information retrieved successfully",
@@ -181,7 +180,17 @@
       }
     }
   },
-  "parameters": {},
+  "parameters": {
+    "IntegrationPlatformHeader": {
+      "name": "x-apify-integration-platform",
+      "in": "header",
+      "required": true,
+      "type": "string",
+      "default": "power-automate",
+      "description": "Integration platform identifier",
+      "x-ms-visibility": "internal"
+    }
+  },
   "responses": {
     "ErrorResponse": {
       "description": "Error response",

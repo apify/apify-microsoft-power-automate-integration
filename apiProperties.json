@@ -37,6 +37,16 @@
             "GetUserInfo"
           ]
         }
+      },
+      {
+        "templateId": "setheader",
+        "title": "Set Apify Integration Platform Header",
+        "parameters": {
+          "x-ms-apimTemplateParameter.name": "x-apify-integration-platform",
+          "x-ms-apimTemplateParameter.value": "power-automate",
+          "x-ms-apimTemplateParameter.existsAction": "override",
+          "x-ms-apimTemplate-policySection": "Request"
+        }
       }
     ]
   },
