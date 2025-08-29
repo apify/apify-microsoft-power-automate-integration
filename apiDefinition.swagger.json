@@ -59,31 +59,107 @@
     }
   ],
   "paths": {
-    "/dummy": {
+    "/users/me": {
       "get": {
         "responses": {
           "200": {
-            "description": "Default response",
+            "description": "User information retrieved successfully",
             "schema": {
-              "type": "object"
+              "$ref": "#/definitions/UserResponse"
             }
           },
           "default": {
             "$ref": "#/responses/ErrorResponse"
           }
         },
-        "summary": "Dummy endpoint",
-        "description": "This is a placeholder endpoint. The actual operations will be implemented in future PRs.",
-        "operationId": "DummyEndpoint",
-        "x-ms-visibility": "internal",
-        "x-ms-summary": "Dummy Endpoint",
+        "summary": "Get User Information",
+        "description": "Returns information about the current user account, including both public and private information.",
+        "operationId": "GetUserInfo",
+        "x-ms-visibility": "important",
+        "x-ms-summary": "Get User Information",
         "tags": [
-          "Actors"
+          "Users"
         ]
       }
     }
   },
   "definitions": {
+    "UserResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "User ID",
+          "x-ms-summary": "User ID"
+        },
+        "username": {
+          "type": "string",
+          "description": "Username",
+          "x-ms-summary": "Username"
+        },
+        "email": {
+          "type": "string",
+          "description": "User email",
+          "x-ms-summary": "Email"
+        },
+        "name": {
+          "type": "string",
+          "description": "User's full name",
+          "x-ms-summary": "Full Name"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Date when the user was created",
+          "x-ms-summary": "Created At"
+        },
+        "subscription": {
+          "type": "object",
+          "properties": {
+            "plan": {
+              "type": "string",
+              "description": "Subscription plan",
+              "x-ms-summary": "Plan"
+            },
+            "planId": {
+              "type": "string",
+              "description": "Subscription plan ID",
+              "x-ms-summary": "Plan ID"
+            },
+            "isActive": {
+              "type": "boolean",
+              "description": "Whether the subscription is active",
+              "x-ms-summary": "Is Active"
+            }
+          }
+        },
+        "profile": {
+          "type": "object",
+          "properties": {
+            "pictureUrl": {
+              "type": "string",
+              "description": "URL to the user's profile picture",
+              "x-ms-summary": "Profile Picture URL"
+            },
+            "githubUsername": {
+              "type": "string",
+              "description": "User's GitHub username",
+              "x-ms-summary": "GitHub Username"
+            },
+            "websiteUrl": {
+              "type": "string",
+              "description": "User's website URL",
+              "x-ms-summary": "Website URL"
+            },
+            "bio": {
+              "type": "string",
+              "description": "User's bio",
+              "x-ms-summary": "Bio"
+            }
+          }
+        }
+      }
+    },
     "ErrorResponse": {
       "type": "object",
       "properties": {
@@ -115,6 +191,10 @@
     }
   },
   "tags": [
+    {
+      "name": "Users",
+      "description": "Operations related to Apify Users"
+    },
     {
       "name": "Actors",
       "description": "Operations related to Apify Actors"

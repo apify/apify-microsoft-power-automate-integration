@@ -33,7 +33,8 @@
             "RunTask",
             "GetDatasetItems",
             "GetKeyValueStoreRecord",
-            "ScrapeSingleUrl"
+            "ScrapeSingleUrl",
+            "GetUserInfo"
           ]
         }
       }
