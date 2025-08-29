@@ -1,8 +1,8 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "Apify",
-    "description": "Connect to Apify to run web scraping and automation tasks, extract data from websites, and process the results in your flows.",
+    "title": "Apify Connector",
+    "description": "A connector for the Apify API.",
     "version": "1.0.0",
     "contact": {
       "name": "Apify Support",
@@ -25,8 +25,14 @@
   "produces": [
     "application/json"
   ],
+  "x-ms-policy": [
+    {
+    "type": "set-header",
+    "header": "x-apify-integration-platform",
+    "value": "power-automate"
+  }],
   "securityDefinitions": {
-    "API Key": {
+    "api_key": {
       "type": "apiKey",
       "in": "header",
       "name": "Authorization",
@@ -35,7 +41,7 @@
   },
   "security": [
     {
-      "API Key": []
+      "api_key": []
     }
   ],
   "x-ms-connector-metadata": [
