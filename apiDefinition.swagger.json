@@ -31,11 +31,27 @@
       "in": "header",
       "name": "Authorization",
       "description": "API Key for authenticating with the Apify API"
+    },
+    "oauth2_auth": {
+      "type": "oauth2",
+      "flow": "accessCode",
+      "authorizationUrl": "https://console.apify.com/authorize/oauth",
+      "tokenUrl": "https://console-backend.apify.com/oauth/apps/token",
+      "scopes": {
+        "profile": "Access to user profile",
+        "full_api_access": "Full access to Apify API"
+      }
     }
   },
   "security": [
     {
       "api_key": []
+    },
+    {
+      "oauth2_auth": [
+        "profile",
+        "full_api_access"
+      ]
     }
   ],
   "x-ms-connector-metadata": [

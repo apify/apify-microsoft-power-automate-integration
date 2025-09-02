@@ -16,6 +16,34 @@
             "required": "true"
           }
         }
+      },
+      "token": {
+        "type": "oauthSetting",
+        "oAuthSettings": {
+          "identityProvider": "oauth2",
+          "clientId": "{{ client id }}",
+          "scopes": [
+            "profile",
+            "full_api_access"
+          ],
+          "redirectMode": "Global",
+          "redirectUrl": "https://global.consent.azure-apim.net/redirect",
+          "properties": {
+            "IsFirstParty": "False",
+            "IsOnbehalfofLoginSupported": false
+          },
+          "customParameters": {
+            "authorizationUrl": {
+              "value": "https://console.apify.com/authorize/oauth"
+            },
+            "tokenUrl": {
+              "value": "https://console-backend.apify.com/oauth/apps/token"
+            },
+            "refreshUrl": {
+              "value": "https://console-backend.apify.com/oauth/apps/token"
+            }
+          }
+        }
       }
     },
     "iconBrandColor": "#0098FF",
@@ -25,8 +53,8 @@
         "title": "Set Apify API Key to Header",
         "parameters": {
           "x-ms-apimTemplateParameter.name": "Authorization",
-          "x-ms-apimTemplateParameter.value": "Bearer @headers('Authorization')",
-          "x-ms-apimTemplateParameter.existsAction": "override",
+          "x-ms-apimTemplateParameter.value": "Bearer @{connectionParameters('api_key')}",
+          "x-ms-apimTemplateParameter.existsAction": "skip",
           "x-ms-apimTemplate-policySection": "Request",
           "x-ms-apimTemplate-operationName": [
             "RunActor",
@@ -77,6 +105,41 @@
               "schema": {
                 "type": "securestring",
                 "description": "Enter your API Key for Apify"
+              }
+            }
+          }
+        }
+      },
+      {
+        "name": "oauth-auth",
+        "uiDefinition": {
+          "displayName": "Use OAuth 2.0",
+          "description": "Log in with Apify via OAuth 2.0."
+        },
+        "parameters": {
+          "token": {
+            "type": "oauthSetting",
+            "uiDefinition": {
+              "displayName": "OAuth 2.0",
+              "description": "Authenticate via Apify OAuth 2.0"
+            },
+            "oAuthSettings": {
+              "identityProvider": "oauth2",
+              "clientId": "{{ client id }}",
+              "scopes": [
+                "profile",
+                "full_api_access"
+              ],
+              "redirectMode": "Global",
+              "redirectUrl": "https://global.consent.azure-apim.net/redirect",
+              "properties": {
+                "IsFirstParty": "False",
+                "IsOnbehalfofLoginSupported": false
+              },
+              "customParameters": {
+                "authorizationUrl": { "value": "https://console.apify.com/authorize/oauth" },
+                "tokenUrl": { "value": "https://console-backend.apify.com/oauth/apps/token" },
+                "refreshUrl": { "value": "https://console-backend.apify.com/oauth/apps/token" }
               }
             }
           }
