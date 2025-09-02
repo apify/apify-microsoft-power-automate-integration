@@ -17,7 +17,7 @@ jobs:
     - name: Validate connector files
       run: |
         # Check required files exist
-        for file in swagger.json apiProperties.json scripts.csx icon.png; do
+        for file in apiDefinition.swagger.json apiProperties.json scripts.csx icon.png; do
           if [ ! -f "./src/$file" ]; then
             echo "Error: $file file not found"
             exit 1
@@ -25,8 +25,8 @@ jobs:
         done
         
         # Validate JSON files in one step
-        echo "Validating swagger.json..."
-        jq -e '.swagger and .info and .info.title and .info.version and .host and .basePath' ./src/swagger.json > /dev/null || { echo "Error: swagger.json is invalid or missing required fields"; exit 1; }
+        echo "Validating apiDefinition.swagger.json..."
+        jq -e '.swagger and .info and .info.title and .info.version and .host and .basePath' ./src/apiDefinition.swagger.json > /dev/null || { echo "Error: apiDefinition.swagger.json is invalid or missing required fields"; exit 1; }
         
         echo "Validating apiProperties.json..."
         jq -e '.connectionParameterSets and .connectionParameterSets.uiDefinition and .connectionParameterSets.values' ./src/apiProperties.json > /dev/null || { echo "Error: apiProperties.json is invalid or missing required fields"; exit 1; }
