@@ -21,6 +21,27 @@ This connector enables Microsoft Power Automate users to use Apify's web scrapin
 
 ## Prerequisites
 
+### Clone Repository
+
+```bash
+git clone https://github.com/apify/apify-microsoft-power-automate-integration.git
+cd apify-microsoft-power-automate-integration
+```
+
+## Connector Structure
+
+```
+.
+├── apiDefinition.swagger.json  # OpenAPI definition of the connector
+├── apiProperties.json          # Connector properties and metadata
+├── scripts.csx                 # Custom connector scripts
+├── icon.png                    # Connector icon
+├── .github/
+│   └── workflows/              # CI/CD pipeline configurations
+├── .gitignore                  # Git ignore file
+└── README.md                   # Documentation
+```
+
 ### Install .NET SDK
 
 The Power Platform CLI requires .NET SDK to be installed on your system. 
@@ -77,46 +98,65 @@ pac auth select --profile "<profileName>"
 
 Verify connectivity with `pac connector list`.
 
-### Clone Repository
-
-```bash
-git clone https://github.com/apify/apify-microsoft-power-automate-integration.git
-cd apify-microsoft-power-automate-integration
-```
-
-## Connector Structure
-
-```
-.
-├── apiDefinition.swagger.json  # OpenAPI definition of the connector
-├── apiProperties.json          # Connector properties and metadata
-├── scripts.csx                 # Custom connector scripts
-├── icon.png                    # Connector icon
-├── .github/
-│   └── workflows/              # CI/CD pipeline configurations
-├── .gitignore                  # Git ignore file
-└── README.md                   # Documentation
-```
-
 ## Development Workflow
 
-1. **Get the Connector ID**
+### Initial Setup
 
-   After creating a connector in your Power Automate environment, you'll need its ID for subsequent operations:
+Before you start development, you need to either create a new connector or download an existing one:
+
+#### Create a New Connector
+
+If you don't have an Apify connector in your Power Automate environment yet:
+
+```bash
+pac connector create \
+  --api-definition-file ./apiDefinition.swagger.json \
+  --api-properties-file ./apiProperties.json \
+  --icon-file ./icon.png \
+  --script-file ./scripts.csx \
+  --solution-unique-name <your_solution_unique_name>
+```
+
+After creation, list your connectors to get the ID for future operations:
+
+```bash
+pac connector list
+```
+
+Find your new Apify connector in the list and note its `ConnectorId`.
+
+#### Download an Existing Connector
+
+If you already have an Apify connector in your environment and want to work on it:
+
+1. First, list available connectors to find the ID:
 
    ```bash
    pac connector list
    ```
 
-   This will return a list of solution-aware connectors in your environment. Find your connector and copy its `ConnectorId`.
+2. Download the connector files to your local environment:
 
-2. **Edit Locally**
+   ```bash
+   pac connector download \
+     --connector-id <connector-id> \
+     --outputDirectory ./
+   ```
 
-   Make all changes to `swagger.json`, `apiProperties.json`, and `scripts.cs` in your local IDE.
+### Development Cycle
 
-3. **Deploy and Test in Power Automate**
+Once you have your connector set up, follow this development cycle:
 
-   Use the `pac connector update` command to push your local files to the connector in your Power Automate environment:
+1. **Edit Locally**
+
+   Make changes to the connector files in your local IDE:
+   - `apiDefinition.swagger.json` - OpenAPI definition
+   - `apiProperties.json` - Connector properties
+   - `scripts.csx` - Custom scripts
+
+2. **Update the Connector**
+
+   Push your changes to Power Automate:
 
    ```bash
    pac connector update \
@@ -127,57 +167,24 @@ cd apify-microsoft-power-automate-integration
      --script-file ./scripts.csx
    ```
 
+3. **Test Your Changes**
+
+   Before testing, you need a valid connection:
+   - Go to `Connections -> New connection` and create a connection to your connector
+   - Ensure the connection shows as `Connected`
+   - Alternatively, create the connection directly in the `Test tab`
+
+   Test your connector in Power Automate:
+   - Navigate to `Custom connectors -> Apify -> Test tab`
+   - Try different operations to verify your changes
+   - You can also use the `Swagger editor` for testing and fine-tuning
+
 4. **Iterate**
 
-   Before testing the connector you need to create a connection. Based on the implemented authentization you can do this either in `Connections -> New connection`. Make sure it shows `Connected`. Or you can create the connection directly in the `Test tab`.
-
-   Use the `Test` tab in the Power Automate UI to test your changes (`Custom connectors -> Apify -> Test tab`). If you find issues, return to your local IDE, fix the files, and repeat the `pac connector update` command.
-
-   Or you can test the connector through `Swagger editor`, where you can also finetune the code. But make sure you reflect those changes in the code here. Or you can download the conenctor opan api definition and api properties using `pac connector download` command.
-
-   If environment id is not defined, the default one is used (see the `pac auth list` command).
-
-   ```
-   pac connector download \
-      --environment <environment id>
-      --connector-id <connector id>
-      --outputDirectory <director to store connector files>
-   ```
-
-## Deployment
-
-### Creating a New Connector
-
-To create a new connector in your Power Automate environment:
-
-```bash
-pac connector create \
-     --api-definition-file ./apiDefinition.swagger.json \
-   --api-properties-file ./apiProperties.json \
-   --icon-file ./icon.png \
-   --script-file ./scripts.csxx \
-  --solution-unique-name <your_solution_unique_name>
-```
-
-### Updating an Existing Connector
-
-To update an existing connector:
-
-```bash
-pac connector update \
-   --connector-id <Your-Connector-ID> \
-   --api-definition-file ./apiDefinition.swagger.json \
-   --api-properties-file ./apiProperties.json \
-   --icon-file ./icon.png \
-   --script-file ./scripts.csxx
-```
-
-## Testing
-
-1. Create test flows in Power Automate to validate each action and trigger
-2. Verify authentication works correctly
-3. Test with various input parameters and edge cases
-4. Validate output schema matches expectations
+   - If you find issues, return to your local IDE
+   - Make necessary fixes to the files
+   - Update the connector again using the `pac connector update` command
+   - Repeat the testing process
 
 ### Run Actor Action
 
@@ -196,6 +203,13 @@ Use the "Run Actor" action to start an Apify Actor run.
   - `waitForFinish` (seconds, max 60): set 0 to no limit
 
 The connector invokes `POST /v2/acts/{actorId}/runs` per Apify docs (see: https://docs.apify.com/api/v2/act-runs-post). The `actorId` path segment is chosen automatically based on your `actor_scope` selection.
+
+## Testing
+
+1. Create test flows in Power Automate to validate each action and trigger
+2. Verify authentication works correctly
+3. Test with various input parameters and edge cases
+4. Validate output schema matches expectations
 
 ## CI/CD
 
