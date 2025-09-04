@@ -53,16 +53,14 @@
         "title": "Set Apify API Key to Header",
         "parameters": {
           "x-ms-apimTemplateParameter.name": "Authorization",
-          "x-ms-apimTemplateParameter.value": "Bearer @{connectionParameters('api_key')}",
+          "x-ms-apimTemplateParameter.value": "Bearer @connectionParameters('api_key')",
           "x-ms-apimTemplateParameter.existsAction": "skip",
           "x-ms-apimTemplate-policySection": "Request",
           "x-ms-apimTemplate-operationName": [
             "RunActor",
-            "RunTask",
-            "GetDatasetItems",
-            "GetKeyValueStoreRecord",
-            "ScrapeSingleUrl",
-            "GetUserInfo"
+            "GetUserInfo",
+            "ListMyActors",
+            "ListStoreActors"
           ]
         }
       },
