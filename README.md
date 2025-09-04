@@ -1,6 +1,6 @@
 # Apify Microsoft Power Automate Integration
 
-Connect your Microsoft Power Automate workflows with Apify's web scraping and automation platform. Run Actors and Tasks, fetch data from Datasets and Key-Value Stores, and trigger flows based on Apify webhooks.
+Connect your Microsoft Power Automate workflows with Apify's web scraping platform. Run Actors and Tasks, fetch data from Datasets and Key-Value Stores, and create Apify webhooks.
 
 ## Table of Contents
 
@@ -17,7 +17,7 @@ Connect your Microsoft Power Automate workflows with Apify's web scraping and au
 
 ## Overview
 
-This connector enables Microsoft Power Automate users to leverage Apify's web scraping and automation capabilities directly in their workflows. Apify provides serverless computing infrastructure for running web scraping, data extraction, and automation tasks called Actors.
+This connector enables Microsoft Power Automate users to use Apify's web scraping capabilities directly in their workflows. Apify provides serverless computing infrastructure for running web scraping, data extraction tasks called Actors.
 
 ## Prerequisites
 
@@ -43,7 +43,6 @@ The Power Platform CLI (pac) is required for development and deployment of the c
    dotnet tool install -g Microsoft.PowerApps.CLI.Tool
    ```
    - Requires .NET SDK to be installed first
-   - Note: Some commands like `pac data` and certain `pac package` commands are only available on Windows
 
 3. **Windows MSI** (Windows only):
    - Download and install from [Microsoft Download Center](https://aka.ms/PowerAppsCLI)
@@ -122,15 +121,28 @@ cd apify-microsoft-power-automate-integration
    ```bash
    pac connector update \
      --connector-id <Your-Connector-ID> \
-        --api-definition-file ./apiDefinition.swagger.json \
-   --api-properties-file ./apiProperties.json \
-   --icon-file ./icon.png \
-   --script-file ./scripts.csx
+     --api-definition-file ./apiDefinition.swagger.json \
+     --api-properties-file ./apiProperties.json \
+     --icon-file ./icon.png \
+     --script-file ./scripts.csx
    ```
 
 4. **Iterate**
 
-   Use the "Test" tab in the Power Automate UI to test your changes. If you find issues, return to your local IDE, fix the files, and repeat the `pac connector update` command.
+   Before testing the connector you need to create a connection. Based on the implemented authentization you can do this either in `Connections -> New connection`. Make sure it shows `Connected`. Or you can create the connection directly in the `Test tab`.
+
+   Use the `Test` tab in the Power Automate UI to test your changes (`Custom connectors -> Apify -> Test tab`). If you find issues, return to your local IDE, fix the files, and repeat the `pac connector update` command.
+
+   Or you can test the connector through `Swagger editor`, where you can also finetune the code. But make sure you reflect those changes in the code here. Or you can download the conenctor opan api definition and api properties using `pac connector download` command.
+
+   If environment id is not defined, the default one is used (see the `pac auth list` command).
+
+   ```
+   pac connector download \
+      --environment <environment id>
+      --connector-id <connector id>
+      --outputDirectory <director to store connector files>
+   ```
 
 ## Deployment
 
@@ -153,8 +165,8 @@ To update an existing connector:
 
 ```bash
 pac connector update \
-  --connector-id <Your-Connector-ID> \
-     --api-definition-file ./apiDefinition.swagger.json \
+   --connector-id <Your-Connector-ID> \
+   --api-definition-file ./apiDefinition.swagger.json \
    --api-properties-file ./apiProperties.json \
    --icon-file ./icon.png \
    --script-file ./scripts.csxx
@@ -181,7 +193,7 @@ Use the "Run Actor" action to start an Apify Actor run.
   - `build`: specific build tag or id
   - `timeout` (seconds)
   - `memory` (MB): 512, 1024, 2048, 4096, 8192, 16384
-  - `waitForFinish` (seconds, max 60): set >0 to wait synchronously
+  - `waitForFinish` (seconds, max 60): set 0 to no limit
 
 The connector invokes `POST /v2/acts/{actorId}/runs` per Apify docs (see: https://docs.apify.com/api/v2/act-runs-post). The `actorId` path segment is chosen automatically based on your `actor_scope` selection.
 
@@ -213,30 +225,7 @@ If you encounter an error like this after installing the .NET tool:
 Tools directory '/Users/username/.dotnet/tools' is not currently on the PATH environment variable.
 ```
 
-You need to add the .NET tools directory to your PATH:
-
-#### For Bash (macOS/Linux)
-Add to your `~/.bashrc` or `~/.bash_profile`:
-```bash
-# Add .NET Core SDK tools
-export PATH="$PATH:$HOME/.dotnet/tools"
-```
-Then run `source ~/.bashrc` (or `source ~/.bash_profile`) to apply changes to your current session.
-
-#### For Zsh (macOS/Linux)
-Add to your `~/.zshrc` or `~/.zprofile`:
-```bash
-# Add .NET Core SDK tools
-export PATH="$PATH:$HOME/.dotnet/tools"
-```
-Then run `source ~/.zshrc` (or `source ~/.zprofile`) to apply changes to your current session.
-
-#### For PowerShell (Windows)
-Add to your PowerShell profile:
-```powershell
-# Add .NET Core SDK tools
-$env:PATH += ";$env:USERPROFILE\.dotnet\tools"
-```
+You need to add the .NET tools directory to your PATH.
 
 ## Resources
 
