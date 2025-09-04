@@ -28,13 +28,7 @@
           "x-ms-apimTemplateParameter.value": "Bearer @headers('Authorization')",
           "x-ms-apimTemplateParameter.existsAction": "override",
           "x-ms-apimTemplate-policySection": "Request",
-          "x-ms-apimTemplate-operationName": [
-            "RunActor",
-            "RunTask",
-            "GetDatasetItems",
-            "GetKeyValueStoreRecord",
-            "ScrapeSingleUrl"
-          ]
+          "x-ms-apimTemplate-operationName": []
         }
       }
     ]

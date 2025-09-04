@@ -58,31 +58,7 @@
       "propertyValue": "Data;AI"
     }
   ],
-  "paths": {
-    "/dummy": {
-      "get": {
-        "responses": {
-          "200": {
-            "description": "Default response",
-            "schema": {
-              "type": "object"
-            }
-          },
-          "default": {
-            "$ref": "#/responses/ErrorResponse"
-          }
-        },
-        "summary": "Dummy endpoint",
-        "description": "This is a placeholder endpoint. The actual operations will be implemented in future PRs.",
-        "operationId": "DummyEndpoint",
-        "x-ms-visibility": "internal",
-        "x-ms-summary": "Dummy Endpoint",
-        "tags": [
-          "Actors"
-        ]
-      }
-    }
-  },
+  "paths": {},
   "definitions": {
     "ErrorResponse": {
       "type": "object",
@@ -114,26 +90,5 @@
       }
     }
   },
-  "tags": [
-    {
-      "name": "Actors",
-      "description": "Operations related to Apify Actors"
-    },
-    {
-      "name": "Tasks",
-      "description": "Operations related to Apify Tasks"
-    },
-    {
-      "name": "Datasets",
-      "description": "Operations related to Apify Datasets"
-    },
-    {
-      "name": "KeyValueStores",
-      "description": "Operations related to Apify Key-Value Stores"
-    },
-    {
-      "name": "Scraping",
-      "description": "Operations related to web scraping"
-    }
-  ]
+  "tags": []
 }
