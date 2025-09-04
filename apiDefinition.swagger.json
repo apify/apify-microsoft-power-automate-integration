@@ -76,7 +76,11 @@
   "paths": {
     "/users/me": {
       "get": {
-        "parameters": [],
+        "parameters": [
+          {
+            "$ref": "#/parameters/IntegrationPlatformHeader"
+          }
+        ],
         "responses": {
           "200": {
             "description": "User information retrieved successfully",
@@ -107,7 +111,11 @@
         "tags": [
           "Actors"
         ],
-        "parameters": [],
+        "parameters": [
+          {
+            "$ref": "#/parameters/IntegrationPlatformHeader"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -167,6 +175,9 @@
         ],
         "parameters": [
           {
+            "$ref": "#/parameters/IntegrationPlatformHeader"
+          },
+          {
             "name": "limit",
             "in": "query",
             "type": "integer",
@@ -223,6 +234,9 @@
         ],
         "parameters": [
           {
+            "$ref": "#/parameters/IntegrationPlatformHeader"
+          },
+          {
             "name": "actorId",
             "in": "path",
             "required": true,
@@ -260,10 +274,7 @@
               "operationId": "ListMyActors",
               "value-collection": "data.items",
               "value-path": "id",
-              "value-title": "name",
-              "parameters": {
-                "actor_scope": { "parameter": "actor_scope" }
-              }
+              "value-title": "name"
             },
             "x-ms-visibility": "important"
           },
@@ -278,10 +289,7 @@
               "operationId": "ListStoreActors",
               "value-collection": "data.items",
               "value-path": "name",
-              "value-title": "title",
-              "parameters": {
-                "actor_scope": { "parameter": "actor_scope" }
-              }
+              "value-title": "title"
             },
             "x-ms-visibility": "important"
           },
