@@ -1,6 +1,6 @@
 # Apify Microsoft Power Automate Integration
 
-Connect your Microsoft Power Automate workflows with Apify's web scraping and automation platform. Run Actors and Tasks, fetch data from Datasets and Key-Value Stores, and trigger flows based on Apify webhooks.
+Connect your Microsoft Power Automate workflows with Apify's web scraping platform. Run Actors and Tasks, fetch data from Datasets and Key-Value Stores, and create Apify webhooks.
 
 ## Table of Contents
 
@@ -17,9 +17,30 @@ Connect your Microsoft Power Automate workflows with Apify's web scraping and au
 
 ## Overview
 
-This connector enables Microsoft Power Automate users to leverage Apify's web scraping and automation capabilities directly in their workflows. Apify provides serverless computing infrastructure for running web scraping, data extraction, and automation tasks called Actors.
+This connector enables Microsoft Power Automate users to use Apify's web scraping capabilities directly in their workflows. Apify provides serverless computing infrastructure for running web scraping, data extraction tasks called Actors.
 
 ## Prerequisites
+
+### Clone Repository
+
+```bash
+git clone https://github.com/apify/apify-microsoft-power-automate-integration.git
+cd apify-microsoft-power-automate-integration
+```
+
+## Connector Structure
+
+```
+.
+├── apiDefinition.swagger.json  # OpenAPI definition of the connector
+├── apiProperties.json          # Connector properties and metadata
+├── scripts.csx                 # Custom connector scripts
+├── icon.png                    # Connector icon
+├── .github/
+│   └── workflows/              # CI/CD pipeline configurations
+├── .gitignore                  # Git ignore file
+└── README.md                   # Documentation
+```
 
 ### Install .NET SDK
 
@@ -43,7 +64,6 @@ The Power Platform CLI (pac) is required for development and deployment of the c
    dotnet tool install -g Microsoft.PowerApps.CLI.Tool
    ```
    - Requires .NET SDK to be installed first
-   - Note: Some commands like `pac data` and certain `pac package` commands are only available on Windows
 
 3. **Windows MSI** (Windows only):
    - Download and install from [Microsoft Download Center](https://aka.ms/PowerAppsCLI)
@@ -78,87 +98,93 @@ pac auth select --profile "<profileName>"
 
 Verify connectivity with `pac connector list`.
 
-### Clone Repository
-
-```bash
-git clone https://github.com/apify/apify-microsoft-power-automate-integration.git
-cd apify-microsoft-power-automate-integration
-```
-
-## Connector Structure
-
-```
-.
-├── apiDefinition.swagger.json  # OpenAPI definition of the connector
-├── apiProperties.json          # Connector properties and metadata
-├── scripts.csx                 # Custom connector scripts
-├── icon.png                    # Connector icon
-├── .github/
-│   └── workflows/              # CI/CD pipeline configurations
-├── .gitignore                  # Git ignore file
-└── README.md                   # Documentation
-```
-
 ## Development Workflow
 
-1. **Get the Connector ID**
+### Initial Setup
 
-   After creating a connector in your Power Automate environment, you'll need its ID for subsequent operations:
+Before you start development, you need to either create a new connector or download an existing one:
+
+#### Create a New Connector
+
+If you don't have an Apify connector in your Power Automate environment yet:
+
+```bash
+pac connector create \
+  --api-definition-file ./apiDefinition.swagger.json \
+  --api-properties-file ./apiProperties.json \
+  --icon-file ./icon.png \
+  --script-file ./scripts.csx \
+  --solution-unique-name <your_solution_unique_name>
+```
+
+After creation, list your connectors to get the ID for future operations:
+
+```bash
+pac connector list
+```
+
+Find your new Apify connector in the list and note its `ConnectorId`.
+
+#### Download an Existing Connector
+
+If you already have an Apify connector in your environment and want to work on it:
+
+1. First, list available connectors to find the ID:
 
    ```bash
    pac connector list
    ```
 
-   This will return a list of solution-aware connectors in your environment. Find your connector and copy its `ConnectorId`.
+2. Download the connector files to your local environment:
 
-2. **Edit Locally**
+   ```bash
+   pac connector download \
+     --connector-id <connector-id> \
+     --outputDirectory ./
+   ```
 
-   Make all changes to `swagger.json`, `apiProperties.json`, and `scripts.cs` in your local IDE.
+### Development Cycle
 
-3. **Deploy and Test in Power Automate**
+Once you have your connector set up, follow this development cycle:
 
-   Use the `pac connector update` command to push your local files to the connector in your Power Automate environment:
+1. **Edit Locally**
+
+   Make changes to the connector files in your local IDE:
+   - `apiDefinition.swagger.json` - OpenAPI definition
+   - `apiProperties.json` - Connector properties
+   - `scripts.csx` - Custom scripts
+
+2. **Update the Connector**
+
+   Push your changes to Power Automate:
 
    ```bash
    pac connector update \
      --connector-id <Your-Connector-ID> \
-        --api-definition-file ./apiDefinition.swagger.json \
-   --api-properties-file ./apiProperties.json \
-   --icon-file ./icon.png \
-   --script-file ./scripts.csx
+     --api-definition-file ./apiDefinition.swagger.json \
+     --api-properties-file ./apiProperties.json \
+     --icon-file ./icon.png \
+     --script-file ./scripts.csx
    ```
+
+3. **Test Your Changes**
+
+   Before testing, you need a valid connection:
+   - Go to `Connections -> New connection` and create a connection to your connector
+   - Ensure the connection shows as `Connected`
+   - Alternatively, create the connection directly in the `Test tab`
+
+   Test your connector in Power Automate:
+   - Navigate to `Custom connectors -> Apify -> Test tab`
+   - Try different operations to verify your changes
+   - You can also use the `Swagger editor` for testing and fine-tuning
 
 4. **Iterate**
 
-   Use the "Test" tab in the Power Automate UI to test your changes. If you find issues, return to your local IDE, fix the files, and repeat the `pac connector update` command.
-
-## Deployment
-
-### Creating a New Connector
-
-To create a new connector in your Power Automate environment:
-
-```bash
-pac connector create \
-     --api-definition-file ./apiDefinition.swagger.json \
-   --api-properties-file ./apiProperties.json \
-   --icon-file ./icon.png \
-   --script-file ./scripts.csxx \
-  --solution-unique-name <your_solution_unique_name>
-```
-
-### Updating an Existing Connector
-
-To update an existing connector:
-
-```bash
-pac connector update \
-  --connector-id <Your-Connector-ID> \
-     --api-definition-file ./apiDefinition.swagger.json \
-   --api-properties-file ./apiProperties.json \
-   --icon-file ./icon.png \
-   --script-file ./scripts.csxx
-```
+   - If you find issues, return to your local IDE
+   - Make necessary fixes to the files
+   - Update the connector again using the `pac connector update` command
+   - Repeat the testing process
 
 ## Testing
 
@@ -195,30 +221,7 @@ If you encounter an error like this after installing the .NET tool:
 Tools directory '/Users/username/.dotnet/tools' is not currently on the PATH environment variable.
 ```
 
-You need to add the .NET tools directory to your PATH:
-
-#### For Bash (macOS/Linux)
-Add to your `~/.bashrc` or `~/.bash_profile`:
-```bash
-# Add .NET Core SDK tools
-export PATH="$PATH:$HOME/.dotnet/tools"
-```
-Then run `source ~/.bashrc` (or `source ~/.bash_profile`) to apply changes to your current session.
-
-#### For Zsh (macOS/Linux)
-Add to your `~/.zshrc` or `~/.zprofile`:
-```bash
-# Add .NET Core SDK tools
-export PATH="$PATH:$HOME/.dotnet/tools"
-```
-Then run `source ~/.zshrc` (or `source ~/.zprofile`) to apply changes to your current session.
-
-#### For PowerShell (Windows)
-Add to your PowerShell profile:
-```powershell
-# Add .NET Core SDK tools
-$env:PATH += ";$env:USERPROFILE\.dotnet\tools"
-```
+You need to add the .NET tools directory to your PATH.
 
 ## Resources
 
