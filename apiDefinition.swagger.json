@@ -70,7 +70,7 @@
   ],
   "x-ms-capabilities": {
     "testConnection": {
-      "operationId": "GetUserInfo"
+      "operationId": "ListStoreActors"
     }
   },
   "paths": {
@@ -91,7 +91,7 @@
         "summary": "Get User Information",
         "description": "Returns information about the current user account, including both public and private information.",
         "operationId": "GetUserInfo",
-        "x-ms-visibility": "important",
+        "x-ms-visibility": "internal",
         "x-ms-summary": "Get User Information",
         "tags": [
           "Users"
@@ -107,20 +107,7 @@
         "tags": [
           "Actors"
         ],
-        "parameters": [
-          {
-            "name": "actor_scope",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "enum": [
-              "my_actors",
-              "store_actors"
-            ],
-            "description": "Only used by the connector UI to trigger list refresh when scope changes.",
-            "x-ms-visibility": "internal"
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
             "description": "OK",
@@ -130,10 +117,10 @@
                 "data": {
                   "type": "object",
                   "properties": {
-                    "total": { "type": "integer" },
-                    "count": { "type": "integer" },
-                    "offset": { "type": "integer" },
-                    "limit": { "type": "integer" },
+                    "total": { "type": "integer", "format": "int32" },
+                    "count": { "type": "integer", "format": "int32" },
+                    "offset": { "type": "integer", "format": "int32" },
+                    "limit": { "type": "integer", "format": "int32" },
                     "desc": { "type": "boolean" },
                     "items": {
                       "type": "array",
@@ -141,16 +128,16 @@
                         "type": "object",
                         "properties": {
                           "id": { "type": "string" },
-                          "createdAt": { "type": "string", "format": "date-time" },
-                          "modifiedAt": { "type": "string", "format": "date-time" },
+                          "createdAt": { "type": "string" },
+                          "modifiedAt": { "type": "string" },
                           "name": { "type": "string" },
                           "username": { "type": "string" },
                           "title": { "type": "string" },
                           "stats": {
                             "type": "object",
                             "properties": {
-                              "totalRuns": { "type": "integer" },
-                              "lastRunStartedAt": { "type": "string", "format": "date-time" }
+                              "totalRuns": { "type": "integer", "format": "int32" },
+                              "lastRunStartedAt": { "type": "string" }
                             }
                           }
                         }
@@ -179,18 +166,6 @@
           "Actors"
         ],
         "parameters": [
-          {
-            "name": "actor_scope",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "enum": [
-              "my_actors",
-              "store_actors"
-            ],
-            "description": "Only used by the connector UI to trigger list refresh when scope changes.",
-            "x-ms-visibility": "internal"
-          },
           {
             "name": "limit",
             "in": "query",

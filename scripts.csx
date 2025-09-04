@@ -19,6 +19,10 @@ public class Script : ScriptBase
            return await HandleRunActor().ConfigureAwait(false);
         case "GetUserInfo":
           return await HandleGetUserInfo().ConfigureAwait(false) ;
+        case "listMyActors":
+          return await HandleListMyActors().ConfigureAwait(false);
+        case "listStoreActors":
+          return await HandleListStoreActors().ConfigureAwait(false);
         default:
           HttpResponseMessage response = new HttpResponseMessage(HttpStatusCode.BadRequest);
           response.Content = CreateJsonContent($"Unknown operation ID '{Context.OperationId}'");
@@ -86,16 +90,24 @@ public class Script : ScriptBase
    {
       var request = Context.Request;
    
-      // Create a new request with the correct Apify API endpoint
-      var apiRequest = new HttpRequestMessage(HttpMethod.Get, new Uri("https://api.apify.com/v2/users/me"));
+      // // Create a new request with the correct Apify API endpoint
+      // var apiRequest = new HttpRequestMessage(HttpMethod.Get, new Uri("https://api.apify.com/v2/users/me"));
       
-      // Copy headers from the original request
-      foreach (var header in request.Headers)
-      {
-          apiRequest.Headers.TryAddWithoutValidation(header.Key, header.Value);
-      }
+      // // Copy headers from the original request
+      // foreach (var header in request.Headers)
+      // {
+      //     apiRequest.Headers.TryAddWithoutValidation(header.Key, header.Value);
+      // }
       
       // Use the Context.SendAsync method to send the request
-      return await Context.SendAsync(apiRequest, CancellationToken).ConfigureAwait(false);
+      return await Context.SendAsync(request, CancellationToken).ConfigureAwait(false);
+   }
+
+   private async Task<HttpResponseMessage> HandleListMyActors() {
+    return await Context.SendAsync(Context.Request, CancellationToken).ConfigureAwait(false);
+   }
+
+   private async Task<HttpResponseMessage> HandleListStoreActors() {
+    return await Context.SendAsync(Context.Request, CancellationToken).ConfigureAwait(false);
    }
 }
