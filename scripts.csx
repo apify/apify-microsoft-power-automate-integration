@@ -20,8 +20,10 @@ public class Script : ScriptBase
         case "GetUserInfo":
           return await HandleGetUserInfo().ConfigureAwait(false) ;
         case "listMyActors":
+          // todo: fix why this is lowercase 
           return await HandleListMyActors().ConfigureAwait(false);
         case "listStoreActors":
+          // todo: fix why this is lowercase
           return await HandleListStoreActors().ConfigureAwait(false);
         default:
           HttpResponseMessage response = new HttpResponseMessage(HttpStatusCode.BadRequest);
