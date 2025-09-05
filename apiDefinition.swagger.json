@@ -70,7 +70,7 @@
   ],
   "x-ms-capabilities": {
     "testConnection": {
-      "operationId": "ListStoreActors"
+      "operationId": "GetUserInfo"
     }
   },
   "paths": {
@@ -112,6 +112,18 @@
           "Actors"
         ],
         "parameters": [
+          {
+            "name": "actor_scope",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "my_actors",
+              "store_actors"
+            ],
+            "description": "Only used by the connector UI to trigger list refresh when scope changes.",
+            "x-ms-visibility": "internal"
+          },
           {
             "$ref": "#/parameters/IntegrationPlatformHeader"
           }
@@ -175,6 +187,18 @@
         ],
         "parameters": [
           {
+            "name": "actor_scope",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "my_actors",
+              "store_actors"
+            ],
+            "description": "Only used by the connector UI to trigger list refresh when scope changes.",
+            "x-ms-visibility": "internal"
+          },
+          {
             "$ref": "#/parameters/IntegrationPlatformHeader"
           },
           {
@@ -229,6 +253,7 @@
         "description": "Runs an Actor and immediately returns without waiting for the run to finish. To wait for the run to finish, use the waitForFinish query parameter. See docs: https://docs.apify.com/api/v2/act-runs-post",
         "operationId": "RunActor",
         "x-ms-summary": "Run Actor",
+        "x-ms-visibility": "important",
         "tags": [
           "Actors"
         ],
@@ -272,9 +297,12 @@
             "x-ms-summary": "Actor",
             "x-ms-dynamic-values": {
               "operationId": "ListMyActors",
-              "value-collection": "data.items",
+              "value-collection": "data/items",
               "value-path": "id",
-              "value-title": "name"
+              "value-title": "name",
+              "parameters": {
+                "actor_scope": { "parameter": "actor_scope" }
+              }
             },
             "x-ms-visibility": "important"
           },
@@ -287,9 +315,13 @@
             "x-ms-summary": "Actor",
             "x-ms-dynamic-values": {
               "operationId": "ListStoreActors",
-              "value-collection": "data.items",
+              "value-collection": "data/items",
               "value-path": "name",
-              "value-title": "title"
+              "value-title": "title",
+              "parameters": {
+                "actor_scope": { "parameter": "actor_scope" },
+                "limit": 50
+              }
             },
             "x-ms-visibility": "important"
           },
