@@ -56,11 +56,8 @@
           "x-ms-apimTemplateParameter.existsAction": "skip",
           "x-ms-apimTemplate-policySection": "Request",
           "x-ms-apimTemplate-operationName": [
-            "RunActor",
-            "GetUserInfo",
-            "ListMyActors",
-            "ListStoreActors",
-            "ListActorsUnified"
+            "ScrapeSingleUrl",
+            "GetUserInfo"
           ]
         }
       },
