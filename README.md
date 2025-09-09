@@ -36,6 +36,7 @@ cd apify-microsoft-power-automate-integration
 ├── apiProperties.json          # Connector properties and metadata
 ├── scripts.csx                 # Custom connector scripts
 ├── icon.png                    # Connector icon
+├── settings.json               # Configuration for connector commands
 ├── .github/
 │   └── workflows/              # CI/CD pipeline configurations
 ├── .gitignore                  # Git ignore file
@@ -98,6 +99,28 @@ pac auth select --profile "<profileName>"
 
 Verify connectivity with `pac connector list`.
 
+### Using Settings File
+
+The repository includes a `settings.json` file that simplifies connector operations by storing configuration parameters. This eliminates the need to specify all parameters in each command.
+
+1. **Update the settings file:**
+   
+   Before using the settings file, make sure to update the following fields.
+   
+   ```json
+   {
+     "connectorId": "YOUR-CONNECTOR-ID",
+     "environment": "YOUR-ENVIRONMENT-ID",
+     "apiProperties": "apiProperties.json",
+     "apiDefinition": "apiDefinition.swagger.json",
+     "icon": "icon.png",
+     "script": "scripts.csx"
+   }
+   ```
+   
+   - Replace `YOUR-CONNECTOR-ID` with your actual connector ID (if you already have one, otherwise leave it be)
+   - Replace `YOUR-ENVIRONMENT-ID` with your Power Platform environment ID
+
 ## Development Workflow
 
 ### Initial Setup
@@ -109,12 +132,7 @@ Before you start development, you need to either create a new connector or downl
 If you don't have an Apify connector in your Power Automate environment yet:
 
 ```bash
-pac connector create \
-  --api-definition-file ./apiDefinition.swagger.json \
-  --api-properties-file ./apiProperties.json \
-  --icon-file ./icon.png \
-  --script-file ./scripts.csx \
-  --solution-unique-name <your_solution_unique_name>
+pac connector create --settings-file settings.json --solution-unique-name <your_solution_unique_name>
 ```
 
 After creation, list your connectors to get the ID for future operations:
@@ -159,12 +177,7 @@ Once you have your connector set up, follow this development cycle:
    Push your changes to Power Automate:
 
    ```bash
-   pac connector update \
-     --connector-id <Your-Connector-ID> \
-     --api-definition-file ./apiDefinition.swagger.json \
-     --api-properties-file ./apiProperties.json \
-     --icon-file ./icon.png \
-     --script-file ./scripts.csx
+   pac connector update --settings-file settings.json
    ```
 
 3. **Test Your Changes**
