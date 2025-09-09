@@ -102,28 +102,16 @@
         ]
       }
     },
-    "/acts": {
+    "/actor-tasks": {
       "get": {
-        "summary": "List My Actors (for dropdown)",
-        "description": "Fetches a list of the user's actors.",
-        "operationId": "ListMyActors",
+        "summary": "List Tasks (for dropdown)",
+        "description": "Fetches a list of the user's actor tasks.",
+        "operationId": "ListTasks",
         "x-ms-visibility": "internal",
         "tags": [
-          "Actors"
+          "Tasks"
         ],
         "parameters": [
-          {
-            "name": "actor_scope",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "enum": [
-              "my_actors",
-              "store_actors"
-            ],
-            "description": "Only used by the connector UI to trigger list refresh when scope changes.",
-            "x-ms-visibility": "internal"
-          },
           {
             "$ref": "#/parameters/IntegrationPlatformHeader"
           }
@@ -137,34 +125,18 @@
                 "data": {
                   "type": "object",
                   "properties": {
-                    "total": { "type": "integer", "format": "int32" },
-                    "count": { "type": "integer", "format": "int32" },
-                    "offset": { "type": "integer", "format": "int32" },
-                    "limit": { "type": "integer", "format": "int32" },
-                    "desc": { "type": "boolean" },
                     "items": {
                       "type": "array",
                       "items": {
                         "type": "object",
                         "properties": {
                           "id": { "type": "string" },
-                          "createdAt": { "type": "string" },
-                          "modifiedAt": { "type": "string" },
-                          "name": { "type": "string" },
-                          "username": { "type": "string" },
-                          "title": { "type": "string" },
-                          "stats": {
-                            "type": "object",
-                            "properties": {
-                              "totalRuns": { "type": "integer", "format": "int32" },
-                              "lastRunStartedAt": { "type": "string" }
-                            }
-                          }
+                          "name": { "type": "string" }
                         }
                       }
                     }
                   },
-                  "required": ["items"]
+                  "required": [ "items" ]
                 }
               },
               "additionalProperties": true
@@ -176,232 +148,42 @@
         }
       }
     },
-    "/store": {
-      "get": {
-        "summary": "List Store Actors (for dropdown)",
-        "description": "Fetches a list of actors from the Apify Store.",
-        "operationId": "ListStoreActors",
-        "x-ms-visibility": "internal",
-        "tags": [
-          "Actors"
-        ],
-        "parameters": [
-          {
-            "name": "actor_scope",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "enum": [
-              "my_actors",
-              "store_actors"
-            ],
-            "description": "Only used by the connector UI to trigger list refresh when scope changes.",
-            "x-ms-visibility": "internal"
-          },
-          {
-            "$ref": "#/parameters/IntegrationPlatformHeader"
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "type": "integer",
-            "required": false,
-            "default": 50,
-            "x-ms-summary": "Maximum number of actors to return"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "data": {
-                  "type": "object",
-                  "properties": {
-                    "items": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "string"
-                          },
-                          "name": {
-                            "type": "string"
-                          },
-                          "title": {
-                            "type": "string"
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "default": {
-            "$ref": "#/responses/ErrorResponse"
-          }
-        }
-      }
-    },
-    "/actors/unified": {
-      "get": {
-        "summary": "List Actors (unified for dropdown)",
-        "description": "Fetches a unified list of actors from My Actors or Apify Store based on scope.",
-        "operationId": "ListActorsUnified",
-        "x-ms-visibility": "internal",
-        "tags": [
-          "Actors"
-        ],
-        "parameters": [
-          {
-            "name": "actor_scope",
-            "in": "query",
-            "required": true,
-            "type": "string",
-            "enum": [
-              "my_actors",
-              "store_actors"
-            ],
-            "description": "Select source of actors: your own or the Apify Store.",
-            "x-ms-visibility": "internal"
-          },
-          {
-            "$ref": "#/parameters/IntegrationPlatformHeader"
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "type": "integer",
-            "required": false,
-            "default": 50,
-            "x-ms-summary": "Maximum number of actors to return"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "data": {
-                  "type": "object",
-                  "properties": {
-                    "items": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": { "type": "string" },
-                          "title": { "type": "string" }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "default": {
-            "$ref": "#/responses/ErrorResponse"
-          }
-        }
-      }
-    },
-    "/acts/{actorId}/runs": {
+    "/actor-tasks/{taskId}/runs": {
       "post": {
-        "summary": "Run Actor",
-        "description": "Runs an Actor and immediately returns without waiting for the run to finish. To wait for the run to finish, use the waitForFinish query parameter. See docs: https://docs.apify.com/api/v2/act-runs-post",
-        "operationId": "RunActor",
-        "x-ms-summary": "Run Actor",
+        "summary": "Run Task",
+        "description": "Runs an Actor task and immediately returns without waiting for the run to finish. To wait for the run to finish, use the waitForFinish query parameter. See docs: https://docs.apify.com/api/v2/actor-task-runs-post",
+        "operationId": "RunTask",
+        "x-ms-summary": "Run Task",
         "x-ms-visibility": "important",
         "tags": [
-          "Actors"
+          "Tasks"
         ],
         "parameters": [
           {
             "$ref": "#/parameters/IntegrationPlatformHeader"
           },
           {
-            "name": "actorId",
+            "name": "taskId",
             "in": "path",
             "required": true,
             "type": "string",
             "default": "not_set",
             "x-ms-visibility": "internal",
-            "description": "Actor ID or a tilde-separated owner's username and Actor name."
+            "description": "Internal placeholder. The actual Task is selected via the 'task_id' parameter."
           },
           {
-            "name": "actor_scope",
-            "description": "Actor can be either yours or from the Apify Store.",
-            "default": "my_actors",
+            "name": "task_id",
             "in": "query",
             "required": true,
             "type": "string",
-            "format": "",
-            "x-ms-summary": "Actor Source",
-            "enum": [
-              "my_actors",
-              "store_actors"
-            ],
-            "x-ms-enum-display-name": [
-              "My Actors",
-              "From Store"
-            ]
-          },
-          {
-            "name": "actor_id",
-            "in": "query",
-            "required": true,
-            "type": "string",
-            "description": "Actor identifier to run. For My Actors supply actor ID; for Store supply actor name.",
-            "x-ms-summary": "Actor",
+            "x-ms-summary": "Task",
+            "description": "Select a task to run.",
             "x-ms-dynamic-values": {
-              "operationId": "ListActorsUnified",
+              "operationId": "ListTasks",
               "value-collection": "data/items",
               "value-path": "id",
-              "value-title": "title",
-              "parameters": {
-                "actor_scope": { "parameter": "actor_scope" },
-                "limit": 50
-              }
-            },
-            "x-ms-visibility": "important"
-          },
-          {
-            "name": "build",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "description": "Specifies the Actor build to run. It can be either a build tag or build number. By default, the run uses the build specified in the default run configuration for the Actor (typically latest).",
-            "x-ms-summary": "Build"
-          },
-          {
-            "name": "timeout",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "description": "Optional timeout for the run, in seconds. By default, the run uses a timeout specified in the default run configuration for the Actor.",
-            "x-ms-summary": "Timeout (seconds)"
-          },
-          {
-            "name": "memory",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "description": "Memory limit for the run, in megabytes. The amount of memory can be set to a power of 2 with a minimum of 128. By default, the run uses a memory limit specified in the default run configuration for the Actor.",
-            "x-ms-summary": "Memory (MB)",
-            "enum": [
-              512,
-              1024,
-              2048,
-              4096,
-              8192,
-              16384
-            ]
+              "value-title": "name"
+            }
           },
           {
             "name": "waitForFinish",
@@ -409,20 +191,34 @@
             "required": false,
             "type": "integer",
             "x-ms-summary": "Wait for Finish (seconds)",
-            "description": "The maximum number of seconds the server waits for the run to finish. By default, it is 0, the maximum value is 60. If the run finishes in time then the returned run object will have a terminal status (e.g. SUCCEEDED), otherwise it will have a transitional status (e.g. RUNNING).",
+            "description": "Max value is 60. If empty or 0, the call is asynchronous.",
             "maximum": 60,
             "default": 0
           },
           {
-            "name": "input_body",
+            "name": "timeout",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "x-ms-summary": "Timeout (seconds)"
+          },
+          {
+            "name": "memory",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "x-ms-summary": "Memory (MB)",
+            "enum": [512, 1024, 2048, 4096, 8192, 16384]
+          },
+          {
+            "name": "input_override",
             "in": "body",
-            "required": true,
-            "description": "Raw JSON object passed as INPUT to the Actor.",
-            "x-ms-textarea": true,
-            "x-ms-summary": "Input Body",
+            "required": false,
+            "x-ms-summary": "Input Override",
             "schema": {
               "type": "object",
-              "description": "Raw JSON object passed as INPUT to the Actor"
+              "description": "Optional. A raw JSON object to override the task's default input.",
+              "x-ms-textarea": true
             }
           }
         ],
