@@ -247,6 +247,70 @@
         }
       }
     },
+    "/actors/unified": {
+      "get": {
+        "summary": "List Actors (unified for dropdown)",
+        "description": "Fetches a unified list of actors from My Actors or Apify Store based on scope.",
+        "operationId": "ListActorsUnified",
+        "x-ms-visibility": "internal",
+        "tags": [
+          "Actors"
+        ],
+        "parameters": [
+          {
+            "name": "actor_scope",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "enum": [
+              "my_actors",
+              "store_actors"
+            ],
+            "description": "Select source of actors: your own or the Apify Store.",
+            "x-ms-visibility": "internal"
+          },
+          {
+            "$ref": "#/parameters/IntegrationPlatformHeader"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "type": "integer",
+            "required": false,
+            "default": 50,
+            "x-ms-summary": "Maximum number of actors to return"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": { "type": "string" },
+                          "title": { "type": "string" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
+    },
     "/acts/{actorId}/runs": {
       "post": {
         "summary": "Run Actor",
@@ -289,34 +353,16 @@
             ]
           },
           {
-            "name": "my_actor_id",
+            "name": "actor_id",
             "in": "query",
-            "required": false,
+            "required": true,
             "type": "string",
-            "description": "ID of your actor to run when Actor Source is My Actors.",
-            "x-ms-summary": "My Actor",
+            "description": "Actor identifier to run. For My Actors supply actor ID; for Store supply actor name.",
+            "x-ms-summary": "Actor",
             "x-ms-dynamic-values": {
-              "operationId": "ListMyActors",
+              "operationId": "ListActorsUnified",
               "value-collection": "data/items",
               "value-path": "id",
-              "value-title": "name",
-              "parameters": {
-                "actor_scope": { "parameter": "actor_scope" }
-              }
-            },
-            "x-ms-visibility": "important"
-          },
-          {
-            "name": "store_actor_id",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "description": "Name of the Apify Store actor to run when Actor Source is From Store.",
-            "x-ms-summary": "Store Actor",
-            "x-ms-dynamic-values": {
-              "operationId": "ListStoreActors",
-              "value-collection": "data/items",
-              "value-path": "name",
               "value-title": "title",
               "parameters": {
                 "actor_scope": { "parameter": "actor_scope" },

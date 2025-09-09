@@ -59,7 +59,8 @@
             "RunActor",
             "GetUserInfo",
             "ListMyActors",
-            "ListStoreActors"
+            "ListStoreActors",
+            "ListActorsUnified"
           ]
         }
       },

@@ -23,6 +23,8 @@ public class Script : ScriptBase
           return await HandleListMyActors().ConfigureAwait(false);
         case "ListStoreActors":
           return await HandleListStoreActors().ConfigureAwait(false);
+        case "ListActorsUnified":
+          return await HandleListActorsUnified().ConfigureAwait(false);
         default:
           HttpResponseMessage response = new HttpResponseMessage(HttpStatusCode.BadRequest);
           response.Content = CreateJsonContent($"Unknown operation ID '{Context.OperationId}'");
@@ -35,19 +37,7 @@ public class Script : ScriptBase
    {
       var request = Context.Request;
       var queryParams = System.Web.HttpUtility.ParseQueryString(request.RequestUri.Query);
-      var actorScope = queryParams["actor_scope"];
-      var myActorId = queryParams["my_actor_id"];
-      var storeActorId = queryParams["store_actor_id"];
-
-      string finalActorId = null;
-      if (string.Equals(actorScope, "my_actors", StringComparison.OrdinalIgnoreCase))
-      {
-         finalActorId = myActorId;
-      }
-      else if (string.Equals(actorScope, "store_actors", StringComparison.OrdinalIgnoreCase))
-      {
-         finalActorId = storeActorId;
-      }
+      var finalActorId = queryParams["actor_id"];
 
       if (string.IsNullOrWhiteSpace(finalActorId))
       {
@@ -55,7 +45,7 @@ public class Script : ScriptBase
          {
             Content = new StringContent(JsonConvert.SerializeObject(new
             {
-               error = new { type = "invalid_request", message = "actor_scope and corresponding actor id must be provided" }
+               error = new { type = "invalid_request", message = "actor_id must be provided" }
             }), Encoding.UTF8, "application/json")
          };
          return error;
@@ -72,6 +62,7 @@ public class Script : ScriptBase
          if (string.IsNullOrEmpty(key)) continue;
          if (key.Equals("my_actor_id", StringComparison.OrdinalIgnoreCase)) continue;
          if (key.Equals("store_actor_id", StringComparison.OrdinalIgnoreCase)) continue;
+         if (key.Equals("actor_id", StringComparison.OrdinalIgnoreCase)) continue;
          if (key.Equals("actorId", StringComparison.OrdinalIgnoreCase)) continue;
          newQuery[key] = queryParams[key];
       }
@@ -98,4 +89,26 @@ public class Script : ScriptBase
    private async Task<HttpResponseMessage> HandleListStoreActors() {
     return await Context.SendAsync(Context.Request, CancellationToken).ConfigureAwait(false);
    }
+
+  private async Task<HttpResponseMessage> HandleListActorsUnified() {
+    var request = Context.Request;
+    var originalUri = request.RequestUri;
+    var queryParams = System.Web.HttpUtility.ParseQueryString(originalUri.Query);
+    var actorScope = queryParams["actor_scope"];
+
+    // Decide target path based on scope
+    var uriBuilder = new UriBuilder(originalUri);
+    if (string.Equals(actorScope, "store_actors", StringComparison.OrdinalIgnoreCase)) {
+      uriBuilder.Path = "/v2/store";
+    } else {
+      uriBuilder.Path = "/v2/acts";
+    }
+
+    // Add query parameters to the request URI
+    uriBuilder.Query = queryParams.ToString();
+
+    // Forward the request to fetch raw list
+    request.RequestUri = uriBuilder.Uri;
+    return await Context.SendAsync(request, CancellationToken).ConfigureAwait(false);
+  }
 }
