@@ -294,7 +294,7 @@
             "required": false,
             "type": "string",
             "description": "ID of your actor to run when Actor Source is My Actors.",
-            "x-ms-summary": "Actor",
+            "x-ms-summary": "My Actor",
             "x-ms-dynamic-values": {
               "operationId": "ListMyActors",
               "value-collection": "data/items",
@@ -312,7 +312,7 @@
             "required": false,
             "type": "string",
             "description": "Name of the Apify Store actor to run when Actor Source is From Store.",
-            "x-ms-summary": "Actor",
+            "x-ms-summary": "Store Actor",
             "x-ms-dynamic-values": {
               "operationId": "ListStoreActors",
               "value-collection": "data/items",
