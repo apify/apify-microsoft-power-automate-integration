@@ -131,6 +131,7 @@ public class Script : ScriptBase
     };
   }
 
+  // Wrap primitive types in an object with a "value" property
   private JObject WrapPrimitive(string type, string format) {
     var inner = new JObject { ["type"] = type };
     if (!string.IsNullOrEmpty(format)) {

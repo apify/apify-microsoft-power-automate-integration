@@ -186,23 +186,27 @@ Once you have your connector set up, follow this development cycle:
    - Update the connector again using the `pac connector update` command
    - Repeat the testing process
 
-### Run Actor Action
+## Actions 
 
-Use the "Run Actor" action to start an Apify Actor run.
+### Get Dataset Items Action
+
+Use the "Get Dataset Items" action to retrieve records from one of your Apify Datasets.
 
 - Authentication: Use Apify API Key or OAuth 2.0 (scopes: `profile`, `full_api_access`).
 - Headers: All requests include `x-apify-integration-platform: power-automate`.
-- Actor Source (`actor_scope`): Choose "My Actors" or "From Store".
-  - If "My Actors": pick from `Actor` populated by your account actors.
-  - If "From Store": pick from `Actor` populated by Apify Store (limit 50).
-- Input Body (`input_body`): Provide JSON for the Actor input.
+- Dataset (`datasetId`): Select a dataset from a dynamically populated dropdown of your datasets.
 - Optional query params:
-  - `build`: specific build tag or id
-  - `timeout` (seconds)
-  - `memory` (MB): 512, 1024, 2048, 4096, 8192, 16384
-  - `waitForFinish` (seconds, max 60): set 0 to no limit
+  - `limit`: number of items to return.
+  - `offset`: number of items to skip (for pagination).
+- Output: An array of dataset items. The item shape is dynamic and depends on the selected dataset.
 
-The connector invokes `POST /v2/acts/{actorId}/runs` per Apify docs (see: https://docs.apify.com/api/v2/act-runs-post). The `actorId` path segment is chosen automatically based on your `actor_scope` selection.
+How it works:
+- The dataset dropdown is populated via `GET /v2/datasets` so you can pick by name.
+- The connector calls `GET /v2/datasets/{datasetId}/items` with the provided `limit` and `offset` to fetch the data.
+- To provide typed fields in Power Automate, it calls `GET /v2/datasets/{datasetId}/items-schema-helper` to infer the item schema from a sample.
+
+Tips:
+- For large datasets, paginate using `limit` and `offset` to process items in batches.
 
 ## Testing
 
