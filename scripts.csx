@@ -43,23 +43,22 @@ public class Script : ScriptBase
     var request = Context.Request;
     var uriBuilder = new UriBuilder(request.RequestUri);
 
-    // Map from /datasets/{datasetId}/items-schema-helper to /datasets/{datasetId}/items
+    // Correct path to get items
     uriBuilder.Path = uriBuilder.Path.Replace("/items-schema-helper", "/items");
 
-    // Ensure limit=1 for schema inference and always return plain array of items
+    // Set limit to 1 for schema inference
     var queryParams = System.Web.HttpUtility.ParseQueryString(uriBuilder.Query);
     queryParams["limit"] = "1";
-    // Remove optional offset to guarantee deterministic first item when possible
-    queryParams.Remove("offset");
     uriBuilder.Query = queryParams.ToString();
 
+    // Correct request URI
     request.RequestUri = uriBuilder.Uri;
 
     // Call Apify API to get a sample item
     var upstreamResponse = await Context.SendAsync(request, CancellationToken).ConfigureAwait(false);
     var contentString = await upstreamResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
 
-    // Try parse JSON
+    // Try to parse JSON
     JToken parsed;
     try {
       parsed = string.IsNullOrWhiteSpace(contentString) ? null : JToken.Parse(contentString);
@@ -67,7 +66,7 @@ public class Script : ScriptBase
       parsed = null;
     }
 
-    // Extract first item (Apify returns an array for /items). If not an array, use as-is
+    // Extract first item, if it's an array, otherwise use as-is
     var sample = parsed is JArray arr && arr.Count > 0 ? arr[0] : parsed;
 
     // Infer OpenAPI (Swagger 2.0) schema from the sample
@@ -103,8 +102,7 @@ public class Script : ScriptBase
               ["type"] = "array",
               ["items"] = InferOpenApiSchemaFromSample(((JArray)sample).FirstOrDefault())
             }
-          },
-          ["additionalProperties"] = true
+          }
         };
       case JTokenType.Integer:
         return WrapPrimitive("integer", "int64");
@@ -120,7 +118,7 @@ public class Script : ScriptBase
         return WrapPrimitive("string", null);
     }
   }
-
+ 
   private JObject InferObjectSchema(JObject obj) {
     var properties = new JObject();
     foreach (var prop in obj.Properties()) {
@@ -129,8 +127,7 @@ public class Script : ScriptBase
     return new JObject
     {
       ["type"] = "object",
-      ["properties"] = properties,
-      ["additionalProperties"] = true
+      ["properties"] = properties
     };
   }
 
@@ -142,8 +139,7 @@ public class Script : ScriptBase
     return new JObject
     {
       ["type"] = "object",
-      ["properties"] = new JObject { ["value"] = inner },
-      ["additionalProperties"] = true
+      ["properties"] = new JObject { ["value"] = inner }
     };
   }
 
