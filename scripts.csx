@@ -11,20 +11,16 @@ using Newtonsoft.Json.Linq;
 public class Script : ScriptBase
 {
    // This method is called before each operation
-   public override async Task<HttpResponseMessage> ExecuteAsync()
-   {
-      switch (Context.OperationId)
-      {
-        case "RunActor":
-           return await HandleRunActor().ConfigureAwait(false);
+   public override async Task<HttpResponseMessage> ExecuteAsync() {
+      switch (Context.OperationId) {
         case "GetUserInfo":
           return await HandleGetUserInfo().ConfigureAwait(false) ;
-        case "ListMyActors":
-          return await HandleListMyActors().ConfigureAwait(false);
-        case "ListStoreActors":
-          return await HandleListStoreActors().ConfigureAwait(false);
-        case "ListActorsUnified":
-          return await HandleListActorsUnified().ConfigureAwait(false);
+        case "ListDatasets":
+          return await HandleListDatasets().ConfigureAwait(false);
+        case "GetDatasetSchema":
+          return await HandleGetDatasetSchema().ConfigureAwait(false);
+        case "GetDatasetItems":
+          return await HandleGetDatasetItems().ConfigureAwait(false);
         default:
           HttpResponseMessage response = new HttpResponseMessage(HttpStatusCode.BadRequest);
           response.Content = CreateJsonContent($"Unknown operation ID '{Context.OperationId}'");
@@ -32,83 +28,126 @@ public class Script : ScriptBase
       }
    }
 
-   // Handle the RunActor operation
-   private async Task<HttpResponseMessage> HandleRunActor()
-   {
-      var request = Context.Request;
-      var queryParams = System.Web.HttpUtility.ParseQueryString(request.RequestUri.Query);
-      var finalActorId = queryParams["actor_id"];
-
-      if (string.IsNullOrWhiteSpace(finalActorId))
-      {
-         var error = new HttpResponseMessage(System.Net.HttpStatusCode.BadRequest)
-         {
-            Content = new StringContent(JsonConvert.SerializeObject(new
-            {
-               error = new { type = "invalid_request", message = "actor_id must be provided" }
-            }), Encoding.UTF8, "application/json")
-         };
-         return error;
-      }
-
-      // Create a new uri: /v2/acts/{actorId}/runs
-      var uriBuilder = new UriBuilder(request.RequestUri);
-      uriBuilder.Path = "/v2/acts/" + Uri.EscapeDataString(finalActorId) + "/runs";
-
-      // Recompose query
-      var newQuery = System.Web.HttpUtility.ParseQueryString(string.Empty);
-      foreach (string key in queryParams.AllKeys)
-      {
-         if (string.IsNullOrEmpty(key)) continue;
-         if (key.Equals("my_actor_id", StringComparison.OrdinalIgnoreCase)) continue;
-         if (key.Equals("store_actor_id", StringComparison.OrdinalIgnoreCase)) continue;
-         if (key.Equals("actor_id", StringComparison.OrdinalIgnoreCase)) continue;
-         if (key.Equals("actorId", StringComparison.OrdinalIgnoreCase)) continue;
-         newQuery[key] = queryParams[key];
-      }
-      uriBuilder.Query = newQuery.ToString();
-
-      // Replace the request URI
-      request.RequestUri = uriBuilder.Uri;
-
-      return await Context.SendAsync(request, CancellationToken).ConfigureAwait(false);
-   }
-
-   private async Task<HttpResponseMessage> HandleGetUserInfo()
-   {
+   private async Task<HttpResponseMessage> HandleGetUserInfo() {
       var request = Context.Request;
       
       // Use the Context.SendAsync method to send the request
       return await Context.SendAsync(request, CancellationToken).ConfigureAwait(false);
    }
 
-   private async Task<HttpResponseMessage> HandleListMyActors() {
+  private async Task<HttpResponseMessage> HandleListDatasets() {
     return await Context.SendAsync(Context.Request, CancellationToken).ConfigureAwait(false);
-   }
+  }
 
-   private async Task<HttpResponseMessage> HandleListStoreActors() {
-    return await Context.SendAsync(Context.Request, CancellationToken).ConfigureAwait(false);
-   }
-
-  private async Task<HttpResponseMessage> HandleListActorsUnified() {
+  private async Task<HttpResponseMessage> HandleGetDatasetSchema() {
     var request = Context.Request;
-    var originalUri = request.RequestUri;
-    var queryParams = System.Web.HttpUtility.ParseQueryString(originalUri.Query);
-    var actorScope = queryParams["actor_scope"];
+    var uriBuilder = new UriBuilder(request.RequestUri);
 
-    // Decide target path based on scope
-    var uriBuilder = new UriBuilder(originalUri);
-    if (string.Equals(actorScope, "store_actors", StringComparison.OrdinalIgnoreCase)) {
-      uriBuilder.Path = "/v2/store";
-    } else {
-      uriBuilder.Path = "/v2/acts";
-    }
+    // Map from /datasets/{datasetId}/items-schema-helper to /datasets/{datasetId}/items
+    uriBuilder.Path = uriBuilder.Path.Replace("/items-schema-helper", "/items");
 
-    // Add query parameters to the request URI
+    // Ensure limit=1 for schema inference and always return plain array of items
+    var queryParams = System.Web.HttpUtility.ParseQueryString(uriBuilder.Query);
+    queryParams["limit"] = "1";
+    // Remove optional offset to guarantee deterministic first item when possible
+    queryParams.Remove("offset");
     uriBuilder.Query = queryParams.ToString();
 
-    // Forward the request to fetch raw list
     request.RequestUri = uriBuilder.Uri;
-    return await Context.SendAsync(request, CancellationToken).ConfigureAwait(false);
+
+    // Call Apify API to get a sample item
+    var upstreamResponse = await Context.SendAsync(request, CancellationToken).ConfigureAwait(false);
+    var contentString = await upstreamResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
+
+    // Try parse JSON
+    JToken parsed;
+    try {
+      parsed = string.IsNullOrWhiteSpace(contentString) ? null : JToken.Parse(contentString);
+    } catch (Exception) {
+      parsed = null;
+    }
+
+    // Extract first item (Apify returns an array for /items). If not an array, use as-is
+    var sample = parsed is JArray arr && arr.Count > 0 ? arr[0] : parsed;
+
+    // Infer OpenAPI (Swagger 2.0) schema from the sample
+    var schema = InferOpenApiSchemaFromSample(sample);
+
+    var response = new HttpResponseMessage(HttpStatusCode.OK);
+    response.Content = CreateJsonContent(schema.ToString(Newtonsoft.Json.Formatting.None));
+    return response;
+  }
+
+  private JObject InferOpenApiSchemaFromSample(JToken sample) {
+    // If no sample, return very permissive object schema
+    if (sample == null || sample.Type == JTokenType.Null || sample.Type == JTokenType.Undefined) {
+      return new JObject
+      {
+        ["type"] = "object",
+        ["additionalProperties"] = true
+      };
+    }
+
+    switch (sample.Type) {
+      case JTokenType.Object:
+        return InferObjectSchema((JObject)sample);
+      case JTokenType.Array:
+        // Wrap arrays in an object to ensure the returned schema is always an object
+        return new JObject
+        {
+          ["type"] = "object",
+          ["properties"] = new JObject
+          {
+            ["value"] = new JObject
+            {
+              ["type"] = "array",
+              ["items"] = InferOpenApiSchemaFromSample(((JArray)sample).FirstOrDefault())
+            }
+          },
+          ["additionalProperties"] = true
+        };
+      case JTokenType.Integer:
+        return WrapPrimitive("integer", "int64");
+      case JTokenType.Float:
+        return WrapPrimitive("number", "double");
+      case JTokenType.Boolean:
+        return WrapPrimitive("boolean", null);
+      case JTokenType.Date:
+        return WrapPrimitive("string", "date-time");
+      case JTokenType.String:
+        return WrapPrimitive("string", null);
+      default:
+        return WrapPrimitive("string", null);
+    }
+  }
+
+  private JObject InferObjectSchema(JObject obj) {
+    var properties = new JObject();
+    foreach (var prop in obj.Properties()) {
+      properties[prop.Name] = InferOpenApiSchemaFromSample(prop.Value);
+    }
+    return new JObject
+    {
+      ["type"] = "object",
+      ["properties"] = properties,
+      ["additionalProperties"] = true
+    };
+  }
+
+  private JObject WrapPrimitive(string type, string format) {
+    var inner = new JObject { ["type"] = type };
+    if (!string.IsNullOrEmpty(format)) {
+      inner["format"] = format;
+    }
+    return new JObject
+    {
+      ["type"] = "object",
+      ["properties"] = new JObject { ["value"] = inner },
+      ["additionalProperties"] = true
+    };
+  }
+
+  private async Task<HttpResponseMessage> HandleGetDatasetItems() {
+    return await Context.SendAsync(Context.Request, CancellationToken).ConfigureAwait(false);
   }
 }
