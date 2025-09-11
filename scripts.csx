@@ -8,13 +8,10 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-public class Script : ScriptBase
-{
+public class Script : ScriptBase {
    // This method is called before each operation
-   public override async Task<HttpResponseMessage> ExecuteAsync()
-   {
-      switch (Context.OperationId)
-      {
+   public override async Task<HttpResponseMessage> ExecuteAsync() {
+      switch (Context.OperationId) {
         case "GetUserInfo":
           return await HandleGetUserInfo().ConfigureAwait(false) ;
         case "ListKeyValueStores":
