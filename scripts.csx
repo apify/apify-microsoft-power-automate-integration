@@ -8,24 +8,20 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-public class Script : ScriptBase
-{
-   // This method is called before each operation
-   public override async Task<HttpResponseMessage> ExecuteAsync()
-   {
-      switch (Context.OperationId)
-      {
-        case "GetUserInfo":
-          return await HandleGetUserInfo().ConfigureAwait(false) ;
-        default:
-          HttpResponseMessage response = new HttpResponseMessage(HttpStatusCode.BadRequest);
-          response.Content = CreateJsonContent($"Unknown operation ID '{Context.OperationId}'");
-          return response;
-      }
-   }
+public class Script : ScriptBase {
+  // This method is called before each operation
+  public override async Task<HttpResponseMessage> ExecuteAsync() {
+    switch (Context.OperationId) {
+      case "GetUserInfo":
+        return await HandleGetUserInfo().ConfigureAwait(false) ;
+      default:
+        HttpResponseMessage response = new HttpResponseMessage(HttpStatusCode.BadRequest);
+        response.Content = CreateJsonContent($"Unknown operation ID '{Context.OperationId}'");
+        return response;
+    }
+  }
 
-   private async Task<HttpResponseMessage> HandleGetUserInfo()
-   {
-      return await Context.SendAsync(Context.Request, CancellationToken).ConfigureAwait(false);
-   }
+  private async Task<HttpResponseMessage> HandleGetUserInfo() {
+    return await Context.SendAsync(Context.Request, CancellationToken).ConfigureAwait(false);
+  }
 }
