@@ -1,0 +1,10 @@
+{
+  "connectorId": "YOUR-CONNECTOR-ID",
+  "environment": "YOUR-ENVIRONMENT-ID",
+  "apiProperties": "apiProperties.json",
+  "apiDefinition": "apiDefinition.swagger.json",
+  "icon": "icon.png",
+  "script": "scripts.csx",
+  "powerAppsApiVersion": "2016-11-01",
+  "powerAppsUrl": "https://api.powerapps.com"
+}

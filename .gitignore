@@ -1,0 +1,65 @@
+# Local development files
+.env
+.env.local
+
+# IDE and editor files
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Visual Studio and .NET specific
+*.suo
+*.user
+*.sln.docstates
+[Dd]ebug/
+[Rr]elease/
+x64/
+[Bb]in/
+[Oo]bj/
+*.vspscc
+*.vssscc
+.builds
+*.pidb
+*.scc
+
+# ReSharper
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+# NuGet Packages
+packages/
+!packages/repositories.config
+
+# Logs and temporary files
+logs
+*.log
+npm-debug.log*
+*.tmp
+*.tmp_proj
+*.temp
+temp/
+*.svclog
+
+# Power Platform specific
+*.msapp
+*.msappx
+*.zip
+*.msapp.source
+*.pbix
+
+# OS specific files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Backup files
+*~
+Backup*/
+UpgradeLog*.XML
+UpgradeLog*.htm

@@ -1,0 +1,70 @@
+{
+  "properties": {
+    "capabilities": [
+      "actions"
+    ],
+    "connectionParameters": {
+      "api_key": {
+        "type": "securestring",
+        "uiDefinition": {
+          "displayName": "API Token",
+          "description": "The API Token for your Apify account. Get it at https://console.apify.com/settings/integrations",
+          "tooltip": "Provide your Apify API Token",
+          "constraints": {
+            "tabIndex": 2,
+            "clearText": false,
+            "required": "true"
+          }
+        }
+      }
+    },
+    "iconBrandColor": "#0098FF",
+    "policyTemplateInstances": [
+      {
+        "templateId": "setheader",
+        "title": "Set Apify API Token to Header",
+        "parameters": {
+          "x-ms-apimTemplateParameter.name": "Authorization",
+          "x-ms-apimTemplateParameter.value": "Bearer @headers('Authorization')",
+          "x-ms-apimTemplateParameter.existsAction": "override",
+          "x-ms-apimTemplate-policySection": "Request",
+          "x-ms-apimTemplate-operationName": []
+        }
+      }
+    ]
+  },
+  "connectionParameterSets": {
+    "uiDefinition": {
+      "displayName": "Authentication Type",
+      "description": "Type of authentication to be used."
+    },
+    "values": [
+      {
+        "name": "api-auth",
+        "uiDefinition": {
+          "displayName": "Use Apify API Token",
+          "description": "Log in using Apify's API Token."
+        },
+        "parameters": {
+          "api_key": {
+            "type": "securestring",
+            "uiDefinition": {
+              "displayName": "API Token",
+              "description": "Enter your API Token for Apify. Get it at https://console.apify.com/settings/integrations",
+              "tooltip": "Find your API Token in the Apify Console",
+              "constraints": {
+                "required": "true",
+                "clearText": false,
+                "tabIndex": 2
+              },
+              "schema": {
+                "type": "securestring",
+                "description": "Enter your API Token for Apify. Get it at https://console.apify.com/settings/integrations"
+              }
+            }
+          }
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Apify Connector",
+    "description": "A connector that brings Apify's web scrapers, AI agents, and automation tools to Power Automate for data collection, monitoring, and business system integration.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Apify Support",
+      "url": "https://apify.com/contact",
+      "email": "support@apify.com"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
+    }
+  },
+  "host": "api.apify.com",
+  "basePath": "/v2",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "x-ms-policy": [
+    {
+    "type": "set-header",
+    "header": "x-apify-integration-platform",
+    "value": "power-automate"
+  }],
+  "securityDefinitions": {
+    "api_key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "Authorization",
+      "description": "API Token for authenticating with the Apify API. Get it at https://console.apify.com/settings/integrations"
+    }
+  },
+  "security": [
+    {
+      "api_key": []
+    }
+  ],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://apify.com"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://apify.com/privacy-policy"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Data;AI"
+    }
+  ],
+  "paths": {},
+  "definitions": {
+    "ErrorResponse": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "description": "Error type",
+              "x-ms-summary": "Error Type"
+            },
+            "message": {
+              "type": "string",
+              "description": "Error message",
+              "x-ms-summary": "Error Message"
+            }
+          }
+        }
+      }
+    }
+  },
+  "parameters": {},
+  "responses": {
+    "ErrorResponse": {
+      "description": "Error response",
+      "schema": {
+        "$ref": "#/definitions/ErrorResponse"
+      }
+    }
+  },
+  "tags": []
+}
