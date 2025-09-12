@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "title": "Apify Connector",
-    "description": "A connector for the Apify API.",
+    "description": "A connector that brings Apify's web scrapers, AI agents, and automation tools to Power Automate for data collection, monitoring, and business system integration.",
     "version": "1.0.0",
     "contact": {
       "name": "Apify Support",
@@ -30,7 +30,7 @@
       "type": "apiKey",
       "in": "header",
       "name": "Authorization",
-      "description": "API Key for authenticating with the Apify API"
+      "description": "API Token for authenticating with the Apify API. Get it at https://console.apify.com/settings/integrations"
     },
     "oauth2_auth": {
       "type": "oauth2",
@@ -505,10 +505,12 @@
           "properties": {
             "type": {
               "type": "string",
+              "description": "Error type",
               "x-ms-summary": "Error Type"
             },
             "message": {
               "type": "string",
+              "description": "Error message",
               "x-ms-summary": "Error Message"
             }
           }
@@ -634,7 +636,7 @@
       "in": "header",
       "required": true,
       "type": "string",
-      "default": "power-automate",
+      "default": "microsoft-power-automate",
       "description": "Integration platform identifier",
       "x-ms-visibility": "internal"
     }

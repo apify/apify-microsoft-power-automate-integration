@@ -9,6 +9,7 @@
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+<<<<<<< HEAD
 *.suo
 .DS_Store
 Thumbs.db
@@ -18,6 +19,42 @@ bin/
 logs
 *.log
 npm-debug.log*
+=======
+
+# Visual Studio and .NET specific
+*.suo
+*.user
+*.sln.docstates
+[Dd]ebug/
+[Rr]elease/
+x64/
+[Bb]in/
+[Oo]bj/
+*.vspscc
+*.vssscc
+.builds
+*.pidb
+*.scc
+
+# ReSharper
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+# NuGet Packages
+packages/
+!packages/repositories.config
+
+# Logs and temporary files
+logs
+*.log
+npm-debug.log*
+*.tmp
+*.tmp_proj
+*.temp
+temp/
+*.svclog
+>>>>>>> main
 
 # Power Platform specific
 *.msapp
@@ -26,7 +63,22 @@ npm-debug.log*
 *.msapp.source
 *.pbix
 
+<<<<<<< HEAD
 # Temporary files
 *.tmp
 *.temp
 temp/
+=======
+# OS specific files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Backup files
+*~
+Backup*/
+UpgradeLog*.XML
+UpgradeLog*.htm
+>>>>>>> main

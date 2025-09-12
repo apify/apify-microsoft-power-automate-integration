@@ -7,9 +7,9 @@
       "api_key": {
         "type": "securestring",
         "uiDefinition": {
-          "displayName": "API Key",
-          "description": "The API Key for your Apify account",
-          "tooltip": "Provide your Apify API Key",
+          "displayName": "API Token",
+          "description": "The API Token for your Apify account. Get it at https://console.apify.com/settings/integrations",
+          "tooltip": "Provide your Apify API Token",
           "constraints": {
             "tabIndex": 2,
             "clearText": false,
@@ -49,15 +49,15 @@
     "policyTemplateInstances": [
       {
         "templateId": "setheader",
-        "title": "Set Apify API Key to Header",
+        "title": "Set Apify API Token to Header",
         "parameters": {
           "x-ms-apimTemplateParameter.name": "Authorization",
           "x-ms-apimTemplateParameter.value": "Bearer @connectionParameters('api_key')",
           "x-ms-apimTemplateParameter.existsAction": "skip",
           "x-ms-apimTemplate-policySection": "Request",
           "x-ms-apimTemplate-operationName": [
-            "RunActor",
             "GetUserInfo",
+            "RunActor",
             "ListMyActors",
             "ListStoreActors",
             "ListActorsUnified"
@@ -69,7 +69,7 @@
         "title": "Set Apify Integration Platform Header",
         "parameters": {
           "x-ms-apimTemplateParameter.name": "x-apify-integration-platform",
-          "x-ms-apimTemplateParameter.value": "power-automate",
+          "x-ms-apimTemplateParameter.value": "microsoft-power-automate",
           "x-ms-apimTemplateParameter.existsAction": "override",
           "x-ms-apimTemplate-policySection": "Request"
         }
@@ -85,16 +85,16 @@
       {
         "name": "api-auth",
         "uiDefinition": {
-          "displayName": "Use Apify API Key",
-          "description": "Log in using Apify's API Key."
+          "displayName": "Use Apify API Token",
+          "description": "Log in using Apify's API Token."
         },
         "parameters": {
           "api_key": {
             "type": "securestring",
             "uiDefinition": {
-              "displayName": "API Key",
-              "description": "Enter your API Key for Apify",
-              "tooltip": "Find your API key in the Apify Console",
+              "displayName": "API Token",
+              "description": "Enter your API Token for Apify. Get it at https://console.apify.com/settings/integrations",
+              "tooltip": "Find your API Token in the Apify Console",
               "constraints": {
                 "required": "true",
                 "clearText": false,
@@ -102,7 +102,7 @@
               },
               "schema": {
                 "type": "securestring",
-                "description": "Enter your API Key for Apify"
+                "description": "Enter your API Token for Apify"
               }
             }
           }
