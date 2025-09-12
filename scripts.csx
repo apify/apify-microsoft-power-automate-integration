@@ -8,23 +8,16 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-public class Script : ScriptBase
-{
-   // This method is called before each operation
-   public override async Task<HttpResponseMessage> ExecuteAsync()
-   {
-      switch (Context.OperationId)
-      {
-        case "RunActor":
-           return await HandleRunActor().ConfigureAwait(false);
-        case "GetUserInfo":
-          return await HandleGetUserInfo().ConfigureAwait(false) ;
-        case "ListMyActors":
-          return await HandleListMyActors().ConfigureAwait(false);
-        case "ListStoreActors":
-          return await HandleListStoreActors().ConfigureAwait(false);
+public class Script : ScriptBase {
+   public override async Task<HttpResponseMessage> ExecuteAsync() {
+      switch (Context.OperationId) {
         case "ListActorsUnified":
           return await HandleListActorsUnified().ConfigureAwait(false);
+        case "GetUserInfo":
+        case "RunActor":
+        case "ListMyActors":
+        case "ListStoreActors":
+          return await HandlePassthrough().ConfigureAwait(false);
         default:
           HttpResponseMessage response = new HttpResponseMessage(HttpStatusCode.BadRequest);
           response.Content = CreateJsonContent($"Unknown operation ID '{Context.OperationId}'");
@@ -32,61 +25,8 @@ public class Script : ScriptBase
       }
    }
 
-   // Handle the RunActor operation
-   private async Task<HttpResponseMessage> HandleRunActor()
-   {
-      var request = Context.Request;
-      var queryParams = System.Web.HttpUtility.ParseQueryString(request.RequestUri.Query);
-      
-      // Extract actorId from the path parameter
-      var pathSegments = request.RequestUri.AbsolutePath.Split('/');
-      var finalActorId = pathSegments.Length >= 4 ? pathSegments[3] : null; // /v2/acts/{actorId}/runs
-
-      if (string.IsNullOrWhiteSpace(finalActorId))
-      {
-         var error = new HttpResponseMessage(System.Net.HttpStatusCode.BadRequest)
-         {
-            Content = new StringContent(JsonConvert.SerializeObject(new
-            {
-               error = new { type = "invalid_request", message = "actorId must be provided in the path" }
-            }), Encoding.UTF8, "application/json")
-         };
-         return error;
-      }
-
-      // Create a new uri: /v2/acts/{actorId}/runs
-      var uriBuilder = new UriBuilder(request.RequestUri);
-      uriBuilder.Path = "/v2/acts/" + Uri.EscapeDataString(finalActorId) + "/runs";
-
-      // Recompose query
-      var newQuery = System.Web.HttpUtility.ParseQueryString(string.Empty);
-      foreach (string key in queryParams.AllKeys)
-      {
-         if (string.IsNullOrEmpty(key)) continue;
-         newQuery[key] = queryParams[key];
-      }
-      uriBuilder.Query = newQuery.ToString();
-
-      // Replace the request URI
-      request.RequestUri = uriBuilder.Uri;
-
-      return await Context.SendAsync(request, CancellationToken).ConfigureAwait(false);
-   }
-
-   private async Task<HttpResponseMessage> HandleGetUserInfo()
-   {
-      var request = Context.Request;
-      
-      // Use the Context.SendAsync method to send the request
-      return await Context.SendAsync(request, CancellationToken).ConfigureAwait(false);
-   }
-
-   private async Task<HttpResponseMessage> HandleListMyActors() {
-    return await Context.SendAsync(Context.Request, CancellationToken).ConfigureAwait(false);
-   }
-
-   private async Task<HttpResponseMessage> HandleListStoreActors() {
-    return await Context.SendAsync(Context.Request, CancellationToken).ConfigureAwait(false);
+   private async Task<HttpResponseMessage> HandlePassthrough() {
+      return await Context.SendAsync(Context.Request, CancellationToken).ConfigureAwait(false);
    }
 
   private async Task<HttpResponseMessage> HandleListActorsUnified() {
