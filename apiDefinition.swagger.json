@@ -25,23 +25,33 @@
   "produces": [
     "application/json"
   ],
-  "x-ms-policy": [
-    {
-    "type": "set-header",
-    "header": "x-apify-integration-platform",
-    "value": "power-automate"
-  }],
   "securityDefinitions": {
     "api_key": {
       "type": "apiKey",
       "in": "header",
       "name": "Authorization",
       "description": "API Token for authenticating with the Apify API. Get it at https://console.apify.com/settings/integrations"
+    },
+    "oauth2_auth": {
+      "type": "oauth2",
+      "flow": "accessCode",
+      "authorizationUrl": "https://console.apify.com/authorize/oauth",
+      "tokenUrl": "https://console-backend.apify.com/oauth/apps/token",
+      "scopes": {
+        "profile": "Access to user profile",
+        "full_api_access": "Full access to Apify API"
+      }
     }
   },
   "security": [
     {
       "api_key": []
+    },
+    {
+      "oauth2_auth": [
+        "profile",
+        "full_api_access"
+      ]
     }
   ],
   "x-ms-connector-metadata": [
@@ -58,8 +68,104 @@
       "propertyValue": "Data;AI"
     }
   ],
-  "paths": {},
+  "x-ms-capabilities": {
+    "testConnection": {
+      "operationId": "GetUserInfo"
+    }
+  },
+  "paths": {
+    "/users/me": {
+      "get": {
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "User information retrieved successfully",
+            "schema": {
+              "$ref": "#/definitions/UserResponse"
+            }
+          },
+          "default": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        },
+        "summary": "Get User Information",
+        "description": "Returns information about the current user account, including both public and private information.",
+        "operationId": "GetUserInfo",
+        "x-ms-visibility": "internal",
+        "x-ms-summary": "Get User Information",
+        "tags": [
+          "Users"
+        ]
+      }
+    }
+  },
   "definitions": {
+    "UserResponse": {
+      "type": "object",
+      "x-ms-summary": "Represents information about the authenticated Apify user.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "x-ms-summary": "User ID"
+        },
+        "username": {
+          "type": "string",
+          "x-ms-summary": "Username"
+        },
+        "email": {
+          "type": "string",
+          "x-ms-summary": "Email"
+        },
+        "name": {
+          "type": "string",
+          "x-ms-summary": "Full Name"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "x-ms-summary": "Created At"
+        },
+        "subscription": {
+          "type": "object",
+          "x-ms-summary": "Subscription",
+          "properties": {
+            "plan": {
+              "type": "string",
+              "x-ms-summary": "Plan"
+            },
+            "planId": {
+              "type": "string",
+              "x-ms-summary": "Plan ID"
+            },
+            "isActive": {
+              "type": "boolean",
+              "x-ms-summary": "Is Active"
+            }
+          }
+        },
+        "profile": {
+          "type": "object",
+          "properties": {
+            "pictureUrl": {
+              "type": "string",
+              "x-ms-summary": "Profile Picture URL"
+            },
+            "githubUsername": {
+              "type": "string",
+              "x-ms-summary": "GitHub Username"
+            },
+            "websiteUrl": {
+              "type": "string",
+              "x-ms-summary": "Website URL"
+            },
+            "bio": {
+              "type": "string",
+              "x-ms-summary": "User's bio"
+            }
+          }
+        }
+      }
+    },
     "ErrorResponse": {
       "type": "object",
       "properties": {
@@ -81,7 +187,17 @@
       }
     }
   },
-  "parameters": {},
+  "parameters": {
+    "IntegrationPlatformHeader": {
+      "name": "x-apify-integration-platform",
+      "in": "header",
+      "required": true,
+      "type": "string",
+      "default": "microsoft-power-automate",
+      "description": "Integration platform identifier",
+      "x-ms-visibility": "internal"
+    }
+  },
   "responses": {
     "ErrorResponse": {
       "description": "Error response",
@@ -90,5 +206,10 @@
       }
     }
   },
-  "tags": []
+  "tags": [
+    {
+      "name": "Users",
+      "description": "Operations related to Apify Users"
+    }
+  ]
 }
