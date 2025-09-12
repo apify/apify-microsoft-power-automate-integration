@@ -37,7 +37,10 @@ public class Script : ScriptBase
    {
       var request = Context.Request;
       var queryParams = System.Web.HttpUtility.ParseQueryString(request.RequestUri.Query);
-      var finalActorId = queryParams["actor_id"];
+      
+      // Extract actorId from the path parameter
+      var pathSegments = request.RequestUri.AbsolutePath.Split('/');
+      var finalActorId = pathSegments.Length >= 4 ? pathSegments[3] : null; // /v2/acts/{actorId}/runs
 
       if (string.IsNullOrWhiteSpace(finalActorId))
       {
@@ -45,7 +48,7 @@ public class Script : ScriptBase
          {
             Content = new StringContent(JsonConvert.SerializeObject(new
             {
-               error = new { type = "invalid_request", message = "actor_id must be provided" }
+               error = new { type = "invalid_request", message = "actorId must be provided in the path" }
             }), Encoding.UTF8, "application/json")
          };
          return error;
@@ -60,10 +63,6 @@ public class Script : ScriptBase
       foreach (string key in queryParams.AllKeys)
       {
          if (string.IsNullOrEmpty(key)) continue;
-         if (key.Equals("my_actor_id", StringComparison.OrdinalIgnoreCase)) continue;
-         if (key.Equals("store_actor_id", StringComparison.OrdinalIgnoreCase)) continue;
-         if (key.Equals("actor_id", StringComparison.OrdinalIgnoreCase)) continue;
-         if (key.Equals("actorId", StringComparison.OrdinalIgnoreCase)) continue;
          newQuery[key] = queryParams[key];
       }
       uriBuilder.Query = newQuery.ToString();
@@ -98,7 +97,7 @@ public class Script : ScriptBase
 
     // Decide target path based on scope
     var uriBuilder = new UriBuilder(originalUri);
-    if (string.Equals(actorScope, "store_actors", StringComparison.OrdinalIgnoreCase)) {
+    if (string.Equals(actorScope, "StoreActors", StringComparison.OrdinalIgnoreCase)) {
       uriBuilder.Path = "/v2/store";
     } else {
       uriBuilder.Path = "/v2/acts";

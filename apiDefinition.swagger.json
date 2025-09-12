@@ -118,8 +118,8 @@
             "required": false,
             "type": "string",
             "enum": [
-              "my_actors",
-              "store_actors"
+              "MyActors",
+              "StoreActors"
             ],
             "description": "Only used by the connector UI to trigger list refresh when scope changes.",
             "x-ms-visibility": "internal"
@@ -163,8 +163,7 @@
                         }
                       }
                     }
-                  },
-                  "required": ["items"]
+                  }
                 }
               },
               "additionalProperties": true
@@ -192,8 +191,8 @@
             "required": false,
             "type": "string",
             "enum": [
-              "my_actors",
-              "store_actors"
+              "MyActors",
+              "StoreActors"
             ],
             "description": "Only used by the connector UI to trigger list refresh when scope changes.",
             "x-ms-visibility": "internal"
@@ -260,11 +259,11 @@
           {
             "name": "actor_scope",
             "in": "query",
-            "required": true,
+            "required": false,
             "type": "string",
             "enum": [
-              "my_actors",
-              "store_actors"
+              "MyActors",
+              "StoreActors"
             ],
             "description": "Select source of actors: your own or the Apify Store.",
             "x-ms-visibility": "internal"
@@ -330,33 +329,6 @@
             "in": "path",
             "required": true,
             "type": "string",
-            "default": "not_set",
-            "x-ms-visibility": "internal",
-            "description": "Actor ID or a tilde-separated owner's username and Actor name."
-          },
-          {
-            "name": "actor_scope",
-            "description": "Actor can be either yours or from the Apify Store.",
-            "default": "my_actors",
-            "in": "query",
-            "required": true,
-            "type": "string",
-            "format": "",
-            "x-ms-summary": "Actor Source",
-            "enum": [
-              "my_actors",
-              "store_actors"
-            ],
-            "x-ms-enum-display-name": [
-              "My Actors",
-              "From Store"
-            ]
-          },
-          {
-            "name": "actor_id",
-            "in": "query",
-            "required": true,
-            "type": "string",
             "description": "Actor identifier to run. For My Actors supply actor ID; for Store supply actor name.",
             "x-ms-summary": "Actor",
             "x-ms-dynamic-values": {
@@ -370,6 +342,24 @@
               }
             },
             "x-ms-visibility": "important"
+          },
+          {
+            "name": "actor_scope",
+            "description": "Actor can be either yours or from the Apify Store.",
+            "default": "MyActors",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "format": "",
+            "x-ms-summary": "Actor Source",
+            "enum": [
+              "MyActors",
+              "StoreActors"
+            ],
+            "x-ms-enum-display-name": [
+              "My Actors",
+              "From Store"
+            ]
           },
           {
             "name": "build",
