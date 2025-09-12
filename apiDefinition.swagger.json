@@ -193,7 +193,7 @@
       "in": "header",
       "required": true,
       "type": "string",
-      "default": "power-automate",
+      "default": "microsoft-power-automate",
       "description": "Integration platform identifier",
       "x-ms-visibility": "internal"
     }
