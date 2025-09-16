@@ -208,7 +208,7 @@ Use the "Run Actor" action to start an Apify Actor run.
 - Authentication: Use Apify API Key or OAuth 2.0 (scopes: `profile`, `full_api_access`).
 - Headers: All requests include `x-apify-integration-platform: power-automate`.
 - Actor Source (`actor_scope`): Choose "My Actors" or "From Store".
-  - If "My Actors": pick from `Actor` populated by your account actors.
+  - If "My Actors": pick from `Actor` populated by your account Actors.
   - If "From Store": pick from `Actor` populated by Apify Store (limit 50).
 - Input Body (`input_body`): Provide JSON for the Actor input.
 - Optional query params:

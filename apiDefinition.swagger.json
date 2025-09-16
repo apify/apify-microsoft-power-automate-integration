@@ -105,7 +105,7 @@
     "/acts": {
       "get": {
         "summary": "List My Actors (for dropdown)",
-        "description": "Fetches a list of the user's actors.",
+        "description": "Fetches a list of the user's Actors.",
         "operationId": "ListMyActors",
         "x-ms-visibility": "internal",
         "tags": [
@@ -178,7 +178,7 @@
     "/store": {
       "get": {
         "summary": "List Store Actors (for dropdown)",
-        "description": "Fetches a list of actors from the Apify Store.",
+        "description": "Fetches a list of Actors from the Apify Store.",
         "operationId": "ListStoreActors",
         "x-ms-visibility": "internal",
         "tags": [
@@ -206,7 +206,7 @@
             "type": "integer",
             "required": false,
             "default": 50,
-            "x-ms-summary": "Maximum number of actors to return"
+            "x-ms-summary": "Maximum number of Actors to return"
           }
         ],
         "responses": {
@@ -249,7 +249,7 @@
     "/actors/dropdown": {
       "get": {
         "summary": "List Actors (dropdown)",
-        "description": "Fetches a list of actors from My Actors or Apify Store based on scope for dropdown selection.",
+        "description": "Fetches a list of Actors from My Actors or Apify Store based on scope for dropdown selection.",
         "operationId": "ListActorsDropdown",
         "x-ms-visibility": "internal",
         "tags": [
@@ -265,7 +265,7 @@
               "MyActors",
               "StoreActors"
             ],
-            "description": "Select source of actors: your own or the Apify Store.",
+            "description": "Select source of Actors: your own or the Apify Store.",
             "x-ms-visibility": "internal"
           },
           {
@@ -277,7 +277,7 @@
             "type": "integer",
             "required": false,
             "default": 50,
-            "x-ms-summary": "Maximum number of actors to return"
+            "x-ms-summary": "Maximum number of Actors to return"
           }
         ],
         "responses": {
@@ -329,7 +329,7 @@
             "in": "path",
             "required": true,
             "type": "string",
-            "description": "Actor identifier to run. For My Actors supply actor ID; for Store supply actor name.",
+            "description": "Actor identifier to run. For My Actors supply Actor ID; for Store supply Actor name.",
             "x-ms-summary": "Actor",
             "x-ms-dynamic-values": {
               "operationId": "ListActorsDropdown",
