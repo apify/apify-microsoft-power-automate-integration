@@ -25,23 +25,33 @@
   "produces": [
     "application/json"
   ],
-  "x-ms-policy": [
-    {
-    "type": "set-header",
-    "header": "x-apify-integration-platform",
-    "value": "power-automate"
-  }],
   "securityDefinitions": {
     "api_key": {
       "type": "apiKey",
       "in": "header",
       "name": "Authorization",
       "description": "API Token for authenticating with the Apify API. Get it at https://console.apify.com/settings/integrations"
+    },
+    "oauth2_auth": {
+      "type": "oauth2",
+      "flow": "accessCode",
+      "authorizationUrl": "https://console.apify.com/authorize/oauth",
+      "tokenUrl": "https://console-backend.apify.com/oauth/apps/token",
+      "scopes": {
+        "profile": "Access to user profile",
+        "full_api_access": "Full access to Apify API"
+      }
     }
   },
   "security": [
     {
       "api_key": []
+    },
+    {
+      "oauth2_auth": [
+        "profile",
+        "full_api_access"
+      ]
     }
   ],
   "x-ms-connector-metadata": [
@@ -58,8 +68,547 @@
       "propertyValue": "Data;AI"
     }
   ],
-  "paths": {},
+  "x-ms-capabilities": {
+    "testConnection": {
+      "operationId": "GetUserInfo"
+    }
+  },
+  "paths": {
+    "/users/me": {
+      "get": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/IntegrationPlatformHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User information retrieved successfully",
+            "schema": {
+              "$ref": "#/definitions/UserResponse"
+            }
+          },
+          "default": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        },
+        "summary": "Get User Information",
+        "description": "Returns information about the current user account, including both public and private information.",
+        "operationId": "GetUserInfo",
+        "x-ms-visibility": "internal",
+        "x-ms-summary": "Get User Information",
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/acts": {
+      "get": {
+        "summary": "List My Actors (for dropdown)",
+        "description": "Fetches a list of the user's Actors.",
+        "operationId": "ListMyActors",
+        "x-ms-visibility": "internal",
+        "tags": [
+          "Actors"
+        ],
+        "parameters": [
+          {
+            "name": "actor_scope",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "MyActors",
+              "StoreActors"
+            ],
+            "description": "Only used by the connector UI to trigger list refresh when scope changes.",
+            "x-ms-visibility": "internal"
+          },
+          {
+            "$ref": "#/parameters/IntegrationPlatformHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "total": { "type": "integer", "format": "int32" },
+                    "count": { "type": "integer", "format": "int32" },
+                    "offset": { "type": "integer", "format": "int32" },
+                    "limit": { "type": "integer", "format": "int32" },
+                    "desc": { "type": "boolean" },
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": { "type": "string" },
+                          "createdAt": { "type": "string" },
+                          "modifiedAt": { "type": "string" },
+                          "name": { "type": "string" },
+                          "username": { "type": "string" },
+                          "title": { "type": "string" },
+                          "stats": {
+                            "type": "object",
+                            "properties": {
+                              "totalRuns": { "type": "integer", "format": "int32" },
+                              "lastRunStartedAt": { "type": "string" }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "additionalProperties": true
+            }
+          },
+          "default": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/store": {
+      "get": {
+        "summary": "List Store Actors (for dropdown)",
+        "description": "Fetches a list of Actors from the Apify Store.",
+        "operationId": "ListStoreActors",
+        "x-ms-visibility": "internal",
+        "tags": [
+          "Actors"
+        ],
+        "parameters": [
+          {
+            "name": "actor_scope",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "MyActors",
+              "StoreActors"
+            ],
+            "description": "Only used by the connector UI to trigger list refresh when scope changes.",
+            "x-ms-visibility": "internal"
+          },
+          {
+            "$ref": "#/parameters/IntegrationPlatformHeader"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "type": "integer",
+            "required": false,
+            "default": 50,
+            "x-ms-summary": "Maximum number of Actors to return"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/actors/dropdown": {
+      "get": {
+        "summary": "List Actors (dropdown)",
+        "description": "Fetches a list of Actors from My Actors or Apify Store based on scope for dropdown selection.",
+        "operationId": "ListActorsDropdown",
+        "x-ms-visibility": "internal",
+        "tags": [
+          "Actors"
+        ],
+        "parameters": [
+          {
+            "name": "actor_scope",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "MyActors",
+              "StoreActors"
+            ],
+            "description": "Select source of Actors: your own or the Apify Store.",
+            "x-ms-visibility": "internal"
+          },
+          {
+            "$ref": "#/parameters/IntegrationPlatformHeader"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "type": "integer",
+            "required": false,
+            "default": 50,
+            "x-ms-summary": "Maximum number of Actors to return"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": { "type": "string" },
+                          "title": { "type": "string" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/acts/{actorId}/runs": {
+      "post": {
+        "summary": "Run Actor",
+        "description": "Runs an Actor and immediately returns without waiting for the run to finish. To wait for the run to finish, use the waitForFinish query parameter. See docs: https://docs.apify.com/api/v2/act-runs-post",
+        "operationId": "RunActor",
+        "x-ms-summary": "Run Actor",
+        "x-ms-visibility": "important",
+        "tags": [
+          "Actors"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/IntegrationPlatformHeader"
+          },
+          {
+            "name": "actorId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Actor identifier to run. For My Actors supply Actor ID; for Store supply Actor name.",
+            "x-ms-summary": "Actor",
+            "x-ms-dynamic-values": {
+              "operationId": "ListActorsDropdown",
+              "value-collection": "data/items",
+              "value-path": "id",
+              "value-title": "title",
+              "parameters": {
+                "actor_scope": { "parameter": "actor_scope" },
+                "limit": 50
+              }
+            },
+            "x-ms-visibility": "important"
+          },
+          {
+            "name": "actor_scope",
+            "description": "Actor can be either yours or from the Apify Store.",
+            "default": "MyActors",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "format": "",
+            "x-ms-summary": "Actor Source",
+            "enum": [
+              "MyActors",
+              "StoreActors"
+            ],
+            "x-ms-enum-display-name": [
+              "My Actors",
+              "From Store"
+            ]
+          },
+          {
+            "name": "build",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "Specifies the Actor build to run. It can be either a build tag or build number. By default, the run uses the build specified in the default run configuration for the Actor (typically latest).",
+            "x-ms-summary": "Build"
+          },
+          {
+            "name": "timeout",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "description": "Optional timeout for the run, in seconds. By default, the run uses a timeout specified in the default run configuration for the Actor.",
+            "x-ms-summary": "Timeout (seconds)"
+          },
+          {
+            "name": "memory",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "description": "Memory limit for the run, in megabytes. The amount of memory can be set to a power of 2 with a minimum of 128. By default, the run uses a memory limit specified in the default run configuration for the Actor.",
+            "x-ms-summary": "Memory (MB)",
+            "enum": [
+              512,
+              1024,
+              2048,
+              4096,
+              8192,
+              16384
+            ]
+          },
+          {
+            "name": "waitForFinish",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "x-ms-summary": "Wait for Finish (seconds)",
+            "description": "The maximum number of seconds the server waits for the run to finish. By default, it is 0, the maximum value is 60. If the run finishes in time then the returned run object will have a terminal status (e.g. SUCCEEDED), otherwise it will have a transitional status (e.g. RUNNING).",
+            "maximum": 60,
+            "default": 0
+          },
+          {
+            "name": "input_body",
+            "in": "body",
+            "required": true,
+            "description": "Raw JSON object passed as INPUT to the Actor.",
+            "x-ms-textarea": true,
+            "x-ms-summary": "Input Body",
+            "schema": {
+              "type": "object",
+              "description": "Raw JSON object passed as INPUT to the Actor"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Actor run created",
+            "schema": {
+              "$ref": "#/definitions/ActorRunResponse"
+            }
+          },
+          "default": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/webhooks": {
+      "x-ms-notification-content": {
+        "description": "Payload received from Apify when the webhook fires",
+        "schema": { "$ref": "#/definitions/WebhookPayload" }
+      },
+      "post": {
+        "summary": "Actor Run Finished",
+        "description": "Creates a webhook to subscribe to Actor run events. Triggers when the selected Actor run finishes with a specific status. See docs: https://docs.apify.com/api/v2/webhooks-post",
+        "operationId": "ActorRunFinishedTrigger",
+        "x-ms-trigger": "single",
+        "tags": [
+          "Webhooks"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/IntegrationPlatformHeader"
+          },
+          {
+            "name": "actor_scope",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "default": "MyActors",
+            "x-ms-summary": "Actor Source",
+            "enum": ["MyActors", "StoreActors"],
+            "x-ms-enum-display-name": ["My Actors", "From Store"]
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "requestUrl": { "type": "string", "x-ms-notification-url": true },
+                "eventTypes": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "x-ms-enum-values": [
+                      { "value": "ACTOR.RUN.SUCCEEDED", "displayName": "SUCCEEDED" },
+                      { "value": "ACTOR.RUN.FAILED", "displayName": "FAILED" },
+                      { "value": "ACTOR.RUN.TIMED_OUT", "displayName": "TIMED_OUT" },
+                      { "value": "ACTOR.RUN.ABORTED", "displayName": "ABORTED" }
+                    ]
+                  }
+                },
+                "condition": {
+                  "type": "object",
+                  "properties": {
+                    "actorId": {
+                      "type": "string",
+                      "x-ms-summary": "Actor",
+                      "x-ms-dynamic-values": {
+                        "operationId": "ListActorsDropdown",
+                        "value-collection": "data/items",
+                        "value-path": "id",
+                        "value-title": "title",
+                        "parameters": {
+                          "actor_scope": { "parameter": "actor_scope" },
+                          "limit": 50
+                        }
+                      }
+                    }
+                  }
+                },
+                "idempotencyKey": { "type": "string" },
+                "payloadTemplate": { "type": "string" },
+                "shouldInterpolateStrings": { "type": "boolean" }
+              },
+              "required": ["requestUrl", "eventTypes", "condition"]
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": { "$ref": "#/definitions/WebhookCreateResponse" }
+          },
+          "default": { "$ref": "#/responses/ErrorResponse" }
+        }
+      }
+    }
+    ,
+    "/webhooks/{webhookId}": {
+      "delete": {
+        "summary": "Delete Actor Webhook (for trigger)",
+        "description": "Deletes an existing webhook subscription.",
+        "operationId": "DeleteActorWebhook",
+        "x-ms-visibility": "internal",
+        "tags": [
+          "Webhooks"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/IntegrationPlatformHeader"
+          },
+          {
+            "name": "webhookId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "204": { "description": "No Content" },
+          "default": { "$ref": "#/responses/ErrorResponse" }
+        }
+      }
+    }
+    
+  },
   "definitions": {
+    "UserResponse": {
+      "type": "object",
+      "x-ms-summary": "Represents information about the authenticated Apify user.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "x-ms-summary": "User ID"
+        },
+        "username": {
+          "type": "string",
+          "x-ms-summary": "Username"
+        },
+        "email": {
+          "type": "string",
+          "x-ms-summary": "Email"
+        },
+        "name": {
+          "type": "string",
+          "x-ms-summary": "Full Name"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "x-ms-summary": "Created At"
+        },
+        "subscription": {
+          "type": "object",
+          "x-ms-summary": "Subscription",
+          "properties": {
+            "plan": {
+              "type": "string",
+              "x-ms-summary": "Plan"
+            },
+            "planId": {
+              "type": "string",
+              "x-ms-summary": "Plan ID"
+            },
+            "isActive": {
+              "type": "boolean",
+              "x-ms-summary": "Is Active"
+            }
+          }
+        },
+        "profile": {
+          "type": "object",
+          "properties": {
+            "pictureUrl": {
+              "type": "string",
+              "x-ms-summary": "Profile Picture URL"
+            },
+            "githubUsername": {
+              "type": "string",
+              "x-ms-summary": "GitHub Username"
+            },
+            "websiteUrl": {
+              "type": "string",
+              "x-ms-summary": "Website URL"
+            },
+            "bio": {
+              "type": "string",
+              "x-ms-summary": "User's bio"
+            }
+          }
+        }
+      }
+    },
     "ErrorResponse": {
       "type": "object",
       "properties": {
@@ -80,8 +629,163 @@
         }
       }
     }
+    ,
+    "ActorRunResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "x-ms-summary": "Actor Run ID"
+        },
+        "actId": {
+          "type": "string",
+          "x-ms-summary": "Actor ID"
+        },
+        "userId": {
+          "type": "string",
+          "x-ms-summary": "User ID"
+        },
+        "actorTaskId": {
+          "type": "string",
+          "x-ms-summary": "Actor Task ID"
+        },
+        "startedAt": {
+          "type": "string",
+          "format": "date-time",
+          "x-ms-summary": "Started At"
+        },
+        "finishedAt": {
+          "type": "string",
+          "format": "date-time",
+          "x-ms-summary": "Finished At"
+        },
+        "status": {
+          "type": "string",
+          "x-ms-summary": "Status"
+        },
+        "statusMessage": {
+          "type": "string",
+          "x-ms-summary": "Status Message"
+        },
+        "isStatusMessageTerminal": {
+          "type": "boolean",
+          "x-ms-summary": "Is Status Message Terminal"
+        },
+        "meta": {
+          "type": "object",
+          "x-ms-summary": "Metadata"
+        },
+        "pricingInfo": {
+          "type": "object",
+          "x-ms-summary": "Pricing Info"
+        },
+        "stats": {
+          "type": "object",
+          "x-ms-summary": "Stats"
+        },
+        "chargedEventCount": {
+          "type": "object",
+          "x-ms-summary": "Charged Event Count"
+        },
+        "options": {
+          "type": "object",
+          "x-ms-summary": "Options"
+        },
+        "buildId": {
+          "type": "string",
+          "x-ms-summary": "Build ID"
+        },
+        "exitCode": {
+          "type": "number",
+          "x-ms-summary": "Exit Code"
+        },
+        "defaultKeyValueStoreId": {
+          "type": "string",
+          "x-ms-summary": "Default KV Store ID"
+        },
+        "defaultDatasetId": {
+          "type": "string",
+          "x-ms-summary": "Default Dataset ID"
+        },
+        "defaultRequestQueueId": {
+          "type": "string",
+          "x-ms-summary": "Default Request Queue ID"
+        },
+        "buildNumber": {
+          "type": "string",
+          "x-ms-summary": "Build Number"
+        },
+        "containerUrl": {
+          "type": "string",
+          "x-ms-summary": "Container URL"
+        },
+        "isContainerServerReady": {
+          "type": "boolean",
+          "x-ms-summary": "Is Container Server Ready"
+        },
+        "gitBranchName": {
+          "type": "string",
+          "x-ms-summary": "Git Branch Name"
+        },
+        "usage": {
+          "type": "object",
+          "x-ms-summary": "Usage"
+        },
+        "usageTotalUsd": {
+          "type": "number",
+          "x-ms-summary": "Usage Total USD"
+        },
+        "usageUsd": {
+          "type": "number",
+          "x-ms-summary": "Usage USD"
+        }
+      }
+    }
+    ,
+    "WebhookPayload": {
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "ID of the user who owns the resource associated with the event." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "The timestamp when the event occurred." },
+        "eventType": { "type": "string", "description": "The type of the event (e.g., ACTOR.RUN.SUCCEEDED)." },
+        "eventData": {
+          "type": "object",
+          "description": "An object containing event-specific data.",
+          "properties": {
+            "actorId": { "type": "string", "description": "ID of the triggering Actor." },
+            "actorRunId": { "type": "string", "description": "ID of the specific Actor run that triggered the event." }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    }
+    ,
+    "WebhookCreateResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "object",
+          "properties": {
+            "id": { "type": "string" }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    }
   },
-  "parameters": {},
+  "parameters": {
+    "IntegrationPlatformHeader": {
+      "name": "x-apify-integration-platform",
+      "in": "header",
+      "required": true,
+      "type": "string",
+      "default": "power-automate",
+      "description": "Integration platform identifier",
+      "x-ms-visibility": "internal"
+    }
+  },
   "responses": {
     "ErrorResponse": {
       "description": "Error response",
@@ -90,5 +794,30 @@
       }
     }
   },
-  "tags": []
+  "tags": [
+    {
+      "name": "Users",
+      "description": "Operations related to Apify Users"
+    },
+    {
+      "name": "Actors",
+      "description": "Operations related to Apify Actors"
+    },
+    {
+      "name": "Tasks",
+      "description": "Operations related to Apify Tasks"
+    },
+    {
+      "name": "Datasets",
+      "description": "Operations related to Apify Datasets"
+    },
+    {
+      "name": "KeyValueStores",
+      "description": "Operations related to Apify Key-Value Stores"
+    },
+    {
+      "name": "Scraping",
+      "description": "Operations related to web scraping"
+    }
+  ]
 }

@@ -1,7 +1,8 @@
 {
   "properties": {
     "capabilities": [
-      "actions"
+      "actions",
+      "triggers"
     ],
     "connectionParameters": {
       "api_key": {
@@ -16,6 +17,33 @@
             "required": "true"
           }
         }
+      },
+      "token": {
+        "type": "oauthSetting",
+        "oAuthSettings": {
+          "identityProvider": "oauth2",
+          "clientId": "{{ client id }}",
+          "scopes": [
+            "profile",
+            "full_api_access"
+          ],
+          "redirectMode": "Global",
+          "properties": {
+            "IsFirstParty": "False",
+            "IsOnbehalfofLoginSupported": false
+          },
+          "customParameters": {
+            "authorizationUrl": {
+              "value": "https://console.apify.com/authorize/oauth"
+            },
+            "tokenUrl": {
+              "value": "https://console-backend.apify.com/oauth/apps/token"
+            },
+            "refreshUrl": {
+              "value": "https://console-backend.apify.com/oauth/apps/token"
+            }
+          }
+        }
       }
     },
     "iconBrandColor": "#0098FF",
@@ -25,10 +53,28 @@
         "title": "Set Apify API Token to Header",
         "parameters": {
           "x-ms-apimTemplateParameter.name": "Authorization",
-          "x-ms-apimTemplateParameter.value": "Bearer @headers('Authorization')",
-          "x-ms-apimTemplateParameter.existsAction": "override",
+          "x-ms-apimTemplateParameter.value": "Bearer @connectionParameters('api_key')",
+          "x-ms-apimTemplateParameter.existsAction": "skip",
           "x-ms-apimTemplate-policySection": "Request",
-          "x-ms-apimTemplate-operationName": []
+          "x-ms-apimTemplate-operationName": [
+            "GetUserInfo",
+            "RunActor",
+            "ListMyActors",
+            "ListStoreActors",
+            "ListActorsDropdown",
+            "CreateActorWebhook",
+            "DeleteActorWebhook"
+          ]
+        }
+      },
+      {
+        "templateId": "setheader",
+        "title": "Set Apify Integration Platform Header",
+        "parameters": {
+          "x-ms-apimTemplateParameter.name": "x-apify-integration-platform",
+          "x-ms-apimTemplateParameter.value": "microsoft-power-automate",
+          "x-ms-apimTemplateParameter.existsAction": "override",
+          "x-ms-apimTemplate-policySection": "Request"
         }
       }
     ]
@@ -59,7 +105,42 @@
               },
               "schema": {
                 "type": "securestring",
-                "description": "Enter your API Token for Apify. Get it at https://console.apify.com/settings/integrations"
+                "description": "Enter your API Token for Apify"
+              }
+            }
+          }
+        }
+      },
+      {
+        "name": "oauth-auth",
+        "uiDefinition": {
+          "displayName": "Use OAuth 2.0",
+          "description": "Log in with Apify via OAuth 2.0."
+        },
+        "parameters": {
+          "token": {
+            "type": "oauthSetting",
+            "uiDefinition": {
+              "displayName": "OAuth 2.0",
+              "description": "Authenticate via Apify OAuth 2.0"
+            },
+            "oAuthSettings": {
+              "identityProvider": "oauth2",
+              "clientId": "{{ client id }}",
+              "scopes": [
+                "profile",
+                "full_api_access"
+              ],
+              "redirectMode": "Global",
+              "redirectUrl": "https://global.consent.azure-apim.net/redirect",
+              "properties": {
+                "IsFirstParty": "False",
+                "IsOnbehalfofLoginSupported": false
+              },
+              "customParameters": {
+                "authorizationUrl": { "value": "https://console.apify.com/authorize/oauth" },
+                "tokenUrl": { "value": "https://console-backend.apify.com/oauth/apps/token" },
+                "refreshUrl": { "value": "https://console-backend.apify.com/oauth/apps/token" }
               }
             }
           }
