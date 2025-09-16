@@ -9,6 +9,13 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 public class Script : ScriptBase {
+   /// <summary>
+   /// Main entry point for the Power Automate custom connector script.
+   /// Routes incoming requests to appropriate handlers based on the operation ID.
+   /// </summary>
+   /// <returns>
+   /// An <see cref="HttpResponseMessage"/> representing the HTTP response message including the status code and data.
+   /// </returns>
    public override async Task<HttpResponseMessage> ExecuteAsync() {
       switch (Context.OperationId) {
         case "ListActorsDropdown":
@@ -25,29 +32,42 @@ public class Script : ScriptBase {
       }
    }
 
+   /// <summary>
+   /// Handles passthrough operations by forwarding the original request to the Apify API.
+   /// Used for operations that don't require any special processing or transformation.
+   /// </summary>
+   /// <returns>
+   /// An <see cref="HttpResponseMessage"/> representing the HTTP response message including the status code and data from the forwarded request.
+   /// </returns>
    private async Task<HttpResponseMessage> HandlePassthrough() {
       return await Context.SendAsync(Context.Request, CancellationToken).ConfigureAwait(false);
    }
 
+  /// <summary>
+  /// Handles the ListActorsDropdown operation by dynamically routing to the appropriate Apify API endpoint
+  /// based on the <c>actor_scope</c> parameter. Routes to <c>/v2/store</c> for StoreActors or <c>/v2/acts</c> for user actors.
+  /// Removes the helper <c>actor_scope</c> parameter before forwarding the request.
+  /// </summary>
+  /// <returns>
+  /// An <see cref="HttpResponseMessage"/> representing the HTTP response message including the status code and data from the forwarded request.
+  /// </returns>
   private async Task<HttpResponseMessage> HandleListActorsDropdown() {
-    var request = Context.Request;
-    var originalUri = request.RequestUri;
+    var originalUri = Context.Request.RequestUri;
     var queryParams = System.Web.HttpUtility.ParseQueryString(originalUri.Query);
     var actorScope = queryParams["actor_scope"];
 
-    // Decide target path based on scope
-    var uriBuilder = new UriBuilder(originalUri);
-    if (string.Equals(actorScope, "StoreActors", StringComparison.OrdinalIgnoreCase)) {
-      uriBuilder.Path = "/v2/store";
-    } else {
-      uriBuilder.Path = "/v2/acts";
-    }
+    string newPath = string.Equals(actorScope, "StoreActors", StringComparison.OrdinalIgnoreCase) 
+      ? "/v2/store" 
+      : "/v2/acts";
 
-    // Add query parameters to the request URI
-    uriBuilder.Query = queryParams.ToString();
+    queryParams.Remove("actor_scope");
+    
+    var newUri = new UriBuilder(originalUri) { 
+      Path = newPath,
+      Query = queryParams.ToString()
+    }.Uri;
 
-    // Forward the request to fetch raw list
-    request.RequestUri = uriBuilder.Uri;
-    return await Context.SendAsync(request, CancellationToken).ConfigureAwait(false);
+    Context.Request.RequestUri = newUri;
+    return await HandlePassthrough().ConfigureAwait(false);
   }
 }
