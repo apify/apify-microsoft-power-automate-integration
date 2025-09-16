@@ -11,8 +11,8 @@ using Newtonsoft.Json.Linq;
 public class Script : ScriptBase {
    public override async Task<HttpResponseMessage> ExecuteAsync() {
       switch (Context.OperationId) {
-        case "ListActorsUnified":
-          return await HandleListActorsUnified().ConfigureAwait(false);
+        case "ListActorsDropdown":
+          return await HandleListActorsDropdown().ConfigureAwait(false);
         case "GetUserInfo":
         case "RunActor":
         case "ListMyActors":
@@ -29,7 +29,7 @@ public class Script : ScriptBase {
       return await Context.SendAsync(Context.Request, CancellationToken).ConfigureAwait(false);
    }
 
-  private async Task<HttpResponseMessage> HandleListActorsUnified() {
+  private async Task<HttpResponseMessage> HandleListActorsDropdown() {
     var request = Context.Request;
     var originalUri = request.RequestUri;
     var queryParams = System.Web.HttpUtility.ParseQueryString(originalUri.Query);

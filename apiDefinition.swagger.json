@@ -246,11 +246,11 @@
         }
       }
     },
-    "/actors/unified": {
+    "/actors/dropdown": {
       "get": {
-        "summary": "List Actors (unified for dropdown)",
-        "description": "Fetches a unified list of actors from My Actors or Apify Store based on scope.",
-        "operationId": "ListActorsUnified",
+        "summary": "List Actors (dropdown)",
+        "description": "Fetches a list of actors from My Actors or Apify Store based on scope for dropdown selection.",
+        "operationId": "ListActorsDropdown",
         "x-ms-visibility": "internal",
         "tags": [
           "Actors"
@@ -332,7 +332,7 @@
             "description": "Actor identifier to run. For My Actors supply actor ID; for Store supply actor name.",
             "x-ms-summary": "Actor",
             "x-ms-dynamic-values": {
-              "operationId": "ListActorsUnified",
+              "operationId": "ListActorsDropdown",
               "value-collection": "data/items",
               "value-path": "id",
               "value-title": "title",

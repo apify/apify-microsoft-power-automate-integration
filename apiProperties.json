@@ -60,7 +60,7 @@
             "RunActor",
             "ListMyActors",
             "ListStoreActors",
-            "ListActorsUnified"
+            "ListActorsDropdown"
           ]
         }
       },
