@@ -9,17 +9,6 @@
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
-<<<<<<< HEAD
-*.suo
-.DS_Store
-Thumbs.db
-bin/
-
-# Logs
-logs
-*.log
-npm-debug.log*
-=======
 
 # Visual Studio and .NET specific
 *.suo
@@ -54,7 +43,6 @@ npm-debug.log*
 *.temp
 temp/
 *.svclog
->>>>>>> main
 
 # Power Platform specific
 *.msapp
@@ -63,12 +51,6 @@ temp/
 *.msapp.source
 *.pbix
 
-<<<<<<< HEAD
-# Temporary files
-*.tmp
-*.temp
-temp/
-=======
 # OS specific files
 .DS_Store
 Thumbs.db
@@ -81,4 +63,3 @@ $RECYCLE.BIN/
 Backup*/
 UpgradeLog*.XML
 UpgradeLog*.htm
->>>>>>> main
