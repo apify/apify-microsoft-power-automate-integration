@@ -205,7 +205,7 @@
             "in": "query",
             "type": "integer",
             "required": false,
-            "default": 50,
+            "default": 1000,
             "x-ms-summary": "Maximum number of Actors to return"
           }
         ],
@@ -276,7 +276,7 @@
             "in": "query",
             "type": "integer",
             "required": false,
-            "default": 50,
+            "default": 1000,
             "x-ms-summary": "Maximum number of Actors to return"
           }
         ],
@@ -338,7 +338,7 @@
               "value-title": "title",
               "parameters": {
                 "actor_scope": { "parameter": "actor_scope" },
-                "limit": 50
+                "limit": 1000
               }
             },
             "x-ms-visibility": "important"
