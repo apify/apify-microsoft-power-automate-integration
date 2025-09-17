@@ -438,6 +438,7 @@
         "summary": "Actor Run Finished",
         "description": "Creates a webhook to subscribe to Actor run events. Triggers when the selected Actor run finishes with a specific status. See docs: https://docs.apify.com/api/v2/webhooks-post",
         "operationId": "ActorRunFinishedTrigger",
+        "x-ms-visibility": "important",
         "x-ms-trigger": "single",
         "tags": [
           "Webhooks"
@@ -447,27 +448,27 @@
             "$ref": "#/parameters/IntegrationPlatformHeader"
           },
           {
-            "name": "actor_scope",
-            "in": "query",
-            "required": true,
-            "type": "string",
-            "default": "MyActors",
-            "x-ms-summary": "Actor Source",
-            "enum": ["MyActors", "StoreActors"],
-            "x-ms-enum-display-name": ["My Actors", "From Store"]
-          },
-          {
             "name": "body",
             "in": "body",
             "required": true,
             "schema": {
               "type": "object",
               "properties": {
-                "requestUrl": { "type": "string", "x-ms-notification-url": true },
+                "requestUrl": { 
+                  "type": "string",
+                  "x-ms-notification-url": true,
+                  "x-ms-visibility": "internal"
+                },
                 "eventTypes": {
                   "type": "array",
                   "items": {
                     "type": "string",
+                    "enum": [
+                      "ACTOR.RUN.SUCCEEDED",
+                      "ACTOR.RUN.FAILED",
+                      "ACTOR.RUN.TIMED_OUT",
+                      "ACTOR.RUN.ABORTED"
+                    ],
                     "x-ms-enum-values": [
                       { "value": "ACTOR.RUN.SUCCEEDED", "displayName": "SUCCEEDED" },
                       { "value": "ACTOR.RUN.FAILED", "displayName": "FAILED" },
@@ -479,20 +480,7 @@
                 "condition": {
                   "type": "object",
                   "properties": {
-                    "actorId": {
-                      "type": "string",
-                      "x-ms-summary": "Actor",
-                      "x-ms-dynamic-values": {
-                        "operationId": "ListActorsDropdown",
-                        "value-collection": "data/items",
-                        "value-path": "id",
-                        "value-title": "title",
-                        "parameters": {
-                          "actor_scope": { "parameter": "actor_scope" },
-                          "limit": 50
-                        }
-                      }
-                    }
+                    "actorId": { "type": "string" }
                   }
                 },
                 "idempotencyKey": { "type": "string" },
@@ -781,7 +769,7 @@
       "in": "header",
       "required": true,
       "type": "string",
-      "default": "power-automate",
+      "default": "microsoft-power-automate",
       "description": "Integration platform identifier",
       "x-ms-visibility": "internal"
     }
