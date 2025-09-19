@@ -42,8 +42,8 @@ public class Script : ScriptBase {
 
   /// <summary>
   /// Handles the ListActorsDropdown operation by dynamically routing to the appropriate Apify API endpoint
-  /// based on the <c>actor_scope</c> parameter. Routes to <c>/v2/store</c> for StoreActors or <c>/v2/acts</c> for user actors.
-  /// Removes the helper <c>actor_scope</c> parameter before forwarding the request.
+  /// based on the <c>actorScope</c> parameter. Routes to <c>/v2/store</c> for StoreActors or <c>/v2/acts</c> for user actors.
+  /// Removes the helper <c>actorScope</c> parameter before forwarding the request.
   /// </summary>
   /// <returns>
   /// An <see cref="HttpResponseMessage"/> representing the HTTP response message including the status code and data from the forwarded request.
@@ -51,13 +51,13 @@ public class Script : ScriptBase {
   private async Task<HttpResponseMessage> HandleListActorsDropdown() {
     var originalUri = Context.Request.RequestUri;
     var queryParams = System.Web.HttpUtility.ParseQueryString(originalUri.Query);
-    var actorScope = queryParams["actor_scope"];
+    var actorScope = queryParams["actorScope"];
 
     string newPath = string.Equals(actorScope, "StoreActors", StringComparison.OrdinalIgnoreCase) 
       ? "/v2/store" 
       : "/v2/acts";
 
-    queryParams.Remove("actor_scope");
+    queryParams.Remove("actorScope");
     
     var newUri = new UriBuilder(originalUri) { 
       Path = newPath,
