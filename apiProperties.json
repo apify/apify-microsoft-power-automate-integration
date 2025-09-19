@@ -73,8 +73,17 @@
         "parameters": {
           "x-ms-apimTemplateParameter.name": "x-apify-integration-platform",
           "x-ms-apimTemplateParameter.value": "microsoft-power-automate",
-          "x-ms-apimTemplateParameter.existsAction": "override",
-          "x-ms-apimTemplate-policySection": "Request"
+          "x-ms-apimTemplateParameter.existsAction": "skip",
+          "x-ms-apimTemplate-policySection": "Request",
+          "x-ms-apimTemplate-operationName": [
+            "GetUserInfo",
+            "RunActor",
+            "ListMyActors",
+            "ListStoreActors",
+            "ListActorsDropdown",
+            "CreateActorWebhook",
+            "DeleteActorWebhook"
+          ]
         }
       }
     ]

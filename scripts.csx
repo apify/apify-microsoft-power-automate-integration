@@ -78,10 +78,51 @@ public class Script : ScriptBase {
   private async Task<HttpResponseMessage> HandleCreateWebhookWithLocation() {
     var originalUri = Context.Request.RequestUri;
     var queryParams = System.Web.HttpUtility.ParseQueryString(originalUri.Query);
-    if (queryParams["actor_scope"] != null) {
-      queryParams.Remove("actor_scope");
-      Context.Request.RequestUri = new UriBuilder(originalUri) { Query = queryParams.ToString() }.Uri;
+    
+    // Extract values from query parameters
+    var actorId = queryParams["actorId"];
+    var eventTypesParam = queryParams["eventTypes"];
+    
+    // Parse eventTypes (can be comma-separated or multiple parameters)
+    var eventTypes = new List<string>();
+    if (!string.IsNullOrEmpty(eventTypesParam)) {
+      eventTypes.AddRange(eventTypesParam.Split(',').Select(e => e.Trim()));
     }
+    
+    // Read existing body or create new one
+    var bodyContent = string.Empty;
+    if (Context.Request.Content != null) {
+      bodyContent = await Context.Request.Content.ReadAsStringAsync().ConfigureAwait(false);
+    }
+    
+    JObject bodyJson;
+    if (string.IsNullOrWhiteSpace(bodyContent)) {
+      bodyJson = new JObject();
+    } else {
+      bodyJson = JsonConvert.DeserializeObject<JObject>(bodyContent) ?? new JObject();
+    }
+    
+    // Populate body with values from query parameters
+    if (!string.IsNullOrEmpty(actorId)) {
+      if (bodyJson["condition"] == null) {
+        bodyJson["condition"] = new JObject();
+      }
+      bodyJson["condition"]["actorId"] = actorId;
+    }
+    
+    if (eventTypes.Count > 0) {
+      bodyJson["eventTypes"] = new JArray(eventTypes);
+    }
+    
+    // Update request body
+    var updatedBodyContent = JsonConvert.SerializeObject(bodyJson);
+    Context.Request.Content = new StringContent(updatedBodyContent, Encoding.UTF8, "application/json");
+    
+    // Remove helper parameters from query string
+    queryParams.Remove("actor_scope");
+    queryParams.Remove("actorId");
+    queryParams.Remove("eventTypes");
+    Context.Request.RequestUri = new UriBuilder(originalUri) { Query = queryParams.ToString() }.Uri;
 
     var response = await Context.SendAsync(Context.Request, CancellationToken).ConfigureAwait(false);
     if (response.StatusCode == HttpStatusCode.Created && !response.Headers.Contains("Location")) {
@@ -97,7 +138,6 @@ public class Script : ScriptBase {
       } catch {
       }
     }
-
     return response;
   }
 }

@@ -448,9 +448,71 @@
             "$ref": "#/parameters/IntegrationPlatformHeader"
           },
           {
+            "name": "actor_scope",
+            "description": "Actor can be either yours or from the Apify Store.",
+            "default": "MyActors",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "format": "",
+            "x-ms-summary": "Actor Source",
+            "enum": [
+              "MyActors",
+              "StoreActors"
+            ],
+            "x-ms-enum-display-name": [
+              "My Actors",
+              "From Store"
+            ]
+          },
+          {
+            "name": "actorId",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "description": "Actor identifier to run. For My Actors supply Actor ID; for Store supply Actor name.",
+            "x-ms-summary": "Actor",
+            "x-ms-dynamic-values": {
+              "operationId": "ListActorsDropdown",
+              "value-collection": "data/items",
+              "value-path": "id",
+              "value-title": "title",
+              "parameters": {
+                "actor_scope": { "parameter": "actor_scope" },
+                "limit": 50
+              }
+            },
+            "x-ms-visibility": "important"
+          },
+          {
+            "name": "eventTypes",
+            "in": "query",
+            "required": true,
+            "type": "array",
+            "description": "Actor run statuses to trigger on",
+            "x-ms-summary": "Trigger On",
+            "items": {
+              "type": "string",
+              "enum": [
+                "ACTOR.RUN.SUCCEEDED",
+                "ACTOR.RUN.FAILED",
+                "ACTOR.RUN.TIMED_OUT",
+                "ACTOR.RUN.ABORTED"
+              ],
+              "x-ms-enum-values": [
+                { "value": "ACTOR.RUN.SUCCEEDED", "displayName": "SUCCEEDED" },
+                { "value": "ACTOR.RUN.FAILED", "displayName": "FAILED" },
+                { "value": "ACTOR.RUN.TIMED_OUT", "displayName": "TIMED_OUT" },
+                { "value": "ACTOR.RUN.ABORTED", "displayName": "ABORTED" }
+              ]
+            },
+            "x-ms-visibility": "important"
+          },
+          {
             "name": "body",
             "in": "body",
-            "required": true,
+            "required": false,
+            "x-ms-visibility": "internal",
             "schema": {
               "type": "object",
               "properties": {
@@ -462,19 +524,7 @@
                 "eventTypes": {
                   "type": "array",
                   "items": {
-                    "type": "string",
-                    "enum": [
-                      "ACTOR.RUN.SUCCEEDED",
-                      "ACTOR.RUN.FAILED",
-                      "ACTOR.RUN.TIMED_OUT",
-                      "ACTOR.RUN.ABORTED"
-                    ],
-                    "x-ms-enum-values": [
-                      { "value": "ACTOR.RUN.SUCCEEDED", "displayName": "SUCCEEDED" },
-                      { "value": "ACTOR.RUN.FAILED", "displayName": "FAILED" },
-                      { "value": "ACTOR.RUN.TIMED_OUT", "displayName": "TIMED_OUT" },
-                      { "value": "ACTOR.RUN.ABORTED", "displayName": "ABORTED" }
-                    ]
+                    "type": "string"
                   }
                 },
                 "condition": {
@@ -493,14 +543,12 @@
         ],
         "responses": {
           "201": {
-            "description": "Created",
-            "schema": { "$ref": "#/definitions/WebhookCreateResponse" }
+            "$ref": "#/responses/WebhookCreated"
           },
           "default": { "$ref": "#/responses/ErrorResponse" }
         }
       }
-    }
-    ,
+    },
     "/webhooks/{webhookId}": {
       "delete": {
         "summary": "Delete Actor Webhook (for trigger)",
@@ -528,7 +576,6 @@
         }
       }
     }
-    
   },
   "definitions": {
     "UserResponse": {
@@ -775,6 +822,18 @@
     }
   },
   "responses": {
+    "WebhookCreated": {
+      "description": "Webhook created",
+      "headers": {
+        "Location": {
+          "type": "string",
+          "description": "New webhook URL"
+        }
+      },
+      "schema": {
+        "$ref": "#/definitions/WebhookCreateResponse"
+      }
+    },
     "ErrorResponse": {
       "description": "Error response",
       "schema": {
