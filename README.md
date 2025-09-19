@@ -199,6 +199,26 @@ Once you have your connector set up, follow this development cycle:
    - Update the connector again using the `pac connector update` command
    - Repeat the testing process
 
+## Actions
+
+### Run Actor Action
+
+Use the "Run Actor" action to start an Apify Actor run.
+
+- Authentication: Use Apify API Key or OAuth 2.0 (scopes: `profile`, `full_api_access`).
+- Headers: All requests include `x-apify-integration-platform: power-automate`.
+- Actor Source (`actor_scope`): Choose "My Actors" or "From Store".
+  - If "My Actors": pick from `Actor` populated by your account Actors.
+  - If "From Store": pick from `Actor` populated by Apify Store (limit 1000).
+- Input Body (`input_body`): Provide JSON for the Actor input.
+- Optional query params:
+  - `build`: specific build tag or id
+  - `timeout` (seconds)
+  - `memory` (MB): 512, 1024, 2048, 4096, 8192, 16384
+  - `waitForFinish` (seconds, max 60): set 0 to no limit
+
+The connector invokes `POST /v2/acts/{actorId}/runs` per Apify docs (see: https://docs.apify.com/api/v2/act-runs-post). The `actorId` path segment is chosen automatically based on your `actor_scope` selection.
+
 ## Testing
 
 1. Create test flows in Power Automate to validate each action and trigger

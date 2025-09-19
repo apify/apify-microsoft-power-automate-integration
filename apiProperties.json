@@ -27,7 +27,6 @@
             "full_api_access"
           ],
           "redirectMode": "Global",
-          "redirectUrl": "https://global.consent.azure-apim.net/redirect",
           "properties": {
             "IsFirstParty": "False",
             "IsOnbehalfofLoginSupported": false
@@ -57,7 +56,11 @@
           "x-ms-apimTemplateParameter.existsAction": "skip",
           "x-ms-apimTemplate-policySection": "Request",
           "x-ms-apimTemplate-operationName": [
-            "GetUserInfo"
+            "GetUserInfo",
+            "RunActor",
+            "ListMyActors",
+            "ListStoreActors",
+            "ListActorsDropdown"
           ]
         }
       },
