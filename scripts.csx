@@ -1,12 +1,8 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 public class Script : ScriptBase {
    /// <summary>
@@ -20,14 +16,12 @@ public class Script : ScriptBase {
       switch (Context.OperationId) {
         case "ListActorsDropdown":
           return await HandleListActorsDropdown().ConfigureAwait(false);
-        case "RunTask":
-           return await HandleRunTask().ConfigureAwait(false);
-        case "ListTasks":
-           return await HandleListTasks().ConfigureAwait(false);
         case "GetUserInfo":
         case "RunActor":
+        case "RunTask":
         case "ListMyActors":
         case "ListStoreActors":
+        case "ListTasks":
           return await HandlePassthrough().ConfigureAwait(false);
         default:
           HttpResponseMessage response = new HttpResponseMessage(HttpStatusCode.BadRequest);
@@ -36,6 +30,13 @@ public class Script : ScriptBase {
       }
    }
 
+   /// <summary>
+   /// Handles the GetUserInfo operation by forwarding the request to the Apify API.
+   /// This is a passthrough operation that retrieves information about the authenticated user.
+   /// </summary>
+   /// <returns>
+   /// An <see cref="HttpResponseMessage"/> representing the HTTP response message including the status code and user data from the Apify API.
+   /// </returns>
    private async Task<HttpResponseMessage> HandleGetUserInfo()
    {
       var request = Context.Request;
@@ -44,46 +45,6 @@ public class Script : ScriptBase {
       return await Context.SendAsync(request, CancellationToken).ConfigureAwait(false);
    }
 
-  private async Task<HttpResponseMessage> HandleRunTask() {
-     var request = Context.Request;
-     var queryParams = System.Web.HttpUtility.ParseQueryString(request.RequestUri.Query);
-     var taskId = queryParams["task_id"];
-
-     if (string.IsNullOrWhiteSpace(taskId))
-     {
-        var error = new HttpResponseMessage(System.Net.HttpStatusCode.BadRequest)
-        {
-           Content = new StringContent(JsonConvert.SerializeObject(new
-           {
-              error = new { type = "invalid_request", message = "task_id must be provided" }
-           }), Encoding.UTF8, "application/json")
-        };
-        return error;
-     }
-
-     // Build /v2/actor-tasks/{taskId}/runs
-     var uriBuilder = new UriBuilder(request.RequestUri);
-     uriBuilder.Path = "/v2/actor-tasks/" + Uri.EscapeDataString(taskId) + "/runs";
-
-     // Recompose query without helper keys
-     var newQuery = System.Web.HttpUtility.ParseQueryString(string.Empty);
-     foreach (string key in queryParams.AllKeys)
-     {
-        if (string.IsNullOrEmpty(key)) continue;
-        if (key.Equals("task_id", StringComparison.OrdinalIgnoreCase)) continue;
-        if (key.Equals("taskId", StringComparison.OrdinalIgnoreCase)) continue;
-        newQuery[key] = queryParams[key];
-     }
-     uriBuilder.Query = newQuery.ToString();
-
-     request.RequestUri = uriBuilder.Uri;
-     return await Context.SendAsync(request, CancellationToken).ConfigureAwait(false);
-  }
-
-  private async Task<HttpResponseMessage> HandleListTasks() {
-    return await Context.SendAsync(Context.Request, CancellationToken).ConfigureAwait(false);
-  }
-  
    /// <summary>
    /// Handles passthrough operations by forwarding the original request to the Apify API.
    /// Used for operations that don't require any special processing or transformation.
