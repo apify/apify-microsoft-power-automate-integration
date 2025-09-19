@@ -30,21 +30,6 @@ public class Script : ScriptBase {
    }
 
    /// <summary>
-   /// Handles the GetUserInfo operation by forwarding the request to the Apify API.
-   /// This is a passthrough operation that retrieves information about the authenticated user.
-   /// </summary>
-   /// <returns>
-   /// An <see cref="HttpResponseMessage"/> representing the HTTP response message including the status code and user data from the Apify API.
-   /// </returns>
-   private async Task<HttpResponseMessage> HandleGetUserInfo()
-   {
-      var request = Context.Request;
-      
-      // Use the Context.SendAsync method to send the request
-      return await Context.SendAsync(request, CancellationToken).ConfigureAwait(false);
-   }
-
-   /// <summary>
    /// Handles passthrough operations by forwarding the original request to the Apify API.
    /// Used for operations that don't require any special processing or transformation.
    /// </summary>
