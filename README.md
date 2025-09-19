@@ -209,7 +209,7 @@ Use the "Run Actor" action to start an Apify Actor run.
 - Headers: All requests include `x-apify-integration-platform: power-automate`.
 - Actor Source (`actor_scope`): Choose "My Actors" or "From Store".
   - If "My Actors": pick from `Actor` populated by your account Actors.
-  - If "From Store": pick from `Actor` populated by Apify Store (limit 50).
+  - If "From Store": pick from `Actor` populated by Apify Store (limit 1000).
 - Input Body (`input_body`): Provide JSON for the Actor input.
 - Optional query params:
   - `build`: specific build tag or id
