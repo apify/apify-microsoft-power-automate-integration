@@ -167,7 +167,6 @@ public class Script : ScriptBase {
 
   /// <summary>
   /// Formats actor titles by combining title, username, and name for better user experience.
-  /// Uses efficient iteration techniques optimized for large arrays.
   /// </summary>
   /// <param name="items">The JArray of actor items to format</param>
   private void FormatActorTitles(JArray items) {
@@ -193,7 +192,6 @@ public class Script : ScriptBase {
 
   /// <summary>
   /// Formats task names by combining name and actName for better user experience.
-  /// Uses efficient iteration techniques optimized for large arrays.
   /// </summary>
   /// <param name="items">The JArray of task items to format</param>
   private void FormatTaskTitles(JArray items) {
