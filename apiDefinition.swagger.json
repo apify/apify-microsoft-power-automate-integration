@@ -223,15 +223,10 @@
                       "items": {
                         "type": "object",
                         "properties": {
-                          "id": {
-                            "type": "string"
-                          },
-                          "name": {
-                            "type": "string"
-                          },
-                          "title": {
-                            "type": "string"
-                          }
+                          "id": { "type": "string" },
+                          "name": { "type": "string" },
+                          "title": { "type": "string" },
+                          "username": { "type": "string" }
                         }
                       }
                     }
@@ -463,7 +458,8 @@
                         "type": "object",
                         "properties": {
                           "id": { "type": "string" },
-                          "name": { "type": "string" }
+                          "name": { "type": "string" },
+                          "actName": { "type": "string" }
                         }
                       }
                     }
