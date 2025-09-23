@@ -113,7 +113,7 @@
         ],
         "parameters": [
           {
-            "name": "actor_scope",
+            "name": "actorScope",
             "in": "query",
             "required": false,
             "type": "string",
@@ -186,7 +186,7 @@
         ],
         "parameters": [
           {
-            "name": "actor_scope",
+            "name": "actorScope",
             "in": "query",
             "required": false,
             "type": "string",
@@ -223,15 +223,10 @@
                       "items": {
                         "type": "object",
                         "properties": {
-                          "id": {
-                            "type": "string"
-                          },
-                          "name": {
-                            "type": "string"
-                          },
-                          "title": {
-                            "type": "string"
-                          }
+                          "id": { "type": "string" },
+                          "name": { "type": "string" },
+                          "title": { "type": "string" },
+                          "username": { "type": "string" }
                         }
                       }
                     }
@@ -257,13 +252,17 @@
         ],
         "parameters": [
           {
-            "name": "actor_scope",
+            "name": "actorScope",
             "in": "query",
             "required": false,
             "type": "string",
             "enum": [
               "MyActors",
               "StoreActors"
+            ],
+            "x-ms-enum-values": [
+              "My Actors",
+              "From Store"
             ],
             "description": "Select source of Actors: your own or the Apify Store.",
             "x-ms-visibility": "internal"
@@ -337,26 +336,25 @@
               "value-path": "id",
               "value-title": "title",
               "parameters": {
-                "actor_scope": { "parameter": "actor_scope" },
+                "actorScope": { "parameter": "actorScope" },
                 "limit": 1000
               }
             },
             "x-ms-visibility": "important"
           },
           {
-            "name": "actor_scope",
+            "name": "actorScope",
             "description": "Actor can be either yours or from the Apify Store.",
             "default": "MyActors",
             "in": "query",
             "required": true,
             "type": "string",
-            "format": "",
             "x-ms-summary": "Actor Source",
             "enum": [
               "MyActors",
               "StoreActors"
             ],
-            "x-ms-enum-display-name": [
+            "x-ms-enum-values": [
               "My Actors",
               "From Store"
             ]
@@ -385,6 +383,8 @@
             "description": "Memory limit for the run, in megabytes. The amount of memory can be set to a power of 2 with a minimum of 128. By default, the run uses a memory limit specified in the default run configuration for the Actor.",
             "x-ms-summary": "Memory (MB)",
             "enum": [
+              128,
+              256,
               512,
               1024,
               2048,
@@ -404,7 +404,7 @@
             "default": 0
           },
           {
-            "name": "input_body",
+            "name": "inputBody",
             "in": "body",
             "required": true,
             "description": "Raw JSON object passed as INPUT to the Actor.",
@@ -413,6 +413,144 @@
             "schema": {
               "type": "object",
               "description": "Raw JSON object passed as INPUT to the Actor"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Actor run created",
+            "schema": {
+              "$ref": "#/definitions/ActorRunResponse"
+            }
+          },
+          "default": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/actor-tasks": {
+      "get": {
+        "summary": "List Tasks (for dropdown)",
+        "description": "Fetches a list of the user's actor tasks.",
+        "operationId": "ListTasks",
+        "x-ms-visibility": "internal",
+        "tags": [
+          "Tasks"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/IntegrationPlatformHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": { "type": "string" },
+                          "name": { "type": "string" },
+                          "actName": { "type": "string" }
+                        }
+                      }
+                    }
+                  },
+                  "required": [ "items" ]
+                }
+              },
+              "additionalProperties": true
+            }
+          },
+          "default": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/actor-tasks/{taskId}/runs": {
+      "post": {
+        "summary": "Run Task",
+        "description": "Runs an Actor task and immediately returns without waiting for the run to finish. To wait for the run to finish, use the waitForFinish query parameter. See docs: https://docs.apify.com/api/v2/actor-task-runs-post",
+        "operationId": "RunTask",
+        "x-ms-summary": "Run Task",
+        "x-ms-visibility": "important",
+        "tags": [
+          "Tasks"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/IntegrationPlatformHeader"
+          },
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Task identifier to run.",
+            "x-ms-summary": "Task",
+            "x-ms-dynamic-values": {
+              "operationId": "ListTasks",
+              "value-collection": "data/items",
+              "value-path": "id",
+              "value-title": "name"
+            },
+            "x-ms-visibility": "important"
+          },
+          {
+            "name": "waitForFinish",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "x-ms-summary": "Wait for Finish (seconds)",
+            "description": "The maximum number of seconds the server waits for the run to finish. By default, it is 0, the maximum value is 60. If the run finishes in time then the returned run object will have a terminal status (e.g. SUCCEEDED), otherwise it will have a transitional status (e.g. RUNNING).",
+            "maximum": 60,
+            "default": 0
+          },
+          {
+            "name": "timeout",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "description": "Optional timeout for the run, in seconds. By default, the run uses a timeout specified in the default run configuration for the Task.",
+            "x-ms-summary": "Timeout (seconds)"
+          },
+          {
+            "name": "memory",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "description": "Memory limit for the run, in megabytes. The amount of memory can be set to a power of 2 with a minimum of 128. By default, the run uses a memory limit specified in the default run configuration for the Task.",
+            "x-ms-summary": "Memory (MB)",
+            "enum": [
+              128,
+              256,
+              512,
+              1024,
+              2048,
+              4096,
+              8192,
+              16384
+            ]
+          },
+          {
+            "name": "inputOverride",
+            "in": "body",
+            "required": false,
+            "description": "Optional. A raw JSON object to override the task's default input.",
+            "x-ms-textarea": true,
+            "x-ms-summary": "Input Override",
+            "schema": {
+              "type": "object",
+              "description": "Optional. A raw JSON object to override the task's default input."
             }
           }
         ],
@@ -499,13 +637,15 @@
     },
     "ErrorResponse": {
       "type": "object",
+      "x-ms-summary": "Represents an error response from the Apify API",
       "properties": {
         "error": {
           "type": "object",
+          "x-ms-summary": "Error Details",
           "properties": {
             "type": {
               "type": "string",
-              "description": "Error type",
+              "description": "Error Type",
               "x-ms-summary": "Error Type"
             },
             "message": {
@@ -516,8 +656,7 @@
           }
         }
       }
-    }
-    ,
+    },
     "ActorRunResponse": {
       "type": "object",
       "properties": {

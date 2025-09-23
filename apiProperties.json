@@ -57,6 +57,8 @@
           "x-ms-apimTemplate-policySection": "Request",
           "x-ms-apimTemplate-operationName": [
             "GetUserInfo",
+            "ListTasks",
+            "RunTask",
             "RunActor",
             "ListMyActors",
             "ListStoreActors",
