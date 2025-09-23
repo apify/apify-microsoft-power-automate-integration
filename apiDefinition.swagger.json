@@ -604,13 +604,38 @@
               "jsdom",
               "playwright:chrome"
             ],
-            "x-ms-enum-display-name": [
-              "Adaptive",
-              "Firefox (Headless Browser)",
-              "Cheerio (Raw HTTP)",
-              "JSDOM (Raw HTTP with JS)",
-              "Chrome (Headless Browser) [DEPRECATED]"
+            "x-ms-enum-values": [
+              {
+                "value": "playwright:adaptive",
+                "displayName": "Adaptive"
+              },
+              {
+                "value": "playwright:firefox",
+                "displayName": "Firefox (Headless Browser)"
+              },
+              {
+                "value": "cheerio",
+                "displayName": "Cheerio (Raw HTTP)"
+              },
+              {
+                "value": "jsdom",
+                "displayName": "JSDOM (Raw HTTP with JS)"
+              },
+              {
+                "value": "playwright:chrome",
+                "displayName": "Chrome (Headless Browser) [DEPRECATED]"
+              }
             ]
+          },
+          {
+            "name": "timeout",
+            "in": "query",
+            "required": true,
+            "x-ms-visibility": "internal",
+            "default": 0,
+            "type": "integer",
+            "description": "Optional timeout for the run, in seconds. By default, the run uses a timeout specified in the default run configuration for the Actor.",
+            "x-ms-summary": "Timeout (seconds)"
           }
         ],
         "responses": {

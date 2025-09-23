@@ -7,35 +7,53 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 public class Script : ScriptBase {
-   /// <summary>
-   /// Main entry point for the Power Automate custom connector script.
-   /// Routes incoming requests to appropriate handlers based on the operation ID.
-   /// </summary>
-   /// <returns>
-   /// An <see cref="HttpResponseMessage"/> representing the HTTP response message including the status code and data.
-   /// </returns>
-   public override async Task<HttpResponseMessage> ExecuteAsync() {
-      switch (Context.OperationId) {
-        case "ListActorsDropdown":
-          return await HandleListActorsDropdown().ConfigureAwait(false);
-        case "ListTasks":
-          return await HandleListTasks().ConfigureAwait(false);
-        case "ScrapeSingleUrl":
-          return await HandleScrapeSingleUrl().ConfigureAwait(false);
-        case "GetUserInfo":
-        case "RunActor":
-        case "RunTask":
-        case "ListMyActors":
-        case "ListStoreActors":
-          return await HandlePassthrough().ConfigureAwait(false);
-        default:
-          HttpResponseMessage response = new HttpResponseMessage(HttpStatusCode.BadRequest);
-          response.Content = CreateJsonContent($"Unknown operation ID '{Context.OperationId}'");
-          return response;
-      }
-   }
+  /// <summary>
+  /// Main entry point for the Power Automate custom connector script.
+  /// Routes incoming requests to appropriate handlers based on the operation ID.
+  /// </summary>
+  /// <returns>
+  /// An <see cref="HttpResponseMessage"/> representing the HTTP response message including the status code and data.
+  /// </returns>
+  public override async Task<HttpResponseMessage> ExecuteAsync() {
+    switch (Context.OperationId) {
+      case "ListActorsDropdown":
+        return await HandleListActorsDropdown().ConfigureAwait(false);
+      case "ListTasks":
+        return await HandleListTasks().ConfigureAwait(false);
+      case "ScrapeSingleUrl":
+        return await HandleScrapeSingleUrl().ConfigureAwait(false);
+      case "GetUserInfo":
+      case "RunActor":
+      case "RunTask":
+      case "ListMyActors":
+      case "ListStoreActors":
+        return await HandlePassthrough().ConfigureAwait(false);
+      default:
+        HttpResponseMessage response = new HttpResponseMessage(HttpStatusCode.BadRequest);
+        response.Content = CreateJsonContent($"Unknown operation ID '{Context.OperationId}'");
+        return response;
+    }
+  }
 
-   // Handle the ScrapeSingleUrl operation
+  /// <summary>
+  /// Handles passthrough operations by forwarding the original request to the Apify API.
+  /// Used for operations that don't require any special processing or transformation.
+  /// </summary>
+  /// <returns>
+  /// An <see cref="HttpResponseMessage"/> representing the HTTP response message including the status code and data from the forwarded request.
+  /// </returns>
+  private async Task<HttpResponseMessage> HandlePassthrough() {
+    return await Context.SendAsync(Context.Request, CancellationToken).ConfigureAwait(false);
+  }
+
+  /// <summary>
+  /// Handles the ScrapeSingleUrl operation by configuring and executing a web scraping request
+  /// using the Apify Web Scraper actor for a single URL.
+  /// </summary>
+  /// <returns>
+  /// An <see cref="HttpResponseMessage"/> representing the HTTP response from the Apify Web Scraper actor,
+  /// containing the scraped data and metadata for the specified URL.
+  /// </returns>
   private async Task<HttpResponseMessage> HandleScrapeSingleUrl() {
     var request = Context.Request;
     var queryParams = System.Web.HttpUtility.ParseQueryString(request.RequestUri.Query);
@@ -60,28 +78,12 @@ public class Script : ScriptBase {
     var jsonBody = JsonConvert.SerializeObject(inputBody);
     request.Content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
 
-    // Set default query parameters
-    // var newQuery = System.Web.HttpUtility.ParseQueryString(string.Empty);
-    // newQuery["timeout"] = "0";
-
     // Update the request URI
     var uriBuilder = new UriBuilder(request.RequestUri);
-    // uriBuilder.Query = newQuery.ToString();
     request.RequestUri = uriBuilder.Uri;
 
-    return await Context.SendAsync(request, CancellationToken).ConfigureAwait(false);
+    return await HandlePassthrough().ConfigureAwait(false);
   }
-
-   /// <summary>
-   /// Handles passthrough operations by forwarding the original request to the Apify API.
-   /// Used for operations that don't require any special processing or transformation.
-   /// </summary>
-   /// <returns>
-   /// An <see cref="HttpResponseMessage"/> representing the HTTP response message including the status code and data from the forwarded request.
-   /// </returns>
-   private async Task<HttpResponseMessage> HandlePassthrough() {
-      return await Context.SendAsync(Context.Request, CancellationToken).ConfigureAwait(false);
-   }
 
   /// <summary>
   /// Handles the ListActorsDropdown operation by routing to the appropriate API endpoint and formatting the response.
