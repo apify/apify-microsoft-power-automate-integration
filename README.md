@@ -36,6 +36,7 @@ cd apify-microsoft-power-automate-integration
 ├── apiProperties.json          # Connector properties and metadata
 ├── scripts.csx                 # Custom connector scripts
 ├── icon.png                    # Connector icon
+├── settings.json               # Configuration for connector commands
 ├── .github/
 │   └── workflows/              # CI/CD pipeline configurations
 ├── .gitignore                  # Git ignore file
@@ -98,6 +99,28 @@ pac auth select --profile "<profileName>"
 
 Verify connectivity with `pac connector list`.
 
+### Using Settings File
+
+The repository includes a `settings.json` file that simplifies connector operations by storing configuration parameters. This eliminates the need to specify all parameters in each command.
+
+1. **Update the settings file:**
+   
+   Before using the settings file, make sure to update the following fields.
+   
+   ```json
+   {
+     "connectorId": "YOUR-CONNECTOR-ID",
+     "environment": "YOUR-ENVIRONMENT-ID",
+     "apiProperties": "apiProperties.json",
+     "apiDefinition": "apiDefinition.swagger.json",
+     "icon": "icon.png",
+     "script": "scripts.csx"
+   }
+   ```
+   
+   - Replace `YOUR-CONNECTOR-ID` with your actual connector ID (if you already have one, otherwise leave it be)
+   - Replace `YOUR-ENVIRONMENT-ID` with your Power Platform environment ID
+
 ## Development Workflow
 
 ### Initial Setup
@@ -109,12 +132,7 @@ Before you start development, you need to either create a new connector or downl
 If you don't have an Apify connector in your Power Automate environment yet:
 
 ```bash
-pac connector create \
-  --api-definition-file ./apiDefinition.swagger.json \
-  --api-properties-file ./apiProperties.json \
-  --icon-file ./icon.png \
-  --script-file ./scripts.csx \
-  --solution-unique-name <your_solution_unique_name>
+pac connector create --settings-file settings.json --solution-unique-name <your_solution_unique_name>
 ```
 
 After creation, list your connectors to get the ID for future operations:
@@ -159,12 +177,7 @@ Once you have your connector set up, follow this development cycle:
    Push your changes to Power Automate:
 
    ```bash
-   pac connector update \
-     --connector-id <Your-Connector-ID> \
-     --api-definition-file ./apiDefinition.swagger.json \
-     --api-properties-file ./apiProperties.json \
-     --icon-file ./icon.png \
-     --script-file ./scripts.csx
+   pac connector update --settings-file settings.json
    ```
 
 3. **Test Your Changes**
@@ -203,6 +216,38 @@ Use the "Scrape Single URL" action to scrape a single webpage using Apify's Web 
   - `playwright:chrome` (Chrome Headless Browser - deprecated)
 
 The connector invokes `POST /v2/acts/aYG0l9s7dbB7j3gbS/runs` (Web Scraper actor) per Apify docs. This action starts an asynchronous scrape and returns the run details immediately. Use the Actor Run Finished trigger to process results once the scrape is complete.
+### Run Actor Action
+
+Use the "Run Actor" action to start an Apify Actor run.
+
+- Authentication: Use Apify API Key or OAuth 2.0 (scopes: `profile`, `full_api_access`).
+- Headers: All requests include `x-apify-integration-platform: microsoft-power-automate`.
+- Actor Source (`actorScope`): Choose "My Actors" or "From Store".
+  - If "My Actors": pick from `Actor` populated by your account Actors.
+  - If "From Store": pick from `Actor` populated by Apify Store (limit 1000).
+- Input Body (`inputBody`): Provide JSON for the Actor input.
+- Optional query params:
+  - `build`: specific build tag or id
+  - `timeout` (seconds)
+  - `memory` (MB): 512, 1024, 2048, 4096, 8192, 16384
+  - `waitForFinish` (seconds, max 60): set 0 to no limit
+
+The connector invokes `POST /v2/acts/{actorId}/runs` per Apify docs (see: https://docs.apify.com/api/v2/act-runs-post). The `actorId` path segment is chosen automatically based on your `actorScope` selection.
+
+### Run Task Action
+
+Use the "Run Task" action to start an Apify Task run.
+
+- Authentication: Use Apify API Key or OAuth 2.0 (scopes: `profile`, `full_api_access`).
+- Headers: All requests include `x-apify-integration-platform: microsoft-power-automate`.
+- Task (`taskId`): Select the task from a dynamic dropdown of your available tasks.
+- Input Body (`inputOverride`): Provide a raw JSON object to override the task's default input.
+- Optional query params:
+  - `timeout` (seconds)
+  - `memory` (MB): 512, 1024, 2048, 4096, 8192, 16384
+  - `waitForFinish` (seconds, max 60). If empty or 0, the call is asynchronous (does not wait).
+
+The connector invokes `POST /v2/actor-tasks/{taskId}/runs` per Apify docs (see: https://docs.apify.com/api/v2/actor-task-runs-post). The `taskId` path segment is selected directly from the dropdown.
 
 ## Testing
 
