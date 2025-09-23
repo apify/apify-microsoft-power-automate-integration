@@ -22,12 +22,13 @@ public class Script : ScriptBase {
           return await HandleListActorsDropdown().ConfigureAwait(false);
         case "ActorRunFinishedTrigger":
           return await HandleCreateWebhookWithLocation().ConfigureAwait(false);
+        case "DeleteActorWebhook":
+          return await HandleDeleteWebhookRobust().ConfigureAwait(false);
         case "GetUserInfo":
         case "RunActor":
         case "ListMyActors":
         case "ListStoreActors":
         case "CreateActorWebhook":
-        case "DeleteActorWebhook":
           return await HandlePassthrough().ConfigureAwait(false);
         default:
           HttpResponseMessage response = new HttpResponseMessage(HttpStatusCode.BadRequest);
@@ -138,6 +139,26 @@ public class Script : ScriptBase {
       } catch {
       }
     }
+    return response;
+  }
+
+  /// <summary>
+  /// Handles webhook deletion with Power Automate compatibility.
+  /// Converts 204 No Content responses to 200 OK for Power Automate compatibility.
+  /// </summary>
+  private async Task<HttpResponseMessage> HandleDeleteWebhookRobust() {
+    var response = await Context.SendAsync(Context.Request, CancellationToken).ConfigureAwait(false);
+    
+    // Convert 204 No Content to 200 OK for Power Automate compatibility
+    if (response.StatusCode == HttpStatusCode.NoContent) {
+      response.StatusCode = HttpStatusCode.OK;
+    }
+    
+    // Treat 404 Not Found as success (webhook already deleted)
+    if (response.StatusCode == HttpStatusCode.NotFound) {
+      response.StatusCode = HttpStatusCode.OK;
+    }
+    
     return response;
   }
 }
