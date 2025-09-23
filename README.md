@@ -216,6 +216,7 @@ Use the "Scrape Single URL" action to scrape a single webpage using Apify's Web 
   - `playwright:chrome` (Chrome Headless Browser - deprecated)
 
 The connector invokes `POST /v2/acts/aYG0l9s7dbB7j3gbS/runs` (Web Scraper actor) per Apify docs. This action starts an asynchronous scrape and returns the run details immediately. Use the Actor Run Finished trigger to process results once the scrape is complete.
+
 ### Run Actor Action
 
 Use the "Run Actor" action to start an Apify Actor run.
