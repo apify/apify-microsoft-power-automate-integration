@@ -18,17 +18,14 @@ public class Script : ScriptBase {
    /// </returns>
    public override async Task<HttpResponseMessage> ExecuteAsync() {
       switch (Context.OperationId) {
-        case "ListActorsDropdown":
-          return await HandleListActorsDropdown().ConfigureAwait(false);
-        case "ActorRunFinishedTrigger":
-          return await HandleCreateWebhookWithLocation().ConfigureAwait(false);
-        case "DeleteActorWebhook":
-          return await HandleDeleteWebhookRobust().ConfigureAwait(false);
+        
+        case "ActorTaskFinishedTrigger":
+          return await HandleCreateTaskWebhookWithLocation().ConfigureAwait(false);
+        case "DeleteTaskWebhook":
+          return await HandleDeleteTaskWebhook().ConfigureAwait(false);
+        case "ListTasks":
+          return await HandleListTasks().ConfigureAwait(false);
         case "GetUserInfo":
-        case "RunActor":
-        case "ListMyActors":
-        case "ListStoreActors":
-        case "CreateActorWebhook":
           return await HandlePassthrough().ConfigureAwait(false);
         default:
           HttpResponseMessage response = new HttpResponseMessage(HttpStatusCode.BadRequest);
@@ -49,39 +46,14 @@ public class Script : ScriptBase {
    }
 
   /// <summary>
-  /// Handles the ListActorsDropdown operation by dynamically routing to the appropriate Apify API endpoint
-  /// based on the <c>actor_scope</c> parameter. Routes to <c>/v2/store</c> for StoreActors or <c>/v2/acts</c> for user actors.
-  /// Removes the helper <c>actor_scope</c> parameter before forwarding the request.
+  /// Handles task webhook creation with Location header fix.
   /// </summary>
-  /// <returns>
-  /// An <see cref="HttpResponseMessage"/> representing the HTTP response message including the status code and data from the forwarded request.
-  /// </returns>
-  private async Task<HttpResponseMessage> HandleListActorsDropdown() {
-    var originalUri = Context.Request.RequestUri;
-    var queryParams = System.Web.HttpUtility.ParseQueryString(originalUri.Query);
-    var actorScope = queryParams["actor_scope"];
-
-    string newPath = string.Equals(actorScope, "StoreActors", StringComparison.OrdinalIgnoreCase) 
-      ? "/v2/store" 
-      : "/v2/acts";
-
-    queryParams.Remove("actor_scope");
-    
-    var newUri = new UriBuilder(originalUri) { 
-      Path = newPath,
-      Query = queryParams.ToString()
-    }.Uri;
-
-    Context.Request.RequestUri = newUri;
-    return await HandlePassthrough().ConfigureAwait(false);
-  }
-
-  private async Task<HttpResponseMessage> HandleCreateWebhookWithLocation() {
+  private async Task<HttpResponseMessage> HandleCreateTaskWebhookWithLocation() {
     var originalUri = Context.Request.RequestUri;
     var queryParams = System.Web.HttpUtility.ParseQueryString(originalUri.Query);
     
     // Extract values from query parameters
-    var actorId = queryParams["actorId"];
+    var taskId = queryParams["taskId"];
     var eventTypesParam = queryParams["eventTypes"];
     
     // Parse eventTypes (can be comma-separated or multiple parameters)
@@ -104,11 +76,11 @@ public class Script : ScriptBase {
     }
     
     // Populate body with values from query parameters
-    if (!string.IsNullOrEmpty(actorId)) {
+    if (!string.IsNullOrEmpty(taskId)) {
       if (bodyJson["condition"] == null) {
         bodyJson["condition"] = new JObject();
       }
-      bodyJson["condition"]["actorId"] = actorId;
+      bodyJson["condition"]["actorTaskId"] = taskId;
     }
     
     if (eventTypes.Count > 0) {
@@ -119,11 +91,13 @@ public class Script : ScriptBase {
     var updatedBodyContent = JsonConvert.SerializeObject(bodyJson);
     Context.Request.Content = new StringContent(updatedBodyContent, Encoding.UTF8, "application/json");
     
-    // Remove helper parameters from query string
-    queryParams.Remove("actor_scope");
-    queryParams.Remove("actorId");
+    // Remove helper parameters from query string and update path to standard webhooks endpoint
+    queryParams.Remove("task_id");
     queryParams.Remove("eventTypes");
-    Context.Request.RequestUri = new UriBuilder(originalUri) { Query = queryParams.ToString() }.Uri;
+    Context.Request.RequestUri = new UriBuilder(originalUri) { 
+      Path = "/v2/webhooks",
+      Query = queryParams.ToString() 
+    }.Uri;
 
     var response = await Context.SendAsync(Context.Request, CancellationToken).ConfigureAwait(false);
     if (response.StatusCode == HttpStatusCode.Created && !response.Headers.Contains("Location")) {
@@ -160,5 +134,102 @@ public class Script : ScriptBase {
     }
     
     return response;
+  }
+
+  /// <summary>
+  /// Handles task webhook deletion by routing to standard webhooks endpoint.
+  /// Routes /webhooks/task/{webhookId} to /webhooks/{webhookId} and applies robust deletion handling.
+  /// </summary>
+  private async Task<HttpResponseMessage> HandleDeleteTaskWebhook() {
+    var originalUri = Context.Request.RequestUri;
+    
+    // Update path from /webhooks/task/{webhookId} to /webhooks/{webhookId}
+    Context.Request.RequestUri = new UriBuilder(originalUri) { 
+      Path = originalUri.AbsolutePath.Replace("/webhooks/task/", "/webhooks/")
+    }.Uri;
+
+    return await HandleDeleteWebhookRobust().ConfigureAwait(false);
+  }
+
+  /// <summary>
+  /// Handles the ListTasks operation by formatting task names to include actor names.
+  /// </summary>
+  /// <returns>
+  /// An <see cref="HttpResponseMessage"/> representing the HTTP response message with formatted task names.
+  /// </returns>
+  private async Task<HttpResponseMessage> HandleListTasks() {
+    try {
+      var response = await Context.SendAsync(Context.Request, CancellationToken).ConfigureAwait(false);
+      return await FormatApiResponse(response, FormatTaskTitles).ConfigureAwait(false);
+    }
+    catch (Exception ex) {
+      // Fallback to passthrough on any error
+      return await HandlePassthrough().ConfigureAwait(false);
+    }
+  }
+
+  /// <summary>
+  /// Formats API response by applying a formatting function to the data.items array.
+  /// </summary>
+  /// <param name="response">The HTTP response to format</param>
+  /// <param name="formatter">The formatting function to apply to the items array</param>
+  /// <returns>A formatted HTTP response</returns>
+  private async Task<HttpResponseMessage> FormatApiResponse(HttpResponseMessage response, Action<JArray> formatter) {
+    if (response.StatusCode != HttpStatusCode.OK) {
+      return response;
+    }
+
+    try {
+      var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+      if (string.IsNullOrWhiteSpace(content)) {
+        return response;
+      }
+
+      var json = JsonConvert.DeserializeObject<JObject>(content);
+      var items = json?["data"]?["items"] as JArray;
+      
+      if (items != null) {
+        formatter(items);
+        var updatedContent = JsonConvert.SerializeObject(json);
+        response.Content = new StringContent(updatedContent, Encoding.UTF8, "application/json");
+      }
+
+      return response;
+    } catch {
+      // Return original response on any error
+      return response;
+    }
+  }
+
+  /// <summary>
+  /// Formats task names by combining name and actName for better user experience.
+  /// </summary>
+  /// <param name="items">The JArray of task items to format</param>
+  private void FormatTaskTitles(JArray items) {
+    if (items == null || items.Count == 0) return;
+    
+    for (int i = 0; i < items.Count; i++) {
+      var item = items[i] as JObject;
+      if (item == null) continue;
+
+      var name = item["name"]?.Value<string>();
+      var actName = item["actName"]?.Value<string>();
+
+      // Only format if we have all required fields
+      if (!string.IsNullOrEmpty(name) && !string.IsNullOrEmpty(actName)) {
+        // Update the name field with formatted string: "name / ({actName})"
+        item["name"] = $"{name} / ({actName})";
+      }
+    }
+  }
+
+  /// <summary>
+  /// Creates JSON content for HTTP responses.
+  /// </summary>
+  /// <param name="message">The message to include in the JSON response</param>
+  /// <returns>StringContent with JSON formatted message</returns>
+  private StringContent CreateJsonContent(string message) {
+    var json = JsonConvert.SerializeObject(new { error = message });
+    return new StringContent(json, Encoding.UTF8, "application/json");
   }
 }
