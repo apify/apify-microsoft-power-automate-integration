@@ -171,9 +171,18 @@
                     }
                   }
                 },
-                "idempotencyKey": { "type": "string" },
-                "payloadTemplate": { "type": "string" },
-                "shouldInterpolateStrings": { "type": "boolean" }
+                "idempotencyKey": { 
+                  "type": "string",
+                  "x-ms-visibility": "internal"
+                },
+                "payloadTemplate": { 
+                  "type": "string",
+                  "x-ms-visibility": "internal"
+                },
+                "shouldInterpolateStrings": { 
+                  "type": "boolean",
+                  "x-ms-visibility": "internal"
+                }
               }
             }
           }
