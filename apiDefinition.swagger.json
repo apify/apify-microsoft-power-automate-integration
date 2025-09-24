@@ -598,6 +598,7 @@
             "in": "query",
             "required": true,
             "type": "string",
+            "pattern": "^https?://[^\\s]+$",
             "description": "The full URL of the single page to be scraped. Must be a valid URL format.",
             "x-ms-summary": "URL to scrape"
           },
