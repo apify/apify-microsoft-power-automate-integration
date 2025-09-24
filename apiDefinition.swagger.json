@@ -113,7 +113,7 @@
         ],
         "parameters": [
           {
-            "name": "actor_scope",
+            "name": "actorScope",
             "in": "query",
             "required": false,
             "type": "string",
@@ -186,7 +186,7 @@
         ],
         "parameters": [
           {
-            "name": "actor_scope",
+            "name": "actorScope",
             "in": "query",
             "required": false,
             "type": "string",
@@ -257,7 +257,7 @@
         ],
         "parameters": [
           {
-            "name": "actor_scope",
+            "name": "actorScope",
             "in": "query",
             "required": false,
             "type": "string",
@@ -337,14 +337,14 @@
               "value-path": "id",
               "value-title": "title",
               "parameters": {
-                "actor_scope": { "parameter": "actor_scope" },
+                "actorScope": { "parameter": "actorScope" },
                 "limit": 50
               }
             },
             "x-ms-visibility": "important"
           },
           {
-            "name": "actor_scope",
+            "name": "actorScope",
             "description": "Actor can be either yours or from the Apify Store.",
             "default": "MyActors",
             "in": "query",
@@ -448,71 +448,33 @@
             "$ref": "#/parameters/IntegrationPlatformHeader"
           },
           {
-            "name": "actor_scope",
+            "name": "actorScope",
             "description": "Actor can be either yours or from the Apify Store.",
             "default": "MyActors",
             "in": "query",
             "required": true,
             "type": "string",
-            "format": "",
             "x-ms-summary": "Actor Source",
             "enum": [
               "MyActors",
               "StoreActors"
             ],
-            "x-ms-enum-display-name": [
-              "My Actors",
-              "From Store"
-            ]
-          },
-          {
-            "name": "actorId",
-            "in": "query",
-            "required": true,
-            "type": "string",
-            "description": "Actor identifier to run. For My Actors supply Actor ID; for Store supply Actor name.",
-            "x-ms-summary": "Actor",
-            "x-ms-dynamic-values": {
-              "operationId": "ListActorsDropdown",
-              "value-collection": "data/items",
-              "value-path": "id",
-              "value-title": "title",
-              "parameters": {
-                "actor_scope": { "parameter": "actor_scope" },
-                "limit": 50
+            "x-ms-enum-values": [
+              { 
+                "value": "MyActors", 
+                "displayName": "My Actors"
+              },
+              { 
+                "value": "StoreActors", 
+                "displayName": "From Store"
               }
-            },
-            "x-ms-visibility": "important"
-          },
-          {
-            "name": "eventTypes",
-            "in": "query",
-            "required": true,
-            "type": "array",
-            "description": "Actor run statuses to trigger on",
-            "x-ms-summary": "Trigger On",
-            "items": {
-              "type": "string",
-              "enum": [
-                "ACTOR.RUN.SUCCEEDED",
-                "ACTOR.RUN.FAILED",
-                "ACTOR.RUN.TIMED_OUT",
-                "ACTOR.RUN.ABORTED"
-              ],
-              "x-ms-enum-values": [
-                { "value": "ACTOR.RUN.SUCCEEDED", "displayName": "SUCCEEDED" },
-                { "value": "ACTOR.RUN.FAILED", "displayName": "FAILED" },
-                { "value": "ACTOR.RUN.TIMED_OUT", "displayName": "TIMED_OUT" },
-                { "value": "ACTOR.RUN.ABORTED", "displayName": "ABORTED" }
-              ]
-            },
-            "x-ms-visibility": "important"
+            ]
           },
           {
             "name": "body",
             "in": "body",
-            "required": false,
-            "x-ms-visibility": "internal",
+            "required": true,
+            "x-ms-visibility": "important",
             "schema": {
               "type": "object",
               "properties": {
@@ -523,19 +485,58 @@
                 },
                 "eventTypes": {
                   "type": "array",
+                  "x-ms-visibility": "important",
+                  "description": "Actor run statuses to trigger on",
+                  "x-ms-summary": "Trigger On",
                   "items": {
-                    "type": "string"
+                    "type": "string",
+                    "enum": [
+                      "ACTOR.RUN.SUCCEEDED",
+                      "ACTOR.RUN.FAILED",
+                      "ACTOR.RUN.TIMED_OUT",
+                      "ACTOR.RUN.ABORTED"
+                    ],
+                    "x-ms-enum-values": [
+                      { "value": "ACTOR.RUN.SUCCEEDED", "displayName": "SUCCEEDED" },
+                      { "value": "ACTOR.RUN.FAILED", "displayName": "FAILED" },
+                      { "value": "ACTOR.RUN.TIMED_OUT", "displayName": "TIMED_OUT" },
+                      { "value": "ACTOR.RUN.ABORTED", "displayName": "ABORTED" }
+                    ]
                   }
                 },
                 "condition": {
                   "type": "object",
                   "properties": {
-                    "actorId": { "type": "string" }
+                    "actorId": { 
+                      "type": "string",
+                      "x-ms-visibility": "important",
+                      "description": "Actor identifier to run. For My Actors supply Actor ID; for Store supply Actor name.",
+                      "x-ms-summary": "Actor",
+                      "x-ms-dynamic-values": {
+                        "operationId": "ListActorsDropdown",
+                        "value-collection": "data/items",
+                        "value-path": "id",
+                        "value-title": "title",
+                        "parameters": {
+                          "actorScope": { "parameter": "actorScope" },
+                          "limit": 1000
+                        }
+                      }
+                    }
                   }
                 },
-                "idempotencyKey": { "type": "string" },
-                "payloadTemplate": { "type": "string" },
-                "shouldInterpolateStrings": { "type": "boolean" }
+                "idempotencyKey": { 
+                  "type": "string",
+                  "x-ms-visibility": "internal"
+                },
+                "payloadTemplate": { 
+                  "type": "string",
+                  "x-ms-visibility": "internal"
+                },
+                "shouldInterpolateStrings": { 
+                  "type": "boolean",
+                  "x-ms-visibility": "internal"
+                }
               },
               "required": ["requestUrl", "eventTypes", "condition"]
             }
