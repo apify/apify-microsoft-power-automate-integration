@@ -216,7 +216,7 @@ Use the "Get Dataset Items" action to retrieve records from one of your Apify Da
 How it works:
 - The dataset dropdown is populated via `GET /v2/datasets` so you can pick by name.
 - The connector calls `GET /v2/datasets/{datasetId}/items` with the provided `limit` and `offset` to fetch the data.
-- To provide typed fields in Power Automate, it calls `GET /v2/datasets/{datasetId}/items-schema-helper` to infer the item schema from a sample.
+- To provide typed fields in Power Automate, it calls `GET /v2/datasets/{datasetId}/itemsSchemaHelper` to infer the item schema from a sample.
 
 Tips:
 - For large datasets, paginate using `limit` and `offset` to process items in batches.
