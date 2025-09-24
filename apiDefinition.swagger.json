@@ -121,49 +121,10 @@
             "$ref": "#/parameters/IntegrationPlatformHeader"
           },
           {
-            "name": "taskId",
-            "in": "query",
-            "required": true,
-            "type": "string",
-            "description": "Actor task identifier to monitor for run events.",
-            "x-ms-summary": "Task",
-            "x-ms-dynamic-values": {
-              "operationId": "ListTasks",
-              "value-collection": "data/items",
-              "value-path": "id",
-              "value-title": "name"
-            },
-            "x-ms-visibility": "important"
-          },
-          {
-            "name": "eventTypes",
-            "in": "query",
-            "required": true,
-            "type": "array",
-            "description": "Task run statuses to trigger on",
-            "x-ms-summary": "Event Status",
-            "items": {
-              "type": "string",
-              "enum": [
-                "ACTOR.RUN.SUCCEEDED",
-                "ACTOR.RUN.FAILED",
-                "ACTOR.RUN.TIMED_OUT",
-                "ACTOR.RUN.ABORTED"
-              ],
-              "x-ms-enum-values": [
-                { "value": "ACTOR.RUN.SUCCEEDED", "displayName": "SUCCEEDED" },
-                { "value": "ACTOR.RUN.FAILED", "displayName": "FAILED" },
-                { "value": "ACTOR.RUN.TIMED_OUT", "displayName": "TIMED_OUT" },
-                { "value": "ACTOR.RUN.ABORTED", "displayName": "ABORTED" }
-              ]
-            },
-            "x-ms-visibility": "important"
-          },
-          {
             "name": "body",
             "in": "body",
-            "required": false,
-            "x-ms-visibility": "internal",
+            "required": true,
+            "x-ms-visibility": "important",
             "schema": {
               "type": "object",
               "properties": {
@@ -174,14 +135,40 @@
                 },
                 "eventTypes": {
                   "type": "array",
+                  "x-ms-visibility": "important",
+                  "description": "Actor run statuses to trigger on",
+                  "x-ms-summary": "Trigger On",
                   "items": {
-                    "type": "string"
+                    "type": "string",
+                    "enum": [
+                      "ACTOR.RUN.SUCCEEDED",
+                      "ACTOR.RUN.FAILED",
+                      "ACTOR.RUN.TIMED_OUT",
+                      "ACTOR.RUN.ABORTED"
+                    ],
+                    "x-ms-enum-values": [
+                      { "value": "ACTOR.RUN.SUCCEEDED", "displayName": "SUCCEEDED" },
+                      { "value": "ACTOR.RUN.FAILED", "displayName": "FAILED" },
+                      { "value": "ACTOR.RUN.TIMED_OUT", "displayName": "TIMED_OUT" },
+                      { "value": "ACTOR.RUN.ABORTED", "displayName": "ABORTED" }
+                    ]
                   }
                 },
                 "condition": {
                   "type": "object",
                   "properties": {
-                    "actorTaskId": { "type": "string" }
+                    "actorTaskId": { 
+                      "type": "string",
+                      "description": "Actor task identifier to monitor for run events.",
+                      "x-ms-summary": "Task",
+                      "x-ms-visibility": "important",
+                      "x-ms-dynamic-values": {
+                        "operationId": "ListTasks",
+                        "value-collection": "data/items",
+                        "value-path": "id",
+                        "value-title": "name"
+                      }
+                    }
                   }
                 },
                 "idempotencyKey": { "type": "string" },

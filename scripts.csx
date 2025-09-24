@@ -18,14 +18,12 @@ public class Script : ScriptBase {
    /// </returns>
    public override async Task<HttpResponseMessage> ExecuteAsync() {
       switch (Context.OperationId) {
-        
-        case "ActorTaskFinishedTrigger":
-          return await HandleCreateTaskWebhookWithLocation().ConfigureAwait(false);
         case "DeleteTaskWebhook":
           return await HandleDeleteTaskWebhook().ConfigureAwait(false);
         case "ListTasks":
           return await HandleListTasks().ConfigureAwait(false);
         case "GetUserInfo":
+        case "ActorTaskFinishedTrigger":
           return await HandlePassthrough().ConfigureAwait(false);
         default:
           HttpResponseMessage response = new HttpResponseMessage(HttpStatusCode.BadRequest);
@@ -44,77 +42,6 @@ public class Script : ScriptBase {
    private async Task<HttpResponseMessage> HandlePassthrough() {
       return await Context.SendAsync(Context.Request, CancellationToken).ConfigureAwait(false);
    }
-
-  /// <summary>
-  /// Handles task webhook creation with Location header fix.
-  /// </summary>
-  private async Task<HttpResponseMessage> HandleCreateTaskWebhookWithLocation() {
-    var originalUri = Context.Request.RequestUri;
-    var queryParams = System.Web.HttpUtility.ParseQueryString(originalUri.Query);
-    
-    // Extract values from query parameters
-    var taskId = queryParams["taskId"];
-    var eventTypesParam = queryParams["eventTypes"];
-    
-    // Parse eventTypes (can be comma-separated or multiple parameters)
-    var eventTypes = new List<string>();
-    if (!string.IsNullOrEmpty(eventTypesParam)) {
-      eventTypes.AddRange(eventTypesParam.Split(',').Select(e => e.Trim()));
-    }
-    
-    // Read existing body or create new one
-    var bodyContent = string.Empty;
-    if (Context.Request.Content != null) {
-      bodyContent = await Context.Request.Content.ReadAsStringAsync().ConfigureAwait(false);
-    }
-    
-    JObject bodyJson;
-    if (string.IsNullOrWhiteSpace(bodyContent)) {
-      bodyJson = new JObject();
-    } else {
-      bodyJson = JsonConvert.DeserializeObject<JObject>(bodyContent) ?? new JObject();
-    }
-    
-    // Populate body with values from query parameters
-    if (!string.IsNullOrEmpty(taskId)) {
-      if (bodyJson["condition"] == null) {
-        bodyJson["condition"] = new JObject();
-      }
-      bodyJson["condition"]["actorTaskId"] = taskId;
-    }
-    
-    if (eventTypes.Count > 0) {
-      bodyJson["eventTypes"] = new JArray(eventTypes);
-    }
-    
-    // Update request body
-    var updatedBodyContent = JsonConvert.SerializeObject(bodyJson);
-    Context.Request.Content = new StringContent(updatedBodyContent, Encoding.UTF8, "application/json");
-    
-    // Remove helper parameters from query string and update path to standard webhooks endpoint
-    queryParams.Remove("task_id");
-    queryParams.Remove("eventTypes");
-    Context.Request.RequestUri = new UriBuilder(originalUri) { 
-      Path = "/v2/webhooks",
-      Query = queryParams.ToString() 
-    }.Uri;
-
-    var response = await Context.SendAsync(Context.Request, CancellationToken).ConfigureAwait(false);
-    if (response.StatusCode == HttpStatusCode.Created && !response.Headers.Contains("Location")) {
-      try {
-        var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-        if (!string.IsNullOrWhiteSpace(content)) {
-          var json = JsonConvert.DeserializeObject<JObject>(content);
-          var id = json?["data"]?["id"]?.ToString();
-          if (!string.IsNullOrEmpty(id)) {
-            response.Headers.Location = new Uri($"https://api.apify.com/v2/webhooks/{id}");
-          }
-        }
-      } catch {
-      }
-    }
-    return response;
-  }
 
   /// <summary>
   /// Handles webhook deletion with Power Automate compatibility.
