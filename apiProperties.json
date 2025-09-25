@@ -57,6 +57,9 @@
           "x-ms-apimTemplate-policySection": "Request",
           "x-ms-apimTemplate-operationName": [
             "GetUserInfo",
+            "ListDatasets",
+            "GetDatasetSchema",
+            "GetDatasetItems",
             "ListTasks",
             "RunTask",
             "RunActor",
