@@ -20,6 +20,10 @@ public class Script : ScriptBase {
           return await HandleListActorsDropdown().ConfigureAwait(false);
         case "ListTasks":
           return await HandleListTasks().ConfigureAwait(false);
+        case "GetDatasetSchema":
+          return await HandleGetDatasetSchema().ConfigureAwait(false);
+        case "ListDatasets":
+        case "GetDatasetItems":
         case "GetUserInfo":
         case "RunActor":
         case "RunTask":
@@ -213,5 +217,176 @@ public class Script : ScriptBase {
         item["name"] = $"{name} / ({actName})";
       }
     }
+  }
+
+  /// <summary>
+  /// Builds a new HTTP request for the dataset items API by modifying the path from schema helper to items endpoint.
+  /// Follows the same pattern as BuildActorRequest for consistency.
+  /// </summary>
+  /// <returns>An <see cref="HttpRequestMessage"/> configured for the dataset items API endpoint.</returns>
+  private HttpRequestMessage BuildDatasetItemsRequest() {
+    var originalUri = Context.Request.RequestUri;
+    var uriBuilder = new UriBuilder(originalUri);
+    
+    // Correct path to get items
+    uriBuilder.Path = uriBuilder.Path.Replace("/itemsSchemaHelper", "/items");
+
+    // Create a new request instead of modifying the original
+    var newRequest = new HttpRequestMessage(Context.Request.Method, uriBuilder.Uri);
+    
+    // Copy headers from original request
+    foreach (var header in Context.Request.Headers) {
+      newRequest.Headers.TryAddWithoutValidation(header.Key, header.Value);
+    }
+
+    // Copy content if present
+    if (Context.Request.Content != null) {
+      newRequest.Content = Context.Request.Content;
+    }
+
+    return newRequest;
+  }
+
+  /// <summary>
+  /// Handles the GetDatasetSchema operation by fetching sample dataset items and inferring an OpenAPI schema.
+  /// Follows the established error handling pattern used by other handler methods.
+  /// </summary>
+  /// <returns>
+  /// An <see cref="HttpResponseMessage"/> containing the inferred OpenAPI schema as JSON.
+  /// </returns>
+  private async Task<HttpResponseMessage> HandleGetDatasetSchema() {
+    try {
+      var modifiedRequest = BuildDatasetItemsRequest();
+      var upstreamResponse = await Context.SendAsync(modifiedRequest, CancellationToken).ConfigureAwait(false);
+      
+      if (!upstreamResponse.IsSuccessStatusCode) {
+        return upstreamResponse; // Return error responses as-is
+      }
+
+      var sample = await ExtractSampleFromResponse(upstreamResponse).ConfigureAwait(false);
+      var schema = InferOpenApiSchemaFromSample(sample);
+
+      var response = new HttpResponseMessage(HttpStatusCode.OK);
+      response.Content = CreateJsonContent(schema.ToString(Newtonsoft.Json.Formatting.None));
+      return response;
+    }
+    catch (Exception ex) {
+      // Fallback to passthrough on any error
+      return await HandlePassthrough().ConfigureAwait(false);
+    }
+  }
+
+  /// <summary>
+  /// Infers an OpenAPI (Swagger 2.0) schema from a sample JSON token.
+  /// Recursively analyzes the structure and data types to generate appropriate schema definitions.
+  /// </summary>
+  /// <param name="sample">The JSON token to analyze for schema inference.</param>
+  /// <returns>
+  /// A <see cref="JObject"/> representing the OpenAPI schema definition.
+  /// </returns>
+  private JObject InferOpenApiSchemaFromSample(JToken sample) {
+    // If no sample, return very permissive object schema
+    if (sample == null || sample.Type == JTokenType.Null || sample.Type == JTokenType.Undefined) {
+      return new JObject
+      {
+        ["type"] = "object",
+        ["additionalProperties"] = true
+      };
+    }
+
+    switch (sample.Type) {
+      case JTokenType.Object:
+        return InferObjectSchema((JObject)sample);
+      case JTokenType.Array:
+        // Wrap arrays in an object to ensure the returned schema is always an object
+        return new JObject
+        {
+          ["type"] = "object",
+          ["properties"] = new JObject
+          {
+            ["value"] = new JObject
+            {
+              ["type"] = "array",
+              ["items"] = InferOpenApiSchemaFromSample(((JArray)sample).FirstOrDefault())
+            }
+          }
+        };
+      case JTokenType.Integer:
+        return WrapPrimitive("integer", "int64");
+      case JTokenType.Float:
+        return WrapPrimitive("number", "double");
+      case JTokenType.Boolean:
+        return WrapPrimitive("boolean", null);
+      case JTokenType.Date:
+        return WrapPrimitive("string", "date-time");
+      case JTokenType.String:
+        return WrapPrimitive("string", null);
+      default:
+        return WrapPrimitive("string", null);
+    }
+  }
+ 
+  /// <summary>
+  /// Infers an OpenAPI object schema from a JSON object by analyzing its properties.
+  /// Recursively processes each property to build a complete schema definition.
+  /// </summary>
+  /// <param name="obj">The JSON object to analyze for schema inference.</param>
+  /// <returns>
+  /// A <see cref="JObject"/> representing the OpenAPI object schema with properties.
+  /// </returns>
+  private JObject InferObjectSchema(JObject obj) {
+    var properties = new JObject();
+    foreach (var prop in obj.Properties()) {
+      properties[prop.Name] = InferOpenApiSchemaFromSample(prop.Value);
+    }
+    return new JObject
+    {
+      ["type"] = "object",
+      ["properties"] = properties
+    };
+  }
+
+  /// <summary>
+  /// Extracts a sample JSON token from the HTTP response for schema inference.
+  /// Handles JSON parsing errors gracefully and extracts the first item from arrays.
+  /// </summary>
+  /// <param name="response">The HTTP response containing JSON data.</param>
+  /// <returns>
+  /// A <see cref="JToken"/> representing the sample data, or null if parsing fails.
+  /// </returns>
+  private async Task<JToken> ExtractSampleFromResponse(HttpResponseMessage response) {
+    var contentString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+
+    // Try to parse JSON
+    JToken parsed;
+    try {
+      parsed = string.IsNullOrWhiteSpace(contentString) ? null : JToken.Parse(contentString);
+    } catch (Exception) {
+      parsed = null;
+    }
+
+    // Extract first item, if it's an array, otherwise use as-is
+    return parsed is JArray arr && arr.Count > 0 ? arr[0] : parsed;
+  }
+
+  /// <summary>
+  /// Wraps primitive types in an object schema with a "value" property.
+  /// This ensures all schemas return objects, which is required for Power Automate compatibility.
+  /// </summary>
+  /// <param name="type">The OpenAPI type (e.g., "string", "integer", "boolean").</param>
+  /// <param name="format">The optional OpenAPI format (e.g., "date-time", "int64").</param>
+  /// <returns>
+  /// A <see cref="JObject"/> representing an object schema containing the primitive type as a "value" property.
+  /// </returns>
+  private JObject WrapPrimitive(string type, string format) {
+    var inner = new JObject { ["type"] = type };
+    if (!string.IsNullOrEmpty(format)) {
+      inner["format"] = format;
+    }
+    return new JObject
+    {
+      ["type"] = "object",
+      ["properties"] = new JObject { ["value"] = inner }
+    };
   }
 }
