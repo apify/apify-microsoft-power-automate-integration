@@ -262,11 +262,11 @@
             ],
             "x-ms-enum-values": [
               {
-                "name": "MyActors",
+                "value": "MyActors",
                 "displayName": "My Actors"
               },
               {
-                "name": "StoreActors",
+                "value": "StoreActors",
                 "displayName": "From Store"
               }
             ],
@@ -362,11 +362,11 @@
             ],
             "x-ms-enum-values": [
               {
-                "name": "MyActors",
+                "value": "MyActors",
                 "displayName": "My Actors"
               },
               {
-                "name": "StoreActors",
+                "value": "StoreActors",
                 "displayName": "From Store"
               }
             ]
