@@ -475,8 +475,7 @@
                         }
                       }
                     }
-                  },
-                  "required": [ "items" ]
+                  }
                 }
               },
               "additionalProperties": true
