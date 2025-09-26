@@ -22,6 +22,9 @@ public class Script : ScriptBase {
           return await HandleListTasks().ConfigureAwait(false);
         case "GetDatasetSchema":
           return await HandleGetDatasetSchema().ConfigureAwait(false);
+        case "GetKeyValueStoreRecordSchema":
+          return await HandleGetKeyValueStoreRecordSchema().ConfigureAwait(false);
+        case "GetKeyValueStoreRecord":
         case "ListDatasets":
         case "GetDatasetItems":
         case "GetUserInfo":
@@ -31,7 +34,6 @@ public class Script : ScriptBase {
         case "ListStoreActors":
         case "ListKeyValueStores":
         case "ListRecordKeys":
-        case "GetKeyValueStoreRecord":
           return await HandlePassthrough().ConfigureAwait(false);
         default:
           HttpResponseMessage response = new HttpResponseMessage(HttpStatusCode.BadRequest);
@@ -52,16 +54,16 @@ public class Script : ScriptBase {
    }
 
   /// <summary>
-  /// Handles the ListActorsDropdown operation by routing to the appropriate API endpoint and formatting the response.
+  /// Generic method to handle formatted responses by applying request modification and response formatting.
   /// </summary>
-  /// <returns>
-  /// An <see cref="HttpResponseMessage"/> representing the HTTP response message with formatted actor titles.
-  /// </returns>
-  private async Task<HttpResponseMessage> HandleListActorsDropdown() {
+  /// <param name="requestModifier">Function to modify the request before sending</param>
+  /// <param name="responseFormatter">Action to format the response items</param>
+  /// <returns>An <see cref="HttpResponseMessage"/> with formatted content</returns>
+  private async Task<HttpResponseMessage> HandleFormattedResponse(Func<HttpRequestMessage> requestModifier, Action<JArray> responseFormatter) {
     try {
-      var modifiedRequest = BuildActorRequest();
+      var modifiedRequest = requestModifier();
       var response = await Context.SendAsync(modifiedRequest, CancellationToken).ConfigureAwait(false);
-      return await FormatApiResponse(response, FormatActorTitles).ConfigureAwait(false);
+      return await FormatApiResponse(response, responseFormatter).ConfigureAwait(false);
     }
     catch (Exception ex) {
       // Fallback to passthrough on any error
@@ -70,11 +72,25 @@ public class Script : ScriptBase {
   }
 
   /// <summary>
-  /// Builds a new HTTP request for the actor API by determining the correct endpoint and removing helper parameters.
+  /// Handles the ListActorsDropdown operation by routing to the appropriate API endpoint and formatting the response.
   /// </summary>
-  /// <returns>An <see cref="HttpRequestMessage"/> configured for the appropriate actor API endpoint.</returns>
+  /// <returns>
+  /// An <see cref="HttpResponseMessage"/> representing the HTTP response message with formatted actor titles.
+  /// </returns>
+  private async Task<HttpResponseMessage> HandleListActorsDropdown() {
+    return await HandleFormattedResponse(BuildActorRequest, items => FormatItems(items, FormatActorTitle)).ConfigureAwait(false);
+  }
+
+  /// <summary>
+  /// Modifies the existing HTTP request for the actor API by determining the correct endpoint and removing helper parameters.
+  /// Includes null safety checks for robustness.
+  /// </summary>
+  /// <returns>The modified <see cref="HttpRequestMessage"/> configured for the appropriate actor API endpoint.</returns>
   private HttpRequestMessage BuildActorRequest() {
-    var originalUri = Context.Request.RequestUri;
+    var request = Context.Request;
+    if (request?.RequestUri == null) return request;
+    
+    var originalUri = request.RequestUri;
     var queryParams = System.Web.HttpUtility.ParseQueryString(originalUri.Query);
     var actorScope = queryParams["actorScope"];
 
@@ -86,20 +102,10 @@ public class Script : ScriptBase {
       Query = queryParams.ToString()
     }.Uri;
 
-    // Create a new request instead of modifying the original
-    var newRequest = new HttpRequestMessage(Context.Request.Method, newUri);
-    
-    // Copy headers from original request
-    foreach (var header in Context.Request.Headers) {
-      newRequest.Headers.TryAddWithoutValidation(header.Key, header.Value);
-    }
+    // Modify the existing request URI instead of creating a new request
+    request.RequestUri = newUri;
 
-    // Copy content if present
-    if (Context.Request.Content != null) {
-      newRequest.Content = Context.Request.Content;
-    }
-
-    return newRequest;
+    return request;
   }
 
   /// <summary>
@@ -162,102 +168,83 @@ public class Script : ScriptBase {
   /// An <see cref="HttpResponseMessage"/> representing the HTTP response message with formatted task names.
   /// </returns>
   private async Task<HttpResponseMessage> HandleListTasks() {
-    try {
-      var response = await Context.SendAsync(Context.Request, CancellationToken).ConfigureAwait(false);
-      return await FormatApiResponse(response, FormatTaskTitles).ConfigureAwait(false);
-    }
-    catch (Exception ex) {
-      // Fallback to passthrough on any error
-      return await HandlePassthrough().ConfigureAwait(false);
+    return await HandleFormattedResponse(() => Context.Request, items => FormatItems(items, FormatTaskTitle)).ConfigureAwait(false);
+  }
+
+  /// <summary>
+  /// Generic method to format items in a JArray by applying a formatting function to each valid item.
+  /// </summary>
+  /// <param name="items">The JArray of items to format</param>
+  /// <param name="formatter">Function to apply formatting to each JObject item</param>
+  private void FormatItems(JArray items, Action<JObject> formatter) {
+    if (items == null || items.Count == 0) return;
+    
+    for (int i = 0; i < items.Count; i++) {
+      var item = items[i] as JObject;
+      if (item == null) continue;
+      formatter(item);
     }
   }
 
   /// <summary>
   /// Formats actor titles by combining title, username, and name for better user experience.
   /// </summary>
-  /// <param name="items">The JArray of actor items to format</param>
-  private void FormatActorTitles(JArray items) {
-    if (items == null || items.Count == 0) return;
-    
-    for (int i = 0; i < items.Count; i++) {
-      var item = items[i] as JObject;
-      if (item == null) continue;
+  /// <param name="item">The JObject representing an actor item</param>
+  private void FormatActorTitle(JObject item) {
+    var title = item["title"]?.Value<string>();
+    var name = item["name"]?.Value<string>();
+    var username = item["username"]?.Value<string>();
 
-      var title = item["title"]?.Value<string>();
-      var name = item["name"]?.Value<string>();
-      var username = item["username"]?.Value<string>();
-
-      // Only format if we have all required fields
-      if (!string.IsNullOrEmpty(title) && 
-          !string.IsNullOrEmpty(name) && 
-          !string.IsNullOrEmpty(username)) {
-        // Update the title field with formatted string
-        item["title"] = $"{title} ({username}/{name})";
-      }
+    // Only format if we have all required fields
+    if (!string.IsNullOrEmpty(title) && 
+        !string.IsNullOrEmpty(name) && 
+        !string.IsNullOrEmpty(username)) {
+      // Update the title field with formatted string
+      item["title"] = $"{title} ({username}/{name})";
     }
   }
 
   /// <summary>
   /// Formats task names by combining name and actName for better user experience.
   /// </summary>
-  /// <param name="items">The JArray of task items to format</param>
-  private void FormatTaskTitles(JArray items) {
-    if (items == null || items.Count == 0) return;
-    
-    for (int i = 0; i < items.Count; i++) {
-      var item = items[i] as JObject;
-      if (item == null) continue;
+  /// <param name="item">The JObject representing a task item</param>
+  private void FormatTaskTitle(JObject item) {
+    var name = item["name"]?.Value<string>();
+    var actName = item["actName"]?.Value<string>();
 
-      var name = item["name"]?.Value<string>();
-      var actName = item["actName"]?.Value<string>();
-
-      // Only format if we have all required fields
-      if (!string.IsNullOrEmpty(name) && !string.IsNullOrEmpty(actName)) {
-        // Update the name field with formatted string: "name / (actName)"
-        item["name"] = $"{name} / ({actName})";
-      }
+    // Only format if we have all required fields
+    if (!string.IsNullOrEmpty(name) && !string.IsNullOrEmpty(actName)) {
+      // Update the name field with formatted string: "name / (actName)"
+      item["name"] = $"{name} / ({actName})";
     }
   }
 
   /// <summary>
-  /// Builds a new HTTP request for the dataset items API by modifying the path from schema helper to items endpoint.
-  /// Follows the same pattern as BuildActorRequest for consistency.
+  /// Generic method to modify the request path by replacing a pattern with a new value.
+  /// Includes null safety checks for robustness.
   /// </summary>
-  /// <returns>An <see cref="HttpRequestMessage"/> configured for the dataset items API endpoint.</returns>
-  private HttpRequestMessage BuildDatasetItemsRequest() {
-    var originalUri = Context.Request.RequestUri;
+  /// <param name="oldPattern">The pattern to replace in the path</param>
+  /// <param name="newPattern">The replacement pattern</param>
+  private void ModifyRequestPath(string oldPattern, string newPattern) {
+    var request = Context.Request;
+    if (request?.RequestUri == null) return;
+    
+    var originalUri = request.RequestUri;
     var uriBuilder = new UriBuilder(originalUri);
     
-    // Correct path to get items
-    uriBuilder.Path = uriBuilder.Path.Replace("/itemsSchemaHelper", "/items");
-
-    // Create a new request instead of modifying the original
-    var newRequest = new HttpRequestMessage(Context.Request.Method, uriBuilder.Uri);
-    
-    // Copy headers from original request
-    foreach (var header in Context.Request.Headers) {
-      newRequest.Headers.TryAddWithoutValidation(header.Key, header.Value);
-    }
-
-    // Copy content if present
-    if (Context.Request.Content != null) {
-      newRequest.Content = Context.Request.Content;
-    }
-
-    return newRequest;
+    uriBuilder.Path = uriBuilder.Path.Replace(oldPattern, newPattern);
+    request.RequestUri = uriBuilder.Uri;
   }
 
   /// <summary>
-  /// Handles the GetDatasetSchema operation by fetching sample dataset items and inferring an OpenAPI schema.
-  /// Follows the established error handling pattern used by other handler methods.
+  /// Generic method to handle schema generation operations by modifying the request, fetching data, and inferring an OpenAPI schema.
   /// </summary>
-  /// <returns>
-  /// An <see cref="HttpResponseMessage"/> containing the inferred OpenAPI schema as JSON.
-  /// </returns>
-  private async Task<HttpResponseMessage> HandleGetDatasetSchema() {
+  /// <param name="requestModifier">Action to modify the request before sending</param>
+  /// <returns>An <see cref="HttpResponseMessage"/> containing the inferred OpenAPI schema as JSON.</returns>
+  private async Task<HttpResponseMessage> HandleSchemaGeneration(Action requestModifier) {
     try {
-      var modifiedRequest = BuildDatasetItemsRequest();
-      var upstreamResponse = await Context.SendAsync(modifiedRequest, CancellationToken).ConfigureAwait(false);
+      requestModifier();
+      var upstreamResponse = await HandlePassthrough().ConfigureAwait(false);
       
       if (!upstreamResponse.IsSuccessStatusCode) {
         return upstreamResponse; // Return error responses as-is
@@ -274,6 +261,22 @@ public class Script : ScriptBase {
       // Fallback to passthrough on any error
       return await HandlePassthrough().ConfigureAwait(false);
     }
+  }
+
+  /// <summary>
+  /// Handles the GetDatasetSchema operation by fetching sample dataset items and inferring an OpenAPI schema.
+  /// </summary>
+  /// <returns>An <see cref="HttpResponseMessage"/> containing the inferred OpenAPI schema as JSON.</returns>
+  private async Task<HttpResponseMessage> HandleGetDatasetSchema() {
+    return await HandleSchemaGeneration(() => ModifyRequestPath("/itemsSchemaHelper", "/items")).ConfigureAwait(false);
+  }
+
+  /// <summary>
+  /// Handles the GetKeyValueStoreRecordSchema operation by fetching a key-value store record and inferring an OpenAPI schema.
+  /// </summary>
+  /// <returns>An <see cref="HttpResponseMessage"/> containing the inferred OpenAPI schema as JSON.</returns>
+  private async Task<HttpResponseMessage> HandleGetKeyValueStoreRecordSchema() {
+    return await HandleSchemaGeneration(() => ModifyRequestPath("/schemaHelper", "")).ConfigureAwait(false);
   }
 
   /// <summary>
@@ -312,17 +315,21 @@ public class Script : ScriptBase {
           }
         };
       case JTokenType.Integer:
-        return WrapPrimitive("integer", "int64");
+        return new JObject { ["type"] = "integer", ["format"] = "int64" };
       case JTokenType.Float:
-        return WrapPrimitive("number", "double");
+        return new JObject { ["type"] = "number", ["format"] = "double" };
       case JTokenType.Boolean:
-        return WrapPrimitive("boolean", null);
+        return new JObject { ["type"] = "boolean" };
       case JTokenType.Date:
-        return WrapPrimitive("string", "date-time");
+        return new JObject { ["type"] = "string", ["format"] = "date-time" };
       case JTokenType.String:
-        return WrapPrimitive("string", null);
+        // Check if this is our binary data marker
+        if (sample.ToString() == "__BINARY_DATA__") {
+          return new JObject { ["type"] = "string", ["format"] = "binary" };
+        }
+        return new JObject { ["type"] = "string" };
       default:
-        return WrapPrimitive("string", null);
+        return new JObject { ["type"] = "string" };
     }
   }
  
@@ -355,6 +362,13 @@ public class Script : ScriptBase {
   /// A <see cref="JToken"/> representing the sample data, or null if parsing fails.
   /// </returns>
   private async Task<JToken> ExtractSampleFromResponse(HttpResponseMessage response) {
+    // Check if this is binary content based on Content-Type
+    var contentType = response.Content.Headers.ContentType?.MediaType;
+    if (contentType != null && !contentType.StartsWith("text/") && !contentType.Contains("json") && !contentType.Contains("xml")) {
+      // For binary content, return a special marker to indicate binary data
+      return JToken.FromObject("__BINARY_DATA__");
+    }
+
     var contentString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 
     // Try to parse JSON
@@ -362,31 +376,12 @@ public class Script : ScriptBase {
     try {
       parsed = string.IsNullOrWhiteSpace(contentString) ? null : JToken.Parse(contentString);
     } catch (Exception) {
-      parsed = null;
+      // If it's not JSON, treat it as a string value
+      parsed = string.IsNullOrWhiteSpace(contentString) ? null : JToken.FromObject(contentString);
     }
 
     // Extract first item, if it's an array, otherwise use as-is
     return parsed is JArray arr && arr.Count > 0 ? arr[0] : parsed;
   }
 
-  /// <summary>
-  /// Wraps primitive types in an object schema with a "value" property.
-  /// This ensures all schemas return objects, which is required for Power Automate compatibility.
-  /// </summary>
-  /// <param name="type">The OpenAPI type (e.g., "string", "integer", "boolean").</param>
-  /// <param name="format">The optional OpenAPI format (e.g., "date-time", "int64").</param>
-  /// <returns>
-  /// A <see cref="JObject"/> representing an object schema containing the primitive type as a "value" property.
-  /// </returns>
-  private JObject WrapPrimitive(string type, string format) {
-    var inner = new JObject { ["type"] = type };
-    if (!string.IsNullOrEmpty(format)) {
-      inner["format"] = format;
-    }
-    return new JObject
-    {
-      ["type"] = "object",
-      ["properties"] = new JObject { ["value"] = inner }
-    };
-  }
 }

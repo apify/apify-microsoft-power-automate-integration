@@ -844,6 +844,48 @@
         }
       }
     },
+    "/key-value-stores/{storeId}/records/{recordKey}/schemaHelper": {
+      "get": {
+        "summary": "Get Key-Value Store Record Schema (for dynamic schema)",
+        "description": "Fetches a record from a key-value store to infer the schema.",
+        "operationId": "GetKeyValueStoreRecordSchema",
+        "x-ms-visibility": "internal",
+        "tags": [
+          "KeyValueStores"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/IntegrationPlatformHeader"
+          },
+          {
+            "name": "storeId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Store ID"
+          },
+          {
+            "name": "recordKey",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Record Key"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "description": "An OpenAPI schema object representing a key-value store record. The schema may include a wrapper if the sample isn't an object.",
+              "additionalProperties": true
+            }
+          },
+          "default": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
+    },
     "/key-value-stores/{storeId}/records/{recordKey}": {
       "get": {
         "summary": "Get Key-Value Store Record",
@@ -889,24 +931,24 @@
                 "storeId": { "parameter": "storeId" }
               }
             }
-          },
-          {
-            "name": "format",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "x-ms-summary": "Format Hint",
-            "description": "Optional hint for expected response format.",
-            "default": "auto",
-            "enum": ["auto", "json", "text", "binary"]
           }
         ],
         "responses": {
           "200": {
             "description": "OK - The record content.",
             "schema": {
-              "type": "string",
-              "format": "binary"
+              "title": "Key-Value Store Record",
+              "x-ms-dynamic-schema": {
+                "operationId": "GetKeyValueStoreRecordSchema",
+                "parameters": {
+                  "storeId": {
+                    "parameter": "storeId"
+                  },
+                  "recordKey": {
+                    "parameter": "recordKey"
+                  }
+                }
+              }
             },
             "headers": {
               "Content-Type": {
