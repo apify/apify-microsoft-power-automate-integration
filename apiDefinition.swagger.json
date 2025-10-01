@@ -746,6 +746,91 @@
         }
       }
     },
+    "/acts/aYG0l9s7dbB7j3gbS/runs": {
+      "post": {
+        "summary": "Scrape Single URL",
+        "description": "Scrapes a single URL using the Web Scraper actor. This action starts an asynchronous scrape and returns the run details immediately. Use the Actor Run Finished trigger to process results once the scrape is complete.",
+        "operationId": "ScrapeSingleUrl",
+        "x-ms-summary": "Scrape Single URL",
+        "x-ms-visibility": "important",
+        "tags": [
+          "Scraping"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/IntegrationPlatformHeader"
+          },
+          {
+            "name": "url",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "pattern": "^https?://[^\\s]+$",
+            "description": "The full URL of the single page to be scraped. Must be a valid URL format.",
+            "x-ms-summary": "URL to scrape"
+          },
+          {
+            "name": "crawler_type",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "description": "Select the crawling engine to use for scraping the page.",
+            "x-ms-summary": "Crawler type",
+            "default": "playwright:adaptive",
+            "enum": [
+              "playwright:adaptive",
+              "playwright:firefox",
+              "cheerio",
+              "jsdom",
+              "playwright:chrome"
+            ],
+            "x-ms-enum-values": [
+              {
+                "value": "playwright:adaptive",
+                "displayName": "Adaptive"
+              },
+              {
+                "value": "playwright:firefox",
+                "displayName": "Firefox (Headless Browser)"
+              },
+              {
+                "value": "cheerio",
+                "displayName": "Cheerio (Raw HTTP)"
+              },
+              {
+                "value": "jsdom",
+                "displayName": "JSDOM (Raw HTTP with JS)"
+              },
+              {
+                "value": "playwright:chrome",
+                "displayName": "Chrome (Headless Browser) [DEPRECATED]"
+              }
+            ]
+          },
+          {
+            "name": "timeout",
+            "in": "query",
+            "required": true,
+            "x-ms-visibility": "internal",
+            "default": 0,
+            "type": "integer",
+            "description": "Optional timeout for the run, in seconds. By default, the run uses a timeout specified in the default run configuration for the Actor.",
+            "x-ms-summary": "Timeout (seconds)"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Scrape started successfully",
+            "schema": {
+              "$ref": "#/definitions/ActorRunResponse"
+            }
+          },
+          "default": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
+    },
     "/key-value-stores": {
       "get": {
         "summary": "List Key-Value Stores (for dropdown)",
