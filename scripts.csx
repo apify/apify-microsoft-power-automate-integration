@@ -22,6 +22,8 @@ public class Script : ScriptBase {
           return await HandleListTasks().ConfigureAwait(false);
         case "GetDatasetSchema":
           return await HandleGetDatasetSchema().ConfigureAwait(false);
+        case "ScrapeSingleUrl":
+          return await HandleScrapeSingleUrl().ConfigureAwait(false);
         case "ListDatasets":
         case "GetDatasetItems":
         case "GetUserInfo":
@@ -37,16 +39,80 @@ public class Script : ScriptBase {
       }
    }
 
-   /// <summary>
-   /// Handles passthrough operations by forwarding the original request to the Apify API.
-   /// Used for operations that don't require any special processing or transformation.
-   /// </summary>
-   /// <returns>
-   /// An <see cref="HttpResponseMessage"/> representing the HTTP response message including the status code and data from the forwarded request.
-   /// </returns>
-   private async Task<HttpResponseMessage> HandlePassthrough() {
-      return await Context.SendAsync(Context.Request, CancellationToken).ConfigureAwait(false);
-   }
+  /// <summary>
+  /// Handles passthrough operations by forwarding the original request to the Apify API.
+  /// Used for operations that don't require any special processing or transformation.
+  /// </summary>
+  /// <returns>
+  /// An <see cref="HttpResponseMessage"/> representing the HTTP response message including the status code and data from the forwarded request.
+  /// </returns>
+  private async Task<HttpResponseMessage> HandlePassthrough() {
+    return await Context.SendAsync(Context.Request, CancellationToken).ConfigureAwait(false);
+  }
+
+  /// <summary>
+  /// Handles the ScrapeSingleUrl operation by configuring and executing a web scraping request
+  /// using the Apify Web Scraper actor for a single URL.
+  /// </summary>
+  /// <remarks>
+  /// This method extracts URL and crawler type parameters from the query string, constructs
+  /// a JSON input body with predefined scraping settings optimized for single URL scraping,
+  /// and forwards the request to the Apify API. The configuration includes:
+  /// - Maximum crawl depth of 0 (single page only)
+  /// - Maximum crawl pages of 1
+  /// - Maximum results of 1
+  /// - Apify proxy configuration enabled
+  /// - Cookie warnings removal enabled
+  /// - HTML and Markdown content saving enabled
+  /// 
+  /// Required query parameters:
+  /// - url: The URL to scrape
+  /// - crawler_type: The type of crawler to use (optional)
+  /// </remarks>
+  /// <returns>
+  /// An <see cref="HttpResponseMessage"/> representing the HTTP response from the Apify Web Scraper actor,
+  /// containing the scraped data and metadata for the specified URL.
+  /// </returns>
+  private async Task<HttpResponseMessage> HandleScrapeSingleUrl() {
+    try {
+      var request = Context.Request;
+      var queryParams = System.Web.HttpUtility.ParseQueryString(request.RequestUri.Query);
+      
+      var url = queryParams["url"];
+      var crawlerType = queryParams["crawler_type"];
+
+      // Validate required parameters
+      if (string.IsNullOrEmpty(url) || string.IsNullOrEmpty(crawlerType)) {
+        var errorResponse = new HttpResponseMessage(HttpStatusCode.BadRequest);
+        errorResponse.Content = CreateJsonContent("Missing required parameter: url or crawler_type");
+        return errorResponse;
+      }
+
+      // Construct the JSON input body for the Web Scraper actor
+      var inputBody = new {
+        startUrls = new[] { new { url = url } },
+        crawlerType = crawlerType,
+        maxCrawlDepth = 0,
+        maxCrawlPages = 1,
+        maxResults = 1,
+        proxyConfiguration = new { useApifyProxy = true },
+        removeCookieWarnings = true,
+        saveHtml = true,
+        saveMarkdown = true
+      };
+
+      // Set the JSON body on the original request
+      var jsonBody = JsonConvert.SerializeObject(inputBody);
+      request.Content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
+
+      // Use HandlePassthrough to send the modified request
+      return await HandlePassthrough().ConfigureAwait(false);
+    }
+    catch (Exception ex) {
+      // Fallback to passthrough on any error
+      return await HandlePassthrough().ConfigureAwait(false);
+    }
+  }
 
   /// <summary>
   /// Handles the ListActorsDropdown operation by routing to the appropriate API endpoint and formatting the response.

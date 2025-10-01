@@ -221,6 +221,22 @@ How it works:
 Tips:
 - For large datasets, paginate using `limit` and `offset` to process items in batches.
 
+### Scrape Single URL Action
+
+Use the "Scrape Single URL" action to scrape a single webpage using Apify's Web Scraper actor.
+
+- Authentication: Use Apify API Key or OAuth 2.0 (scopes: `profile`, `full_api_access`).
+- Headers: All requests include `x-apify-integration-platform: power-automate`.
+- URL (`url`): The full URL of the single page to be scraped. Must be a valid URL format.
+- Crawler Type (`crawler_type`): Select the crawling engine to use:
+  - `playwright:adaptive` (Adaptive - recommended)
+  - `playwright:firefox` (Firefox Headless Browser)
+  - `cheerio` (Cheerio - Raw HTTP, fastest)
+  - `jsdom` (JSDOM - Raw HTTP with JS support)
+  - `playwright:chrome` (Chrome Headless Browser - deprecated)
+
+The connector invokes `POST /v2/acts/aYG0l9s7dbB7j3gbS/runs` (Web Scraper actor) per Apify docs. This action starts an asynchronous scrape and returns the run details immediately. Use the Actor Run Finished trigger to process results once the scrape is complete.
+
 ### Run Actor Action
 
 Use the "Run Actor" action to start an Apify Actor run.
