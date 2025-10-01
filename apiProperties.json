@@ -58,6 +58,9 @@
           "x-ms-apimTemplate-operationName": [
             "ScrapeSingleUrl",
             "GetUserInfo",
+            "ListDatasets",
+            "GetDatasetSchema",
+            "GetDatasetItems",
             "ListTasks",
             "RunTask",
             "RunActor",

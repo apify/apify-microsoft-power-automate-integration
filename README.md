@@ -199,7 +199,27 @@ Once you have your connector set up, follow this development cycle:
    - Update the connector again using the `pac connector update` command
    - Repeat the testing process
 
-## Actions
+## Actions 
+
+### Get Dataset Items Action
+
+Use the "Get Dataset Items" action to retrieve records from one of your Apify Datasets.
+
+- Authentication: Use Apify API Key or OAuth 2.0 (scopes: `profile`, `full_api_access`).
+- Headers: All requests include `x-apify-integration-platform: power-automate`.
+- Dataset (`datasetId`): Select a dataset from a dynamically populated dropdown of your datasets.
+- Optional query params:
+  - `limit`: number of items to return.
+  - `offset`: number of items to skip (for pagination).
+- Output: An array of dataset items. The item shape is dynamic and depends on the selected dataset.
+
+How it works:
+- The dataset dropdown is populated via `GET /v2/datasets` so you can pick by name.
+- The connector calls `GET /v2/datasets/{datasetId}/items` with the provided `limit` and `offset` to fetch the data.
+- To provide typed fields in Power Automate, it calls `GET /v2/datasets/{datasetId}/itemsSchemaHelper` to infer the item schema from a sample.
+
+Tips:
+- For large datasets, paginate using `limit` and `offset` to process items in batches.
 
 ### Scrape Single URL Action
 
