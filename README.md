@@ -199,6 +199,93 @@ Once you have your connector set up, follow this development cycle:
    - Update the connector again using the `pac connector update` command
    - Repeat the testing process
 
+## Actions 
+
+### Get Dataset Items Action
+
+Use the "Get Dataset Items" action to retrieve records from one of your Apify Datasets.
+
+- Authentication: Use Apify API Key or OAuth 2.0 (scopes: `profile`, `full_api_access`).
+- Headers: All requests include `x-apify-integration-platform: power-automate`.
+- Dataset (`datasetId`): Select a dataset from a dynamically populated dropdown of your datasets.
+- Optional query params:
+  - `limit`: number of items to return.
+  - `offset`: number of items to skip (for pagination).
+- Output: An array of dataset items. The item shape is dynamic and depends on the selected dataset.
+
+How it works:
+- The dataset dropdown is populated via `GET /v2/datasets` so you can pick by name.
+- The connector calls `GET /v2/datasets/{datasetId}/items` with the provided `limit` and `offset` to fetch the data.
+- To provide typed fields in Power Automate, it calls `GET /v2/datasets/{datasetId}/itemsSchemaHelper` to infer the item schema from a sample.
+
+Tips:
+- For large datasets, paginate using `limit` and `offset` to process items in batches.
+
+### Get Key-Value Store Record Action
+
+Retrieve a record's content from a selected Key-Value Store.
+
+- **Authentication**: API Key or OAuth 2.0 (scopes: `profile`, `full_api_access`).
+- **Headers**: All requests include `x-apify-integration-platform: power-automate`.
+- **Inputs**:
+  - `Store` (`storeId`, required): Dynamic dropdown listing your stores.
+  - `Record Key` (`recordKey`, required): Dependent dropdown listing keys for the selected store.
+  - `Format Hint` (`format`, optional): `auto` (default), `json`, `text`, `binary`.
+- **Output**:
+  - Body: Raw record content (handled as binary; text and JSON are shown accordingly by Power Automate).
+  - Header: `Content-Type` is exposed as an output value.
+
+This action calls `GET /v2/key-value-stores/{storeId}/records/{recordKey}` via Apify API proxy.
+
+### Scrape Single URL Action
+
+Use the "Scrape Single URL" action to scrape a single webpage using Apify's Web Scraper actor.
+
+- Authentication: Use Apify API Key or OAuth 2.0 (scopes: `profile`, `full_api_access`).
+- Headers: All requests include `x-apify-integration-platform: power-automate`.
+- URL (`url`): The full URL of the single page to be scraped. Must be a valid URL format.
+- Crawler Type (`crawler_type`): Select the crawling engine to use:
+  - `playwright:adaptive` (Adaptive - recommended)
+  - `playwright:firefox` (Firefox Headless Browser)
+  - `cheerio` (Cheerio - Raw HTTP, fastest)
+  - `jsdom` (JSDOM - Raw HTTP with JS support)
+  - `playwright:chrome` (Chrome Headless Browser - deprecated)
+
+The connector invokes `POST /v2/acts/aYG0l9s7dbB7j3gbS/runs` (Web Scraper actor) per Apify docs. This action starts an asynchronous scrape and returns the run details immediately. Use the Actor Run Finished trigger to process results once the scrape is complete.
+
+### Run Actor Action
+
+Use the "Run Actor" action to start an Apify Actor run.
+
+- Authentication: Use Apify API Key or OAuth 2.0 (scopes: `profile`, `full_api_access`).
+- Headers: All requests include `x-apify-integration-platform: microsoft-power-automate`.
+- Actor Source (`actorScope`): Choose "My Actors" or "From Store".
+  - If "My Actors": pick from `Actor` populated by your account Actors.
+  - If "From Store": pick from `Actor` populated by Apify Store (limit 1000).
+- Input Body (`inputBody`): Provide JSON for the Actor input.
+- Optional query params:
+  - `build`: specific build tag or id
+  - `timeout` (seconds)
+  - `memory` (MB): 512, 1024, 2048, 4096, 8192, 16384
+  - `waitForFinish` (seconds, max 60): set 0 to no limit
+
+The connector invokes `POST /v2/acts/{actorId}/runs` per Apify docs (see: https://docs.apify.com/api/v2/act-runs-post). The `actorId` path segment is chosen automatically based on your `actorScope` selection.
+
+### Run Task Action
+
+Use the "Run Task" action to start an Apify Task run.
+
+- Authentication: Use Apify API Key or OAuth 2.0 (scopes: `profile`, `full_api_access`).
+- Headers: All requests include `x-apify-integration-platform: microsoft-power-automate`.
+- Task (`taskId`): Select the task from a dynamic dropdown of your available tasks.
+- Input Body (`inputOverride`): Provide a raw JSON object to override the task's default input.
+- Optional query params:
+  - `timeout` (seconds)
+  - `memory` (MB): 512, 1024, 2048, 4096, 8192, 16384
+  - `waitForFinish` (seconds, max 60). If empty or 0, the call is asynchronous (does not wait).
+
+The connector invokes `POST /v2/actor-tasks/{taskId}/runs` per Apify docs (see: https://docs.apify.com/api/v2/actor-task-runs-post). The `taskId` path segment is selected directly from the dropdown.
+
 ## Testing
 
 1. Create test flows in Power Automate to validate each action and trigger
