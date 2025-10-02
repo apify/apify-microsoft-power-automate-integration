@@ -1292,109 +1292,135 @@
       "properties": {
         "id": {
           "type": "string",
-          "x-ms-summary": "Actor Run ID"
+          "x-ms-summary": "Actor Run ID",
+          "description": "Unique identifier of the Actor run."
         },
         "actId": {
           "type": "string",
-          "x-ms-summary": "Actor ID"
+          "x-ms-summary": "Actor ID",
+          "description": "Unique identifier of the Actor that was executed."
         },
         "userId": {
           "type": "string",
-          "x-ms-summary": "User ID"
+          "x-ms-summary": "User ID",
+          "description": "Unique identifier of the user who owns the Actor run."
         },
         "actorTaskId": {
           "type": "string",
-          "x-ms-summary": "Actor Task ID"
+          "x-ms-summary": "Actor Task ID",
+          "description": "Unique identifier of the Actor task (if the run was started from a task)."
         },
         "startedAt": {
           "type": "string",
           "format": "date-time",
-          "x-ms-summary": "Started At"
+          "x-ms-summary": "Started At",
+          "description": "Timestamp when the Actor run started."
         },
         "finishedAt": {
           "type": "string",
           "format": "date-time",
-          "x-ms-summary": "Finished At"
+          "x-ms-summary": "Finished At",
+          "description": "Timestamp when the Actor run finished."
         },
         "status": {
           "type": "string",
-          "x-ms-summary": "Status"
+          "x-ms-summary": "Status",
+          "description": "Status of the Actor run (e.g., SUCCEEDED, FAILED, RUNNING, ABORTED)."
         },
         "statusMessage": {
           "type": "string",
-          "x-ms-summary": "Status Message"
+          "x-ms-summary": "Status Message",
+          "description": "Detailed status message from the Actor run, including processing summary and results."
         },
         "isStatusMessageTerminal": {
           "type": "boolean",
-          "x-ms-summary": "Is Status Message Terminal"
+          "x-ms-summary": "Is Status Message Terminal",
+          "description": "Whether the status message is terminal (final) or may change during the run."
         },
         "meta": {
           "type": "object",
-          "x-ms-summary": "Metadata"
+          "x-ms-summary": "Metadata",
+          "description": "Additional metadata about the Actor run, including origin and user agent information."
         },
         "pricingInfo": {
           "type": "object",
-          "x-ms-summary": "Pricing Info"
+          "x-ms-summary": "Pricing Info",
+          "description": "Detailed pricing information including pricing model, events, and cost breakdown."
         },
         "stats": {
           "type": "object",
-          "x-ms-summary": "Stats"
+          "x-ms-summary": "Stats",
+          "description": "Performance statistics including runtime, memory usage, CPU usage, and network traffic."
         },
         "chargedEventCount": {
           "type": "object",
-          "x-ms-summary": "Charged Event Count"
+          "x-ms-summary": "Charged Event Count",
+          "description": "Count of billable events that occurred during the Actor run."
         },
         "options": {
           "type": "object",
-          "x-ms-summary": "Options"
+          "x-ms-summary": "Options",
+          "description": "Configuration options used for the Actor run (memory, timeout, build version, etc.)."
         },
         "buildId": {
           "type": "string",
-          "x-ms-summary": "Build ID"
+          "x-ms-summary": "Build ID",
+          "description": "Unique identifier of the Actor build used for this run."
         },
         "exitCode": {
           "type": "number",
-          "x-ms-summary": "Exit Code"
+          "x-ms-summary": "Exit Code",
+          "description": "Exit code returned by the Actor process (0 indicates success)."
         },
         "defaultKeyValueStoreId": {
           "type": "string",
-          "x-ms-summary": "Default KV Store ID"
+          "x-ms-summary": "Default KV Store ID",
+          "description": "Unique identifier of the default key-value store associated with this run."
         },
         "defaultDatasetId": {
           "type": "string",
-          "x-ms-summary": "Default Dataset ID"
+          "x-ms-summary": "Default Dataset ID",
+          "description": "Unique identifier of the default dataset where the Actor stored its results."
         },
         "defaultRequestQueueId": {
           "type": "string",
-          "x-ms-summary": "Default Request Queue ID"
+          "x-ms-summary": "Default Request Queue ID",
+          "description": "Unique identifier of the default request queue used by the Actor."
         },
         "buildNumber": {
           "type": "string",
-          "x-ms-summary": "Build Number"
+          "x-ms-summary": "Build Number",
+          "description": "Build number of the Actor version used for this run."
         },
         "containerUrl": {
           "type": "string",
-          "x-ms-summary": "Container URL"
+          "x-ms-summary": "Container URL",
+          "description": "URL of the container where the Actor run was executed."
         },
         "isContainerServerReady": {
           "type": "boolean",
-          "x-ms-summary": "Is Container Server Ready"
+          "x-ms-summary": "Is Container Server Ready",
+          "description": "Whether the container server is ready and accessible."
         },
         "gitBranchName": {
           "type": "string",
-          "x-ms-summary": "Git Branch Name"
+          "x-ms-summary": "Git Branch Name",
+          "description": "Name of the Git branch used for this Actor run (if applicable)."
         },
         "usage": {
           "type": "object",
-          "x-ms-summary": "Usage"
+          "x-ms-summary": "Usage",
+          "description": "Detailed usage information including compute units and resource consumption."
         },
         "usageTotalUsd": {
           "type": "number",
-          "x-ms-summary": "Usage Total USD"
+          "x-ms-summary": "Usage Total USD",
+          "description": "Total cost of the Actor run in USD."
         },
         "usageUsd": {
           "type": "number",
-          "x-ms-summary": "Usage USD"
+          "x-ms-summary": "Usage USD",
+          "description": "Usage cost in USD for this specific run."
         }
       }
     },
@@ -1412,6 +1438,10 @@
             "actorRunId": { "type": "string", "description": "ID of the specific Actor run that triggered the event." }
           },
           "additionalProperties": true
+        },
+        "resource": {
+          "description": "Detailed information about the Actor run resource.",
+          "$ref": "#/definitions/ActorRunResponse"
         }
       },
       "additionalProperties": true
