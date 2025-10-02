@@ -221,6 +221,22 @@ How it works:
 Tips:
 - For large datasets, paginate using `limit` and `offset` to process items in batches.
 
+### Get Key-Value Store Record Action
+
+Retrieve a record's content from a selected Key-Value Store.
+
+- **Authentication**: API Key or OAuth 2.0 (scopes: `profile`, `full_api_access`).
+- **Headers**: All requests include `x-apify-integration-platform: power-automate`.
+- **Inputs**:
+  - `Store` (`storeId`, required): Dynamic dropdown listing your stores.
+  - `Record Key` (`recordKey`, required): Dependent dropdown listing keys for the selected store.
+  - `Format Hint` (`format`, optional): `auto` (default), `json`, `text`, `binary`.
+- **Output**:
+  - Body: Raw record content (handled as binary; text and JSON are shown accordingly by Power Automate).
+  - Header: `Content-Type` is exposed as an output value.
+
+This action calls `GET /v2/key-value-stores/{storeId}/records/{recordKey}` via Apify API proxy.
+
 ### Scrape Single URL Action
 
 Use the "Scrape Single URL" action to scrape a single webpage using Apify's Web Scraper actor.

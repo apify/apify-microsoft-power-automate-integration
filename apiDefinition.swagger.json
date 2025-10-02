@@ -830,6 +830,223 @@
           }
         }
       }
+    },
+    "/key-value-stores": {
+      "get": {
+        "summary": "List Key-Value Stores (for dropdown)",
+        "description": "Fetches a list of the user's key-value stores.",
+        "operationId": "ListKeyValueStores",
+        "x-ms-visibility": "internal",
+        "tags": [
+          "KeyValueStores"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/IntegrationPlatformHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": { "type": "string" },
+                          "name": { "type": "string" }
+                        }
+                      }
+                    }
+                  },
+                  "required": ["items"]
+                }
+              },
+              "additionalProperties": true
+            }
+          },
+          "default": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/key-value-stores/{storeId}/keys": {
+      "get": {
+        "summary": "List Record Keys (for dropdown)",
+        "description": "Fetches a list of keys for a specific key-value store.",
+        "operationId": "ListRecordKeys",
+        "x-ms-visibility": "internal",
+        "tags": [
+          "KeyValueStores"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/IntegrationPlatformHeader"
+          },
+          {
+            "name": "storeId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The ID of the key-value store."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "key": { "type": "string" }
+                        }
+                      }
+                    }
+                  },
+                  "required": ["items"]
+                }
+              },
+              "additionalProperties": true
+            }
+          },
+          "default": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/key-value-stores/{storeId}/records/{recordKey}/schemaHelper": {
+      "get": {
+        "summary": "Get Key-Value Store Record Schema (for dynamic schema)",
+        "description": "Fetches a record from a key-value store to infer the schema.",
+        "operationId": "GetKeyValueStoreRecordSchema",
+        "x-ms-visibility": "internal",
+        "tags": [
+          "KeyValueStores"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/IntegrationPlatformHeader"
+          },
+          {
+            "name": "storeId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Store ID"
+          },
+          {
+            "name": "recordKey",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Record Key"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "description": "An OpenAPI schema object representing a key-value store record. The schema may include a wrapper if the sample isn't an object.",
+              "additionalProperties": true
+            }
+          },
+          "default": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/key-value-stores/{storeId}/records/{recordKey}": {
+      "get": {
+        "summary": "Get Key-Value Store Record",
+        "description": "Gets a value stored in the key-value store under a specific key.",
+        "operationId": "GetKeyValueStoreRecord",
+        "x-ms-summary": "Get Key-Value Store Record",
+        "x-ms-visibility": "important",
+        "tags": [
+          "KeyValueStores"
+        ],
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/IntegrationPlatformHeader"
+          },
+          {
+            "name": "storeId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Store",
+            "x-ms-dynamic-values": {
+              "operationId": "ListKeyValueStores",
+              "value-collection": "data/items",
+              "value-path": "id",
+              "value-title": "name"
+            }
+          },
+          {
+            "name": "recordKey",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Record Key",
+            "x-ms-dynamic-values": {
+              "operationId": "ListRecordKeys",
+              "value-collection": "data/items",
+              "value-path": "key",
+              "value-title": "key",
+              "parameters": {
+                "storeId": { "parameter": "storeId" }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK - The record content.",
+            "schema": {
+              "title": "Key-Value Store Record",
+              "x-ms-dynamic-schema": {
+                "operationId": "GetKeyValueStoreRecordSchema",
+                "parameters": {
+                  "storeId": {
+                    "parameter": "storeId"
+                  },
+                  "recordKey": {
+                    "parameter": "recordKey"
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Content-Type": {
+                "type": "string",
+                "description": "The MIME type of the record's content."
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
     }
   },
   "definitions": {

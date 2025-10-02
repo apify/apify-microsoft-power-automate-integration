@@ -49,29 +49,6 @@
     "policyTemplateInstances": [
       {
         "templateId": "setheader",
-        "title": "Set Apify API Token to Header",
-        "parameters": {
-          "x-ms-apimTemplateParameter.name": "Authorization",
-          "x-ms-apimTemplateParameter.value": "Bearer @connectionParameters('api_key')",
-          "x-ms-apimTemplateParameter.existsAction": "skip",
-          "x-ms-apimTemplate-policySection": "Request",
-          "x-ms-apimTemplate-operationName": [
-            "ScrapeSingleUrl",
-            "GetUserInfo",
-            "ListDatasets",
-            "GetDatasetSchema",
-            "GetDatasetItems",
-            "ListTasks",
-            "RunTask",
-            "RunActor",
-            "ListMyActors",
-            "ListStoreActors",
-            "ListActorsDropdown"
-          ]
-        }
-      },
-      {
-        "templateId": "setheader",
         "title": "Set Apify Integration Platform Header",
         "parameters": {
           "x-ms-apimTemplateParameter.name": "x-apify-integration-platform",
