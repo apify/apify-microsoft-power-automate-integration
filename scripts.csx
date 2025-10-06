@@ -27,6 +27,7 @@ public class Script : ScriptBase {
         case "DeleteTaskWebhook":
           return await HandleDeleteTaskWebhook().ConfigureAwait(false);
         case "ActorTaskFinishedTrigger":
+          return await HandleActorTaskFinishedTrigger().ConfigureAwait(false);
         case "GetKeyValueStoreRecord":
         case "ListDatasets":
         case "GetDatasetItems":
@@ -467,16 +468,22 @@ public class Script : ScriptBase {
   }
 
   /// <summary>
+  /// Handles actor task finished trigger by routing to standard webhooks endpoint.
+  /// Routes /webhooks/task to /webhooks and applies robust deletion handling.
+  /// </summary>
+  private async Task<HttpResponseMessage> HandleActorTaskFinishedTrigger() {
+    // Update path from /webhooks/task to /webhooks
+    ModifyRequestPath("/webhooks/task", "/webhooks");
+
+    return await HandlePassthrough().ConfigureAwait(false);
+  }
+
+  /// <summary>
   /// Handles task webhook deletion by routing to standard webhooks endpoint.
   /// Routes /webhooks/task/{webhookId} to /webhooks/{webhookId} and applies robust deletion handling.
   /// </summary>
   private async Task<HttpResponseMessage> HandleDeleteTaskWebhook() {
-    var originalUri = Context.Request.RequestUri;
-    
-    // Update path from /webhooks/task/{webhookId} to /webhooks/{webhookId}
-    Context.Request.RequestUri = new UriBuilder(originalUri) { 
-      Path = originalUri.AbsolutePath.Replace("/webhooks/task/", "/webhooks/")
-    }.Uri;
+    ModifyRequestPath("/webhooks/task/{webhookId}", "/webhooks/{webhookId}");
 
     return await HandleDeleteWebhook().ConfigureAwait(false);
   }
