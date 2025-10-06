@@ -355,7 +355,7 @@
             "in": "query",
             "required": true,
             "type": "string",
-            "x-ms-summary": "Actor Source",
+            "x-ms-summary": "Actor Scope",
             "enum": [
               "RecentActors",
               "StoreActors"
