@@ -55,14 +55,7 @@
           "x-ms-apimTemplateParameter.name": "x-apify-integration-platform",
           "x-ms-apimTemplateParameter.value": "microsoft-power-automate",
           "x-ms-apimTemplateParameter.existsAction": "skip",
-          "x-ms-apimTemplate-policySection": "Request",
-          "x-ms-apimTemplate-operationName": [
-            "GetUserInfo",
-            "ActorRunFinishedTrigger",
-            "ListTasks",
-            "DeleteTaskWebhook",
-            "ActorTaskFinishedTrigger"
-          ]
+          "x-ms-apimTemplate-policySection": "Request"
         }
       }
     ]
