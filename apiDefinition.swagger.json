@@ -1429,7 +1429,16 @@
       "properties": {
         "userId": { "type": "string", "description": "ID of the user who owns the resource associated with the event." },
         "createdAt": { "type": "string", "format": "date-time", "description": "The timestamp when the event occurred." },
-        "eventType": { "type": "string", "description": "The type of the event (e.g., ACTOR.RUN.SUCCEEDED)." },
+        "eventType": { 
+          "type": "string", 
+          "description": "The type of the event that triggered the webhook. (e.g., ACTOR.RUN.SUCCEEDED)",
+          "enum": [
+            "ACTOR.RUN.SUCCEEDED",
+            "ACTOR.RUN.FAILED",
+            "ACTOR.RUN.TIMED_OUT",
+            "ACTOR.RUN.ABORTED"
+          ]
+        },
         "eventData": {
           "type": "object",
           "description": "An object containing event-specific data.",
