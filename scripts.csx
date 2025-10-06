@@ -34,7 +34,7 @@ public class Script : ScriptBase {
         case "GetUserInfo":
         case "RunActor":
         case "RunTask":
-        case "ListMyActors":
+        case "ListLatestActors":
         case "ListStoreActors":
         case "ListKeyValueStores":
         case "ListRecordKeys":
