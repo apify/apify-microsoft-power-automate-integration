@@ -104,9 +104,9 @@
     },
     "/acts": {
       "get": {
-        "summary": "List latest Actors (for dropdown)",
+        "summary": "List recently used Actors (for dropdown)",
         "description": "Fetches a list of the user's Actors.",
-        "operationId": "ListMyActors",
+        "operationId": "ListRecentActors",
         "x-ms-visibility": "internal",
         "tags": [
           "Actors"
@@ -118,7 +118,7 @@
             "required": false,
             "type": "string",
             "enum": [
-              "MyActors",
+              "RecentActors",
               "StoreActors"
             ],
             "description": "Only used by the connector UI to trigger list refresh when scope changes.",
@@ -191,7 +191,7 @@
             "required": false,
             "type": "string",
             "enum": [
-              "MyActors",
+              "RecentActors",
               "StoreActors"
             ],
             "description": "Only used by the connector UI to trigger list refresh when scope changes.",
@@ -244,7 +244,7 @@
     "/actors/dropdown": {
       "get": {
         "summary": "List Actors (dropdown)",
-        "description": "Fetches a list of Actors from latest Actors or Apify Store based on scope for dropdown selection.",
+        "description": "Fetches a list of Actors from recently used Actors or from Apify Store based on scope for dropdown selection.",
         "operationId": "ListActorsDropdown",
         "x-ms-visibility": "internal",
         "tags": [
@@ -257,20 +257,20 @@
             "required": false,
             "type": "string",
             "enum": [
-              "MyActors",
+              "RecentActors",
               "StoreActors"
             ],
             "x-ms-enum-values": [
               {
-                "value": "MyActors",
-                "displayName": "Latest Actors"
+                "value": "RecentActors",
+                "displayName": "Recently used Actors"
               },
               {
                 "value": "StoreActors",
                 "displayName": "From Store"
               }
             ],
-            "description": "Select source of Actors: your own or the Apify Store.",
+            "description": "Select scope of Actors: recently used or from the Apify Store.",
             "x-ms-visibility": "internal"
           },
           {
@@ -334,7 +334,7 @@
             "in": "path",
             "required": true,
             "type": "string",
-            "description": "Actor identifier to run. For latest Actors supply Actor ID; for Store supply Actor name.",
+            "description": "Actor identifier to run. For recently used Actors supply Actor ID; for Store supply Actor name.",
             "x-ms-summary": "Actor",
             "x-ms-dynamic-values": {
               "operationId": "ListActorsDropdown",
@@ -351,19 +351,19 @@
           {
             "name": "actorScope",
             "description": "Actor can be either yours or from the Apify Store.",
-            "default": "MyActors",
+            "default": "RecentActors",
             "in": "query",
             "required": true,
             "type": "string",
-            "x-ms-summary": "Actor Source",
+            "x-ms-summary": "Actor Scope",
             "enum": [
-              "MyActors",
+              "RecentActors",
               "StoreActors"
             ],
             "x-ms-enum-values": [
               {
-                "value": "MyActors",
-                "displayName": "Latest Actors"
+                "value": "RecentActors",
+                "displayName": "Recently used Actors"
               },
               {
                 "value": "StoreActors",
@@ -1069,19 +1069,19 @@
           {
             "name": "actorScope",
             "description": "Actor can be either yours or from the Apify Store.",
-            "default": "MyActors",
+            "default": "RecentActors",
             "in": "query",
             "required": true,
             "type": "string",
-            "x-ms-summary": "Actor Source",
+            "x-ms-summary": "Actor Scope",
             "enum": [
-              "MyActors",
+              "RecentActors",
               "StoreActors"
             ],
             "x-ms-enum-values": [
               { 
-                "value": "MyActors", 
-                "displayName": "Latest Actors"
+                "value": "RecentActors", 
+                "displayName": "Recently used Actors"
               },
               { 
                 "value": "StoreActors", 
@@ -1129,7 +1129,7 @@
                     "actorId": { 
                       "type": "string",
                       "x-ms-visibility": "important",
-                      "description": "Actor identifier to run. For latest Actors supply Actor ID; for Store supply Actor name.",
+                      "description": "Actor identifier to run. Supply Actor ID or Actor name.",
                       "x-ms-summary": "Actor",
                       "x-ms-dynamic-values": {
                         "operationId": "ListActorsDropdown",
