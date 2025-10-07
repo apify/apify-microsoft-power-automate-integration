@@ -270,7 +270,7 @@
                 "displayName": "From Store"
               }
             ],
-            "description": "Select source of Actors: your own or the Apify Store.",
+            "description": "Select source of Actors: recently used or from the Apify Store.",
             "x-ms-visibility": "internal"
           },
           {
