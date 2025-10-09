@@ -201,6 +201,23 @@ Once you have your connector set up, follow this development cycle:
 
 ## Triggers
 
+### Actor Run Finished Trigger
+
+Use the "Actor Run Finished" trigger to automatically execute your Power Automate flow when a specific Apify Actor run completes with a selected status.
+
+- **Authentication**: Use Apify API Key or OAuth 2.0 (scopes: `profile`, `full_api_access`).
+- **Headers**: All requests include `x-apify-integration-platform: microsoft-power-automate`.
+- **Inputs**:
+  - `Actor Scope`: Choose between "Recently used Actors" or "From Store" (Apify Store actors).
+  - `Actor`: Dynamic dropdown populated with actors based on the selected scope.
+  - `Trigger On`: Select which run statuses should trigger the flow (SUCCEEDED, FAILED, TIMED_OUT, ABORTED).
+- **Output**: Webhook payload containing detailed information about the completed actor run.
+
+How it works:
+- Actor dropdown is populated via `GET /v2/acts` (for recent actors) or via `GET /v2/store` store API (for store actors).
+- The trigger creates a webhook via `POST /v2/webhooks` that subscribes to actor run events.
+- When the selected actor finishes with one of the specified statuses, Apify sends a webhook payload to Power Automate.
+
 ### Actor Task Finished Trigger
 
 Use the "Actor Task Finished" trigger to automatically execute your Power Automate flow when a specific Apify Actor task run completes with a selected status.

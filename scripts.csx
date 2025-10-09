@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -28,16 +31,20 @@ public class Script : ScriptBase {
           return await HandleDeleteTaskWebhook().ConfigureAwait(false);
         case "ActorTaskFinishedTrigger":
           return await HandleActorTaskFinishedTrigger().ConfigureAwait(false);
-        case "GetKeyValueStoreRecord":
-        case "ListDatasets":
-        case "GetDatasetItems":
-        case "GetUserInfo":
+        case "ActorRunFinishedTrigger":
+          return await HandleCreateWebhookWithLocation().ConfigureAwait(false);
+        case "DeleteActorWebhook":
+          return await HandleDeleteWebhook().ConfigureAwait(false);
         case "RunActor":
         case "RunTask":
-        case "ListRecentActors":
-        case "ListStoreActors":
-        case "ListKeyValueStores":
+        case "GetUserInfo":
+        case "ListDatasets":
         case "ListRecordKeys":
+        case "ListStoreActors":
+        case "GetDatasetItems":
+        case "ListRecentActors":
+        case "ListKeyValueStores":
+        case "GetKeyValueStoreRecord":
           return await HandlePassthrough().ConfigureAwait(false);
         default:
           HttpResponseMessage response = new HttpResponseMessage(HttpStatusCode.BadRequest);
@@ -450,6 +457,27 @@ public class Script : ScriptBase {
 
     // Extract first item, if it's an array, otherwise use as-is
     return parsed is JArray arr && arr.Count > 0 ? arr[0] : parsed;
+  }
+
+  /// <summary>
+  /// Handles the creation of webhooks for Power Automate triggers with proper Location header.
+  /// Removes the helper actorScope parameter and forwards the request to Apify API.
+  /// The critical fix ensures webhook cleanup by intercepting the 201 response and adding
+  /// the Location header manually since Apify API doesn't provide it by default.
+  /// </summary>
+  /// <returns>
+  /// An <see cref="HttpResponseMessage"/> representing the HTTP response message with proper Location header for webhook deletion.
+  /// </returns>
+  private async Task<HttpResponseMessage> HandleCreateWebhookWithLocation() {
+    var originalUri = Context.Request.RequestUri;
+    var queryParams = System.Web.HttpUtility.ParseQueryString(originalUri.Query);
+    
+    // Remove helper parameter from query string
+    queryParams.Remove("actorScope");
+    Context.Request.RequestUri = new UriBuilder(originalUri) { Query = queryParams.ToString() }.Uri;
+
+    // Forward request to Apify API
+    return await HandlePassthrough().ConfigureAwait(false);
   }
 
   /// <summary>
