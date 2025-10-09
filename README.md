@@ -218,6 +218,21 @@ How it works:
 - The trigger creates a webhook via `POST /v2/webhooks` that subscribes to actor run events.
 - When the selected actor finishes with one of the specified statuses, Apify sends a webhook payload to Power Automate.
 
+### Actor Task Finished Trigger
+
+Use the "Actor Task Finished" trigger to automatically execute your Power Automate flow when a specific Apify Actor task run completes with a selected status.
+
+- **Authentication**: Use Apify API Key or OAuth 2.0 (scopes: `profile`, `full_api_access`).
+- **Headers**: All requests include `x-apify-integration-platform: microsoft-power-automate`.
+- **Inputs**:
+  - `Task`: Dynamic dropdown populated with your actor tasks.
+  - `Trigger On`: Select which run statuses should trigger the flow (SUCCEEDED, FAILED, TIMED_OUT, ABORTED).
+- **Output**: Webhook payload containing detailed information about the completed task run.
+
+How it works:
+- Creates a webhook via `POST /v2/webhooks` that subscribes to actor task run events.
+- Task dropdown is populated via `GET /v2/actor-tasks` to list your available tasks.
+
 ## Actions 
 
 ### Get Dataset Items Action
@@ -278,7 +293,7 @@ Use the "Run Actor" action to start an Apify Actor run.
 
 - Authentication: Use Apify API Key or OAuth 2.0 (scopes: `profile`, `full_api_access`).
 - Headers: All requests include `x-apify-integration-platform: microsoft-power-automate`.
-- Actor Source (`actorScope`): Choose "Recently used Actors" or "From Store".
+- Actor Scope (`actorScope`): Choose "Recently used Actors" or "From Store".
   - If "Recently used Actors": pick from `Actor` populated by your account Actors.
   - If "From Store": pick from `Actor` populated by Apify Store (limit 1000).
 - Input Body (`inputBody`): Provide JSON for the Actor input.

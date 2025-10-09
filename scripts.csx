@@ -4,7 +4,6 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using System.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -28,20 +27,24 @@ public class Script : ScriptBase {
           return await HandleScrapeSingleUrl().ConfigureAwait(false);
         case "GetKeyValueStoreRecordSchema":
           return await HandleGetKeyValueStoreRecordSchema().ConfigureAwait(false);
+        case "DeleteTaskWebhook":
+          return await HandleDeleteTaskWebhook().ConfigureAwait(false);
+        case "ActorTaskFinishedTrigger":
+          return await HandleActorTaskFinishedTrigger().ConfigureAwait(false);
         case "ActorRunFinishedTrigger":
           return await HandleCreateWebhookWithLocation().ConfigureAwait(false);
         case "DeleteActorWebhook":
-          return await HandleDeleteWebhookRobust().ConfigureAwait(false);
-        case "GetKeyValueStoreRecord":
-        case "ListDatasets":
-        case "GetDatasetItems":
-        case "GetUserInfo":
+          return await HandleDeleteWebhook().ConfigureAwait(false);
         case "RunActor":
         case "RunTask":
-        case "ListRecentActors":
-        case "ListStoreActors":
-        case "ListKeyValueStores":
+        case "GetUserInfo":
+        case "ListDatasets":
         case "ListRecordKeys":
+        case "ListStoreActors":
+        case "GetDatasetItems":
+        case "ListRecentActors":
+        case "ListKeyValueStores":
+        case "GetKeyValueStoreRecord":
           return await HandlePassthrough().ConfigureAwait(false);
         default:
           HttpResponseMessage response = new HttpResponseMessage(HttpStatusCode.BadRequest);
@@ -478,27 +481,38 @@ public class Script : ScriptBase {
   }
 
   /// <summary>
-  /// Handles webhook deletion with Power Automate compatibility.
-  /// Converts 204 No Content responses to 200 OK for Power Automate compatibility,
-  /// and treats 404 Not Found as success (webhook already deleted).
-  /// This ensures robust webhook cleanup when Power Automate flows are removed.
+  /// Handles webhook deletion.
+  /// Converts 204 No Content responses to 200 OK.
   /// </summary>
-  /// <returns>
-  /// An <see cref="HttpResponseMessage"/> representing the HTTP response message with status codes compatible with Power Automate.
-  /// </returns>
-  private async Task<HttpResponseMessage> HandleDeleteWebhookRobust() {
-    var response = await HandlePassthrough().ConfigureAwait(false);
+  private async Task<HttpResponseMessage> HandleDeleteWebhook() {
+    var response = await Context.SendAsync(Context.Request, CancellationToken).ConfigureAwait(false);
     
-    // Convert 204 No Content to 200 OK for Power Automate compatibility
+    // Convert 204 No Content to 200 OK (for Power Automate compatibility)
     if (response.StatusCode == HttpStatusCode.NoContent) {
       response.StatusCode = HttpStatusCode.OK;
     }
     
-    // Treat 404 Not Found as success (webhook already deleted)
-    if (response.StatusCode == HttpStatusCode.NotFound) {
-      response.StatusCode = HttpStatusCode.OK;
-    }
-    
     return response;
+  }
+
+  /// <summary>
+  /// Handles actor task finished trigger by routing to standard webhooks endpoint.
+  /// Routes /webhooks/task to /webhooks and applies robust deletion handling.
+  /// </summary>
+  private async Task<HttpResponseMessage> HandleActorTaskFinishedTrigger() {
+    // Update path from /webhooks/task to /webhooks
+    ModifyRequestPath("/webhooks/task", "/webhooks");
+
+    return await HandlePassthrough().ConfigureAwait(false);
+  }
+
+  /// <summary>
+  /// Handles task webhook deletion by routing to standard webhooks endpoint.
+  /// Routes /webhooks/task/{webhookId} to /webhooks/{webhookId} and applies robust deletion handling.
+  /// </summary>
+  private async Task<HttpResponseMessage> HandleDeleteTaskWebhook() {
+    ModifyRequestPath("/webhooks/task/{webhookId}", "/webhooks/{webhookId}");
+
+    return await HandleDeleteWebhook().ConfigureAwait(false);
   }
 }

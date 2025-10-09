@@ -105,7 +105,7 @@
     "/acts": {
       "get": {
         "summary": "List recently used Actors (for dropdown)",
-        "description": "Fetches a list of the user's Actors.",
+        "description": "Fetches a list of recently used Actors.",
         "operationId": "ListRecentActors",
         "x-ms-visibility": "internal",
         "tags": [
@@ -334,7 +334,7 @@
             "in": "path",
             "required": true,
             "type": "string",
-            "description": "Actor identifier to run. For recently used Actors supply Actor ID; for Store supply Actor name.",
+            "description": "Actor identifier to run. Supply Actor ID or Actor name.",
             "x-ms-summary": "Actor",
             "x-ms-dynamic-values": {
               "operationId": "ListActorsDropdown",
@@ -1174,6 +1174,128 @@
         "summary": "Delete Actor Webhook (for trigger)",
         "description": "Deletes an existing webhook subscription.",
         "operationId": "DeleteActorWebhook",
+        "x-ms-visibility": "internal",
+        "tags": [
+          "Webhooks"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/IntegrationPlatformHeader"
+          },
+          {
+            "name": "webhookId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": { "description": "OK" },
+          "204": { "description": "No Content" },
+          "default": { "$ref": "#/responses/ErrorResponse" }
+        }
+      }
+    },
+    "/webhooks/task": {
+      "x-ms-notification-content": {
+        "description": "Payload received from Apify when the task webhook fires",
+        "schema": { "$ref": "#/definitions/WebhookPayload" }
+      },
+      "post": {
+        "summary": "Actor Task Finished",
+        "description": "Creates a webhook to subscribe to Actor task run events. Triggers when the selected Actor task run finishes with a specific status. See docs: https://docs.apify.com/api/v2/webhooks-post",
+        "operationId": "ActorTaskFinishedTrigger",
+        "x-ms-visibility": "important",
+        "x-ms-trigger": "single",
+        "tags": [
+          "Webhooks"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/IntegrationPlatformHeader"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "x-ms-visibility": "important",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "requestUrl": { 
+                  "type": "string",
+                  "x-ms-notification-url": true,
+                  "x-ms-visibility": "internal"
+                },
+                "eventTypes": {
+                  "type": "array",
+                  "x-ms-visibility": "important",
+                  "description": "Actor run statuses to trigger on",
+                  "x-ms-summary": "Trigger On",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "ACTOR.RUN.SUCCEEDED",
+                      "ACTOR.RUN.FAILED",
+                      "ACTOR.RUN.TIMED_OUT",
+                      "ACTOR.RUN.ABORTED"
+                    ],
+                    "x-ms-enum-values": [
+                      { "value": "ACTOR.RUN.SUCCEEDED", "displayName": "SUCCEEDED" },
+                      { "value": "ACTOR.RUN.FAILED", "displayName": "FAILED" },
+                      { "value": "ACTOR.RUN.TIMED_OUT", "displayName": "TIMED_OUT" },
+                      { "value": "ACTOR.RUN.ABORTED", "displayName": "ABORTED" }
+                    ]
+                  }
+                },
+                "condition": {
+                  "type": "object",
+                  "properties": {
+                    "actorTaskId": { 
+                      "type": "string",
+                      "description": "Actor task identifier to monitor for run events.",
+                      "x-ms-summary": "Task",
+                      "x-ms-visibility": "important",
+                      "x-ms-dynamic-values": {
+                        "operationId": "ListTasks",
+                        "value-collection": "data/items",
+                        "value-path": "id",
+                        "value-title": "name"
+                      }
+                    }
+                  }
+                },
+                "idempotencyKey": { 
+                  "type": "string",
+                  "x-ms-visibility": "internal"
+                },
+                "payloadTemplate": { 
+                  "type": "string",
+                  "x-ms-visibility": "internal"
+                },
+                "shouldInterpolateStrings": { 
+                  "type": "boolean",
+                  "x-ms-visibility": "internal"
+                }
+              },
+              "required": ["requestUrl", "eventTypes", "condition"]
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "$ref": "#/responses/WebhookCreated"
+          },
+          "default": { "$ref": "#/responses/ErrorResponse" }
+        }
+      }
+    },
+    "/webhooks/task/{webhookId}": {
+      "delete": {
+        "summary": "Delete Task Webhook (for trigger)",
+        "description": "Deletes an existing task webhook subscription.",
+        "operationId": "DeleteTaskWebhook",
         "x-ms-visibility": "internal",
         "tags": [
           "Webhooks"
