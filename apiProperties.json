@@ -1,7 +1,8 @@
 {
   "properties": {
     "capabilities": [
-      "actions"
+      "actions",
+      "triggers"
     ],
     "connectionParameters": {
       "api_key": {
@@ -53,7 +54,7 @@
         "parameters": {
           "x-ms-apimTemplateParameter.name": "x-apify-integration-platform",
           "x-ms-apimTemplateParameter.value": "microsoft-power-automate",
-          "x-ms-apimTemplateParameter.existsAction": "override",
+          "x-ms-apimTemplateParameter.existsAction": "skip",
           "x-ms-apimTemplate-policySection": "Request"
         }
       }

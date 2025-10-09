@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -26,13 +28,17 @@ public class Script : ScriptBase {
           return await HandleScrapeSingleUrl().ConfigureAwait(false);
         case "GetKeyValueStoreRecordSchema":
           return await HandleGetKeyValueStoreRecordSchema().ConfigureAwait(false);
+        case "ActorRunFinishedTrigger":
+          return await HandleCreateWebhookWithLocation().ConfigureAwait(false);
+        case "DeleteActorWebhook":
+          return await HandleDeleteWebhookRobust().ConfigureAwait(false);
         case "GetKeyValueStoreRecord":
         case "ListDatasets":
         case "GetDatasetItems":
         case "GetUserInfo":
         case "RunActor":
         case "RunTask":
-        case "ListMyActors":
+        case "ListRecentActors":
         case "ListStoreActors":
         case "ListKeyValueStores":
         case "ListRecordKeys":
@@ -450,4 +456,49 @@ public class Script : ScriptBase {
     return parsed is JArray arr && arr.Count > 0 ? arr[0] : parsed;
   }
 
+  /// <summary>
+  /// Handles the creation of webhooks for Power Automate triggers with proper Location header.
+  /// Removes the helper actorScope parameter and forwards the request to Apify API.
+  /// The critical fix ensures webhook cleanup by intercepting the 201 response and adding
+  /// the Location header manually since Apify API doesn't provide it by default.
+  /// </summary>
+  /// <returns>
+  /// An <see cref="HttpResponseMessage"/> representing the HTTP response message with proper Location header for webhook deletion.
+  /// </returns>
+  private async Task<HttpResponseMessage> HandleCreateWebhookWithLocation() {
+    var originalUri = Context.Request.RequestUri;
+    var queryParams = System.Web.HttpUtility.ParseQueryString(originalUri.Query);
+    
+    // Remove helper parameter from query string
+    queryParams.Remove("actorScope");
+    Context.Request.RequestUri = new UriBuilder(originalUri) { Query = queryParams.ToString() }.Uri;
+
+    // Forward request to Apify API
+    return await HandlePassthrough().ConfigureAwait(false);
+  }
+
+  /// <summary>
+  /// Handles webhook deletion with Power Automate compatibility.
+  /// Converts 204 No Content responses to 200 OK for Power Automate compatibility,
+  /// and treats 404 Not Found as success (webhook already deleted).
+  /// This ensures robust webhook cleanup when Power Automate flows are removed.
+  /// </summary>
+  /// <returns>
+  /// An <see cref="HttpResponseMessage"/> representing the HTTP response message with status codes compatible with Power Automate.
+  /// </returns>
+  private async Task<HttpResponseMessage> HandleDeleteWebhookRobust() {
+    var response = await HandlePassthrough().ConfigureAwait(false);
+    
+    // Convert 204 No Content to 200 OK for Power Automate compatibility
+    if (response.StatusCode == HttpStatusCode.NoContent) {
+      response.StatusCode = HttpStatusCode.OK;
+    }
+    
+    // Treat 404 Not Found as success (webhook already deleted)
+    if (response.StatusCode == HttpStatusCode.NotFound) {
+      response.StatusCode = HttpStatusCode.OK;
+    }
+    
+    return response;
+  }
 }

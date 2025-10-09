@@ -199,6 +199,25 @@ Once you have your connector set up, follow this development cycle:
    - Update the connector again using the `pac connector update` command
    - Repeat the testing process
 
+## Triggers
+
+### Actor Run Finished Trigger
+
+Use the "Actor Run Finished" trigger to automatically execute your Power Automate flow when a specific Apify Actor run completes with a selected status.
+
+- **Authentication**: Use Apify API Key or OAuth 2.0 (scopes: `profile`, `full_api_access`).
+- **Headers**: All requests include `x-apify-integration-platform: microsoft-power-automate`.
+- **Inputs**:
+  - `Actor Scope`: Choose between "Recently used Actors" or "From Store" (Apify Store actors).
+  - `Actor`: Dynamic dropdown populated with actors based on the selected scope.
+  - `Trigger On`: Select which run statuses should trigger the flow (SUCCEEDED, FAILED, TIMED_OUT, ABORTED).
+- **Output**: Webhook payload containing detailed information about the completed actor run.
+
+How it works:
+- Actor dropdown is populated via `GET /v2/acts` (for recent actors) or via `GET /v2/store` store API (for store actors).
+- The trigger creates a webhook via `POST /v2/webhooks` that subscribes to actor run events.
+- When the selected actor finishes with one of the specified statuses, Apify sends a webhook payload to Power Automate.
+
 ## Actions 
 
 ### Get Dataset Items Action
@@ -259,8 +278,8 @@ Use the "Run Actor" action to start an Apify Actor run.
 
 - Authentication: Use Apify API Key or OAuth 2.0 (scopes: `profile`, `full_api_access`).
 - Headers: All requests include `x-apify-integration-platform: microsoft-power-automate`.
-- Actor Source (`actorScope`): Choose "My Actors" or "From Store".
-  - If "My Actors": pick from `Actor` populated by your account Actors.
+- Actor Source (`actorScope`): Choose "Recently used Actors" or "From Store".
+  - If "Recently used Actors": pick from `Actor` populated by your account Actors.
   - If "From Store": pick from `Actor` populated by Apify Store (limit 1000).
 - Input Body (`inputBody`): Provide JSON for the Actor input.
 - Optional query params:
