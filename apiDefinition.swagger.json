@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "title": "Apify Connector",
-    "description": "A connector that brings Apify's web scrapers, AI agents, and automation tools to Power Automate for data collection, monitoring, and business system integration.",
+    "description": "Use Apify in Power Automate to run web scrapers and AI agents, manage Actors and tasks, schedule and monitor runs, retrieve datasets and results, and trigger flows from webhooks. Enable end-to-end data collection, enrichment, and automation in your flows.",
     "version": "1.0.0",
     "contact": {
       "name": "Apify Support",
@@ -26,13 +26,7 @@
     "application/json"
   ],
   "securityDefinitions": {
-    "api_key": {
-      "type": "apiKey",
-      "in": "header",
-      "name": "Authorization",
-      "description": "API Token for authenticating with the Apify API. Get it at https://console.apify.com/settings/integrations"
-    },
-    "oauth2_auth": {
+    "apify_oauth2_auth": {
       "type": "oauth2",
       "flow": "accessCode",
       "authorizationUrl": "https://console.apify.com/authorize/oauth",
@@ -44,15 +38,7 @@
     }
   },
   "security": [
-    {
-      "api_key": []
-    },
-    {
-      "oauth2_auth": [
-        "profile",
-        "full_api_access"
-      ]
-    }
+    { "apify_oauth2_auth": [ "profile", "full_api_access" ] }
   ],
   "x-ms-connector-metadata": [
     {
