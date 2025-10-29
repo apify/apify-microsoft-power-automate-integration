@@ -1,7 +1,7 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "Apify Connector",
+    "title": "Apify",
     "description": "Use Apify in Power Automate to run web scrapers and AI agents, manage Actors and tasks, schedule and monitor runs, retrieve datasets and results, and trigger flows from webhooks. Enable end-to-end data collection, enrichment, and automation in your flows.",
     "version": "1.0.0",
     "contact": {
