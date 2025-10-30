@@ -481,18 +481,10 @@ public class Script : ScriptBase {
   }
 
   /// <summary>
-  /// Handles webhook deletion.
-  /// Converts 204 No Content responses to 200 OK.
+  /// Handles webhook deletion by forwarding the delete request to the Apify API.
   /// </summary>
   private async Task<HttpResponseMessage> HandleDeleteWebhook() {
-    var response = await Context.SendAsync(Context.Request, CancellationToken).ConfigureAwait(false);
-    
-    // Convert 204 No Content to 200 OK (for Power Automate compatibility)
-    if (response.StatusCode == HttpStatusCode.NoContent) {
-      response.StatusCode = HttpStatusCode.OK;
-    }
-    
-    return response;
+    return await Context.SendAsync(Context.Request, CancellationToken).ConfigureAwait(false);
   }
 
   /// <summary>

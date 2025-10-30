@@ -22,7 +22,7 @@
           "clientSecret": "{{ client secret }}",
           "scopes": [
             "profile",
-            "full_api_accessPa"
+            "full_api_access"
           ],
           "redirectMode": "GlobalPerConnector",
           "properties": {

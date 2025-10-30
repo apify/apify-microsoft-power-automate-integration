@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "title": "Apify",
-    "description": "Use Apify in Power Automate to run web scrapers and AI agents, manage Actors and tasks, schedule and monitor runs, retrieve datasets and results, and trigger flows from webhooks. Enable end-to-end data collection, enrichment, and automation in your flows.",
+    "description": "Use Apify to run web scrapers and AI agents, manage Actors and tasks, schedule and monitor runs, retrieve datasets and results, and trigger flows from webhooks. Enable end-to-end data collection, enrichment, and automation in your workflows.",
     "version": "1.0.0",
     "contact": {
       "name": "Apify Support",
@@ -93,6 +93,7 @@
         "summary": "List recently used Actors (for dropdown)",
         "description": "Fetches a list of recently used Actors.",
         "operationId": "ListRecentActors",
+        "x-ms-summary": "List recently used Actors (for dropdown)",
         "x-ms-visibility": "internal",
         "tags": [
           "Actors"
@@ -166,6 +167,7 @@
         "summary": "List Store Actors (for dropdown)",
         "description": "Fetches a list of Actors from the Apify Store.",
         "operationId": "ListStoreActors",
+        "x-ms-summary": "List Store Actors (for dropdown)",
         "x-ms-visibility": "internal",
         "tags": [
           "Actors"
@@ -192,6 +194,7 @@
             "type": "integer",
             "required": false,
             "default": 1000,
+            "description": "Maximum number of Actors to return from the store.",
             "x-ms-summary": "Maximum number of Actors to return"
           }
         ],
@@ -232,6 +235,7 @@
         "summary": "List Actors (dropdown)",
         "description": "Fetches a list of Actors from recently used Actors or from Apify Store based on scope for dropdown selection.",
         "operationId": "ListActorsDropdown",
+        "x-ms-summary": "List Actors (dropdown)",
         "x-ms-visibility": "internal",
         "tags": [
           "Actors"
@@ -268,6 +272,7 @@
             "type": "integer",
             "required": false,
             "default": 1000,
+            "description": "Maximum number of Actors to return for the dropdown.",
             "x-ms-summary": "Maximum number of Actors to return"
           }
         ],
@@ -304,7 +309,7 @@
     "/acts/{actorId}/runs": {
       "post": {
         "summary": "Run Actor",
-        "description": "Runs an Actor and immediately returns without waiting for the run to finish. To wait for the run to finish, use the waitForFinish query parameter. See docs: https://docs.apify.com/api/v2/act-runs-post",
+        "description": "Runs an Actor and immediately returns without waiting for the run to finish. To wait for the run to finish, use the waitForFinish query parameter. See docs: https://docs.apify.com/api/v2/act-runs-post.",
         "operationId": "RunActor",
         "x-ms-summary": "Run Actor",
         "x-ms-visibility": "important",
@@ -432,6 +437,7 @@
         "summary": "List Tasks (for dropdown)",
         "description": "Fetches a list of the user's actor tasks.",
         "operationId": "ListTasks",
+        "x-ms-summary": "List Tasks (for dropdown)",
         "x-ms-visibility": "internal",
         "tags": [
           "Tasks"
@@ -476,7 +482,7 @@
     "/actor-tasks/{taskId}/runs": {
       "post": {
         "summary": "Run Task",
-        "description": "Runs an Actor task and immediately returns without waiting for the run to finish. To wait for the run to finish, use the waitForFinish query parameter. See docs: https://docs.apify.com/api/v2/actor-task-runs-post",
+        "description": "Runs an Actor task and immediately returns without waiting for the run to finish. To wait for the run to finish, use the waitForFinish query parameter. See docs: https://docs.apify.com/api/v2/actor-task-runs-post.",
         "operationId": "RunTask",
         "x-ms-summary": "Run Task",
         "x-ms-visibility": "important",
@@ -569,6 +575,7 @@
         "summary": "List Datasets (for dropdown)",
         "description": "Fetches a list of the user's datasets.",
         "operationId": "ListDatasets",
+        "x-ms-summary": "List Datasets (for dropdown)",
         "x-ms-visibility": "internal",
         "tags": [
           "Datasets"
@@ -623,6 +630,7 @@
         "summary": "Get Dataset Schema (for dynamic schema)",
         "description": "Fetches one item from a dataset to infer the schema.",
         "operationId": "GetDatasetSchema",
+        "x-ms-summary": "Get Dataset Schema (for dynamic schema)",
         "x-ms-visibility": "internal",
         "tags": [
           "Datasets"
@@ -822,6 +830,7 @@
         "summary": "List Key-Value Stores (for dropdown)",
         "description": "Fetches a list of the user's key-value stores.",
         "operationId": "ListKeyValueStores",
+        "x-ms-summary": "List Key-Value Stores (for dropdown)",
         "x-ms-visibility": "internal",
         "tags": [
           "KeyValueStores"
@@ -868,6 +877,7 @@
         "summary": "List Record Keys (for dropdown)",
         "description": "Fetches a list of keys for a specific key-value store.",
         "operationId": "ListRecordKeys",
+        "x-ms-summary": "List Record Keys (for dropdown)",
         "x-ms-visibility": "internal",
         "tags": [
           "KeyValueStores"
@@ -920,6 +930,7 @@
         "summary": "Get Key-Value Store Record Schema (for dynamic schema)",
         "description": "Fetches a record from a key-value store to infer the schema.",
         "operationId": "GetKeyValueStoreRecordSchema",
+        "x-ms-summary": "Get Key-Value Store Record Schema (for dynamic schema)",
         "x-ms-visibility": "internal",
         "tags": [
           "KeyValueStores"
@@ -979,6 +990,7 @@
             "in": "path",
             "required": true,
             "type": "string",
+            "description": "The ID of the key-value store to retrieve the record from.",
             "x-ms-summary": "Store",
             "x-ms-dynamic-values": {
               "operationId": "ListKeyValueStores",
@@ -992,6 +1004,7 @@
             "in": "path",
             "required": true,
             "type": "string",
+            "description": "The key of the record to retrieve from the key-value store.",
             "x-ms-summary": "Record Key",
             "x-ms-dynamic-values": {
               "operationId": "ListRecordKeys",
@@ -1041,8 +1054,9 @@
       },
       "post": {
         "summary": "Actor Run Finished",
-        "description": "Creates a webhook to subscribe to Actor run events. Triggers when the selected Actor run finishes with a specific status. See docs: https://docs.apify.com/api/v2/webhooks-post",
+        "description": "Creates a webhook to subscribe to Actor run events. Triggers when the selected Actor run finishes with a specific status. See docs: https://docs.apify.com/api/v2/webhooks-post.",
         "operationId": "ActorRunFinishedTrigger",
+        "x-ms-summary": "Actor Run Finished",
         "x-ms-visibility": "important",
         "x-ms-trigger": "single",
         "tags": [
@@ -1079,6 +1093,7 @@
             "name": "body",
             "in": "body",
             "required": true,
+            "description": "Webhook subscription configuration including the callback URL and event types.",
             "x-ms-visibility": "important",
             "schema": {
               "type": "object",
@@ -1160,6 +1175,7 @@
         "summary": "Delete Actor Webhook (for trigger)",
         "description": "Deletes an existing webhook subscription.",
         "operationId": "DeleteActorWebhook",
+        "x-ms-summary": "Delete Actor Webhook (for trigger)",
         "x-ms-visibility": "internal",
         "tags": [
           "Webhooks"
@@ -1173,12 +1189,14 @@
             "in": "path",
             "required": true,
             "type": "string",
+            "description": "The ID of the webhook to delete.",
             "x-ms-url-encoding": "single"
           }
         ],
         "responses": {
-          "200": { "description": "OK" },
-          "204": { "description": "No Content" },
+          "204": { 
+            "description": "Webhook successfully deleted."
+          },
           "default": { "$ref": "#/responses/ErrorResponse" }
         }
       }
@@ -1190,8 +1208,9 @@
       },
       "post": {
         "summary": "Actor Task Finished",
-        "description": "Creates a webhook to subscribe to Actor task run events. Triggers when the selected Actor task run finishes with a specific status. See docs: https://docs.apify.com/api/v2/webhooks-post",
+        "description": "Creates a webhook to subscribe to Actor task run events. Triggers when the selected Actor task run finishes with a specific status. See docs: https://docs.apify.com/api/v2/webhooks-post.",
         "operationId": "ActorTaskFinishedTrigger",
+        "x-ms-summary": "Actor Task Finished",
         "x-ms-visibility": "important",
         "x-ms-trigger": "single",
         "tags": [
@@ -1205,6 +1224,7 @@
             "name": "body",
             "in": "body",
             "required": true,
+            "description": "Webhook subscription configuration for task run events including the callback URL and event types.",
             "x-ms-visibility": "important",
             "schema": {
               "type": "object",
@@ -1282,6 +1302,7 @@
         "summary": "Delete Task Webhook (for trigger)",
         "description": "Deletes an existing task webhook subscription.",
         "operationId": "DeleteTaskWebhook",
+        "x-ms-summary": "Delete Task Webhook (for trigger)",
         "x-ms-visibility": "internal",
         "tags": [
           "Webhooks"
@@ -1295,12 +1316,14 @@
             "in": "path",
             "required": true,
             "type": "string",
+            "description": "The ID of the task webhook to delete.",
             "x-ms-url-encoding": "single"
           }
         ],
         "responses": {
-          "200": { "description": "OK" },
-          "204": { "description": "No Content" },
+          "204": { 
+            "description": "Task webhook successfully deleted."
+          },
           "default": { "$ref": "#/responses/ErrorResponse" }
         }
       }
