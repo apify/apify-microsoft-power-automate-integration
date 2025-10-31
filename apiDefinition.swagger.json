@@ -316,25 +316,6 @@
             "$ref": "#/parameters/IntegrationPlatformHeader"
           },
           {
-            "name": "actorId",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "description": "Actor identifier to run. Supply Actor ID or Actor name.",
-            "x-ms-summary": "Actor",
-            "x-ms-dynamic-values": {
-              "operationId": "ListActorsDropdown",
-              "value-collection": "data/items",
-              "value-path": "id",
-              "value-title": "title",
-              "parameters": {
-                "actorScope": { "parameter": "actorScope" },
-                "limit": 1000
-              }
-            },
-            "x-ms-visibility": "important"
-          },
-          {
             "name": "actorScope",
             "description": "Actor can be either yours or from the Apify Store.",
             "default": "RecentActors",
@@ -356,6 +337,25 @@
                 "displayName": "From Store"
               }
             ]
+          },
+          {
+            "name": "actorId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Actor identifier to run. Supply Actor ID or Actor name.",
+            "x-ms-summary": "Actor",
+            "x-ms-dynamic-values": {
+              "operationId": "ListActorsDropdown",
+              "value-collection": "data/items",
+              "value-path": "id",
+              "value-title": "title",
+              "parameters": {
+                "actorScope": { "parameter": "actorScope" },
+                "limit": 1000
+              }
+            },
+            "x-ms-visibility": "important"
           },
           {
             "name": "build",
