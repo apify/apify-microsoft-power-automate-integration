@@ -22,7 +22,7 @@
           "clientSecret": "{{ client secret }}",
           "scopes": [
             "profile",
-            "full_api_accessPa"
+            "full_api_access"
           ],
           "redirectMode": "GlobalPerConnector",
           "properties": {
@@ -52,16 +52,6 @@
           "x-ms-apimTemplateParameter.name": "x-apify-integration-platform",
           "x-ms-apimTemplateParameter.value": "microsoft-power-automate",
           "x-ms-apimTemplateParameter.existsAction": "skip",
-          "x-ms-apimTemplate-policySection": "Request"
-        }
-      },
-      {
-        "templateId": "setheader",
-        "title": "Set Authorization Header",
-        "parameters": {
-          "x-ms-apimTemplateParameter.name": "Authorization",
-          "x-ms-apimTemplateParameter.value": "Bearer @connectionParameters('token')",
-          "x-ms-apimTemplateParameter.existsAction": "override",
           "x-ms-apimTemplate-policySection": "Request"
         }
       }
