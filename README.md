@@ -91,7 +91,7 @@ pac auth create --environment "<ENV_ID-or-URL>"
 
 # Manage profiles
 pac auth list
-pac auth select --name "<profileName>"
+pac auth select --profile "<profileName>"
 ```
 
 - **Important:** Omitting `--environment` can leave no active environment set and cause later `pac` commands to fail.
@@ -120,8 +120,6 @@ The repository includes a `settings.json` file that simplifies connector operati
    
    - Replace `YOUR-CONNECTOR-ID` with your actual connector ID (if you already have one, otherwise leave it be)
    - Replace `YOUR-ENVIRONMENT-ID` with your Power Platform environment ID
-   
-   Note: Use the settings file for initial creation/download convenience. For ongoing updates, prefer explicit `pac connector update` commands (see below) to avoid re-uploading the icon.
 
 ## Development Workflow
 
@@ -178,24 +176,8 @@ Once you have your connector set up, follow this development cycle:
 
    Push your changes to Power Automate:
 
-   - Important: After the first creation/upload, do not re-upload the icon on every update. Microsoft may duplicate/rename images when the icon is sent repeatedly. Update only the API definition and properties (and scripts when they change).
-
    ```bash
-   # Update definition and properties only (recommended)
-   pac connector update \
-     --connector-id <CONNECTOR_ID> \
-     -df ./apiDefinition.swagger.json \
-     --api-properties-file ./apiProperties.json
-   ```
-
-   If `scripts.csx` changed, include it as well:
-
-   ```bash
-   pac connector update \
-     --connector-id <CONNECTOR_ID> \
-     -df ./apiDefinition.swagger.json \
-     --api-properties-file ./apiProperties.json \
-     --script ./scripts.csx
+   pac connector update --settings-file settings.json
    ```
 
 3. **Test Your Changes**
