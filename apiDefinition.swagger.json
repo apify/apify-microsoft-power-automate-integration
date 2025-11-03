@@ -418,7 +418,12 @@
           "201": {
             "description": "Actor run created",
             "schema": {
-              "$ref": "#/definitions/ActorRunResponse"
+              "type": "object",
+              "properties": {
+                "data": {
+                  "$ref": "#/definitions/ActorRunResponse"
+                }
+              }
             }
           },
           "default": {
@@ -555,7 +560,12 @@
           "201": {
             "description": "Actor run created",
             "schema": {
-              "$ref": "#/definitions/ActorRunResponse"
+              "type": "object",
+              "properties": {
+                "data": {
+                  "$ref": "#/definitions/ActorRunResponse"
+                }
+              }
             }
           },
           "default": {
@@ -808,7 +818,12 @@
           "201": {
             "description": "Scrape started successfully",
             "schema": {
-              "$ref": "#/definitions/ActorRunResponse"
+              "type": "object",
+              "properties": {
+                "data": {
+                  "$ref": "#/definitions/ActorRunResponse"
+                }
+              }
             }
           },
           "default": {
@@ -1495,6 +1510,21 @@
           "x-ms-summary": "Default Request Queue ID",
           "description": "Unique identifier of the default request queue used by the Actor."
         },
+        "platformUsageBillingModel": {
+          "type": "string",
+          "x-ms-summary": "Platform Usage Billing Model",
+          "description": "The billing model used for platform usage (e.g., USER, ORGANIZATION)."
+        },
+        "integrationTracking": {
+          "type": "object",
+          "x-ms-summary": "Integration Tracking",
+          "description": "Information about the integration platform and whether it's an AI tool."
+        },
+        "generalAccess": {
+          "type": "string",
+          "x-ms-summary": "General Access",
+          "description": "General access setting for the Actor run (e.g., FOLLOW_USER_SETTING)."
+        },
         "buildNumber": {
           "type": "string",
           "x-ms-summary": "Build Number",
@@ -1526,9 +1556,9 @@
           "description": "Total cost of the Actor run in USD."
         },
         "usageUsd": {
-          "type": "number",
+          "type": "object",
           "x-ms-summary": "Usage USD",
-          "description": "Usage cost in USD for this specific run."
+          "description": "Usage cost breakdown in USD by resource type (compute units, datasets, key-value stores, etc.)."
         }
       }
     },
