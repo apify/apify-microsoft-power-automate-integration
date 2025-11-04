@@ -54,16 +54,6 @@
           "x-ms-apimTemplateParameter.existsAction": "skip",
           "x-ms-apimTemplate-policySection": "Request"
         }
-      },
-      {
-        "templateId": "setheader",
-        "title": "Set Authorization Header",
-        "parameters": {
-          "x-ms-apimTemplateParameter.name": "Authorization",
-          "x-ms-apimTemplateParameter.value": "Bearer @connectionParameters('token')",
-          "x-ms-apimTemplateParameter.existsAction": "override",
-          "x-ms-apimTemplate-policySection": "Request"
-        }
       }
     ]
   }
