@@ -322,7 +322,7 @@
             "in": "query",
             "required": true,
             "type": "string",
-            "x-ms-summary": "Actor Scope",
+            "x-ms-summary": "Select Actor from",
             "enum": [
               "RecentActors",
               "StoreActors"
@@ -362,7 +362,7 @@
             "in": "query",
             "required": false,
             "type": "string",
-            "description": "Specifies the Actor build to run. It can be either a build tag or build number. By default, the run uses the build specified in the default run configuration for the Actor (typically latest).",
+            "description": "Actor build to run (tag or build number). Default is latest.",
             "x-ms-summary": "Build"
           },
           {
@@ -370,16 +370,16 @@
             "in": "query",
             "required": false,
             "type": "integer",
-            "description": "Optional timeout for the run, in seconds. By default, the run uses a timeout specified in the default run configuration for the Actor.",
-            "x-ms-summary": "Timeout (seconds)"
+            "description": "Timeout for the run in seconds.",
+            "x-ms-summary": "Timeout"
           },
           {
             "name": "memory",
             "in": "query",
             "required": false,
             "type": "integer",
-            "description": "Memory limit for the run, in megabytes. The amount of memory can be set to a power of 2 with a minimum of 128. By default, the run uses a memory limit specified in the default run configuration for the Actor.",
-            "x-ms-summary": "Memory (MB)",
+            "description": "Memory limit in MB (power of 2, min 128).",
+            "x-ms-summary": "Memory",
             "enum": [
               128,
               256,
@@ -396,8 +396,8 @@
             "in": "query",
             "required": false,
             "type": "integer",
-            "x-ms-summary": "Wait for Finish (seconds)",
-            "description": "The maximum number of seconds the server waits for the run to finish. By default, it is 0, the maximum value is 60. If the run finishes in time then the returned run object will have a terminal status (e.g. SUCCEEDED), otherwise it will have a transitional status (e.g. RUNNING).",
+            "x-ms-summary": "Wait for Finish",
+            "description": "Wait for the run to finish in seconds (0–60).",
             "maximum": 60,
             "default": 0
           },
@@ -512,8 +512,8 @@
             "in": "query",
             "required": false,
             "type": "integer",
-            "x-ms-summary": "Wait for Finish (seconds)",
-            "description": "The maximum number of seconds the server waits for the run to finish. By default, it is 0, the maximum value is 60. If the run finishes in time then the returned run object will have a terminal status (e.g. SUCCEEDED), otherwise it will have a transitional status (e.g. RUNNING).",
+            "x-ms-summary": "Wait for Finish",
+            "description": "Wait for the run to finish in seconds (0–60).",
             "maximum": 60,
             "default": 0
           },
@@ -522,16 +522,16 @@
             "in": "query",
             "required": false,
             "type": "integer",
-            "description": "Optional timeout for the run, in seconds. By default, the run uses a timeout specified in the default run configuration for the Task.",
-            "x-ms-summary": "Timeout (seconds)"
+            "description": "Timeout for the run in seconds.",
+            "x-ms-summary": "Timeout"
           },
           {
             "name": "memory",
             "in": "query",
             "required": false,
             "type": "integer",
-            "description": "Memory limit for the run, in megabytes. The amount of memory can be set to a power of 2 with a minimum of 128. By default, the run uses a memory limit specified in the default run configuration for the Task.",
-            "x-ms-summary": "Memory (MB)",
+            "description": "Memory limit in MB (power of 2, min 128).",
+            "x-ms-summary": "Memory",
             "enum": [
               128,
               256,
@@ -547,12 +547,12 @@
             "name": "inputOverride",
             "in": "body",
             "required": false,
-            "description": "Optional. A raw JSON object to override the task's default input.",
+            "description": "A raw JSON object to override the task's default input.",
             "x-ms-textarea": true,
             "x-ms-summary": "Input Override",
             "schema": {
               "type": "object",
-              "description": "Optional. A raw JSON object to override the task's default input."
+              "description": "A raw JSON object to override the task's default input."
             }
           }
         ],
@@ -655,7 +655,7 @@
             "x-ms-visibility": "internal",
             "default": 1,
             "type": "integer",
-            "description": "Optional. Set limit to 1 for schema inference."
+            "description": "Set limit to 1 for schema inference."
           }
         ],
         "responses": {
@@ -707,7 +707,7 @@
             "required": false,
             "type": "integer",
             "x-ms-summary": "Limit",
-            "description": "Optional. The number of items to retrieve. Defaults to the API's default if not provided."
+            "description": "Maximum number of items to be returned."
           },
           {
             "name": "offset",
@@ -715,7 +715,7 @@
             "required": false,
             "type": "integer",
             "x-ms-summary": "Offset",
-            "description": "Optional. The number of items to skip from the beginning. Used for pagination."
+            "description": "Number of items to skip from the beginning of the list."
           }
         ],
         "responses": {
@@ -810,8 +810,8 @@
             "x-ms-visibility": "internal",
             "default": 0,
             "type": "integer",
-            "description": "Optional timeout for the run, in seconds. By default, the run uses a timeout specified in the default run configuration for the Actor.",
-            "x-ms-summary": "Timeout (seconds)"
+            "description": "Timeout for the run in seconds.",
+            "x-ms-summary": "Timeout"
           }
         ],
         "responses": {
@@ -948,14 +948,16 @@
             "in": "path",
             "required": true,
             "type": "string",
-            "description": "Store ID"
+            "x-ms-summary": "Select a value",
+            "description": "Store"
           },
           {
             "name": "recordKey",
             "in": "path",
             "required": true,
             "type": "string",
-            "description": "Record Key"
+            "x-ms-summary": "Select a value",
+            "description": "Key"
           }
         ],
         "responses": {
@@ -995,6 +997,7 @@
             "required": true,
             "type": "string",
             "x-ms-summary": "Store",
+            "description": "Select the key-value store from which to retrieve the record.",
             "x-ms-dynamic-values": {
               "operationId": "ListKeyValueStores",
               "value-collection": "data/items",
@@ -1007,7 +1010,8 @@
             "in": "path",
             "required": true,
             "type": "string",
-            "x-ms-summary": "Record Key",
+            "x-ms-summary": "Key",
+            "description": "Select the key from which to retrieve the record.",
             "x-ms-dynamic-values": {
               "operationId": "ListRecordKeys",
               "value-collection": "data/items",
@@ -1074,7 +1078,7 @@
             "in": "query",
             "required": true,
             "type": "string",
-            "x-ms-summary": "Actor Scope",
+            "x-ms-summary": "Select Actor from",
             "enum": [
               "RecentActors",
               "StoreActors"
@@ -1107,7 +1111,7 @@
                   "type": "array",
                   "x-ms-visibility": "important",
                   "description": "Actor run statuses to trigger on",
-                  "x-ms-summary": "Trigger On",
+                  "x-ms-summary": "Statuses",
                   "items": {
                     "type": "string",
                     "enum": [
@@ -1233,7 +1237,7 @@
                   "type": "array",
                   "x-ms-visibility": "important",
                   "description": "Actor run statuses to trigger on",
-                  "x-ms-summary": "Trigger On",
+                  "x-ms-summary": "Statuses",
                   "items": {
                     "type": "string",
                     "enum": [
