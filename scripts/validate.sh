@@ -15,7 +15,7 @@ echo "Validating apiDefinition.swagger.json..."
 jq -e '.swagger and .info and .info.title and .info.version and .host and .basePath' ./apiDefinition.swagger.json > /dev/null || { echo "Error: apiDefinition.swagger.json is invalid or missing required fields"; exit 1; }
 
 echo "Validating apiProperties.json..."
-jq -e '.connectionParameterSets and .connectionParameterSets.uiDefinition and .connectionParameterSets.values' ./apiProperties.json > /dev/null || { echo "Error: apiProperties.json is invalid or missing required fields"; exit 1; }
+jq -e '.properties and .properties.connectionParameters and .properties.capabilities' ./apiProperties.json > /dev/null || { echo "Error: apiProperties.json is invalid or missing required fields"; exit 1; }
 
 # Check script contains required class
 echo "Validating scripts.csx..."

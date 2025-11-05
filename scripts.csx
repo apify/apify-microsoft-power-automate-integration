@@ -27,18 +27,15 @@ public class Script : ScriptBase {
           return await HandleScrapeSingleUrl().ConfigureAwait(false);
         case "GetKeyValueStoreRecordSchema":
           return await HandleGetKeyValueStoreRecordSchema().ConfigureAwait(false);
-        case "DeleteTaskWebhook":
-          return await HandleDeleteTaskWebhook().ConfigureAwait(false);
         case "ActorTaskFinishedTrigger":
           return await HandleActorTaskFinishedTrigger().ConfigureAwait(false);
         case "ActorRunFinishedTrigger":
           return await HandleCreateWebhookWithLocation().ConfigureAwait(false);
-        case "DeleteActorWebhook":
-          return await HandleDeleteWebhook().ConfigureAwait(false);
         case "RunActor":
         case "RunTask":
         case "GetUserInfo":
         case "ListDatasets":
+        case "DeleteWebhook":
         case "ListRecordKeys":
         case "ListStoreActors":
         case "GetDatasetItems":
@@ -511,7 +508,7 @@ public class Script : ScriptBase {
   /// Routes /webhooks/task/{webhookId} to /webhooks/{webhookId} and applies robust deletion handling.
   /// </summary>
   private async Task<HttpResponseMessage> HandleDeleteTaskWebhook() {
-    ModifyRequestPath("/webhooks/task/{webhookId}", "/webhooks/{webhookId}");
+    ModifyRequestPath("/webhooks/task/", "/webhooks/");
 
     return await HandleDeleteWebhook().ConfigureAwait(false);
   }
