@@ -1,8 +1,8 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "Apify Connector",
-    "description": "A connector that brings Apify's web scrapers, AI agents, and automation tools to Power Automate for data collection, monitoring, and business system integration.",
+    "title": "Apify",
+    "description": "Use Apify in Power Automate to run web scrapers and AI agents, manage Actors and tasks, schedule and monitor runs, retrieve datasets and results, and trigger flows from webhooks. Enable end-to-end data collection, enrichment, and automation in your flows.",
     "version": "1.0.0",
     "contact": {
       "name": "Apify Support",
@@ -26,13 +26,7 @@
     "application/json"
   ],
   "securityDefinitions": {
-    "api_key": {
-      "type": "apiKey",
-      "in": "header",
-      "name": "Authorization",
-      "description": "API Token for authenticating with the Apify API. Get it at https://console.apify.com/settings/integrations"
-    },
-    "oauth2_auth": {
+    "apify_oauth2_auth": {
       "type": "oauth2",
       "flow": "accessCode",
       "authorizationUrl": "https://console.apify.com/authorize/oauth",
@@ -44,15 +38,7 @@
     }
   },
   "security": [
-    {
-      "api_key": []
-    },
-    {
-      "oauth2_auth": [
-        "profile",
-        "full_api_access"
-      ]
-    }
+    { "apify_oauth2_auth": [ "profile", "full_api_access" ] }
   ],
   "x-ms-connector-metadata": [
     {
@@ -93,10 +79,10 @@
           }
         },
         "summary": "Get User Information",
+        "x-ms-summary": "Get User Information",
         "description": "Returns information about the current user account, including both public and private information.",
         "operationId": "GetUserInfo",
         "x-ms-visibility": "internal",
-        "x-ms-summary": "Get User Information",
         "tags": [
           "Users"
         ]
@@ -206,7 +192,8 @@
             "type": "integer",
             "required": false,
             "default": 1000,
-            "x-ms-summary": "Maximum number of Actors to return"
+            "x-ms-summary": "Limit",
+            "description": "Maximum number of Actors to return"
           }
         ],
         "responses": {
@@ -282,7 +269,8 @@
             "type": "integer",
             "required": false,
             "default": 1000,
-            "x-ms-summary": "Maximum number of Actors to return"
+            "x-ms-summary": "Limit",
+            "description": "Maximum number of Actors to return"
           }
         ],
         "responses": {
@@ -318,9 +306,9 @@
     "/acts/{actorId}/runs": {
       "post": {
         "summary": "Run Actor",
+        "x-ms-summary": "Run Actor",
         "description": "Runs an Actor and immediately returns without waiting for the run to finish. To wait for the run to finish, use the waitForFinish query parameter. See docs: https://docs.apify.com/api/v2/act-runs-post",
         "operationId": "RunActor",
-        "x-ms-summary": "Run Actor",
         "x-ms-visibility": "important",
         "tags": [
           "Actors"
@@ -330,32 +318,13 @@
             "$ref": "#/parameters/IntegrationPlatformHeader"
           },
           {
-            "name": "actorId",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "description": "Actor identifier to run. Supply Actor ID or Actor name.",
-            "x-ms-summary": "Actor",
-            "x-ms-dynamic-values": {
-              "operationId": "ListActorsDropdown",
-              "value-collection": "data/items",
-              "value-path": "id",
-              "value-title": "title",
-              "parameters": {
-                "actorScope": { "parameter": "actorScope" },
-                "limit": 1000
-              }
-            },
-            "x-ms-visibility": "important"
-          },
-          {
             "name": "actorScope",
+            "x-ms-summary": "Select Actor from",
             "description": "Actor can be either yours or from the Apify Store.",
             "default": "RecentActors",
             "in": "query",
             "required": true,
             "type": "string",
-            "x-ms-summary": "Actor Scope",
             "enum": [
               "RecentActors",
               "StoreActors"
@@ -372,28 +341,47 @@
             ]
           },
           {
+            "name": "actorId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Actor",
+            "description": "Actor identifier to run. Supply Actor ID or Actor name.",
+            "x-ms-dynamic-values": {
+              "operationId": "ListActorsDropdown",
+              "value-collection": "data/items",
+              "value-path": "id",
+              "value-title": "title",
+              "parameters": {
+                "actorScope": { "parameter": "actorScope" },
+                "limit": 1000
+              }
+            },
+            "x-ms-visibility": "important"
+          },
+          {
             "name": "build",
             "in": "query",
             "required": false,
             "type": "string",
-            "description": "Specifies the Actor build to run. It can be either a build tag or build number. By default, the run uses the build specified in the default run configuration for the Actor (typically latest).",
-            "x-ms-summary": "Build"
+            "x-ms-summary": "Build",
+            "description": "Actor build to run (tag or build number). Default is latest."
           },
           {
             "name": "timeout",
             "in": "query",
             "required": false,
             "type": "integer",
-            "description": "Optional timeout for the run, in seconds. By default, the run uses a timeout specified in the default run configuration for the Actor.",
-            "x-ms-summary": "Timeout (seconds)"
+            "x-ms-summary": "Timeout",
+            "description": "Timeout for the run in seconds."
           },
           {
             "name": "memory",
             "in": "query",
             "required": false,
             "type": "integer",
-            "description": "Memory limit for the run, in megabytes. The amount of memory can be set to a power of 2 with a minimum of 128. By default, the run uses a memory limit specified in the default run configuration for the Actor.",
-            "x-ms-summary": "Memory (MB)",
+            "x-ms-summary": "Memory",
+            "description": "Memory limit in MB (power of 2, min 128).",
             "enum": [
               128,
               256,
@@ -410,8 +398,8 @@
             "in": "query",
             "required": false,
             "type": "integer",
-            "x-ms-summary": "Wait for Finish (seconds)",
-            "description": "The maximum number of seconds the server waits for the run to finish. By default, it is 0, the maximum value is 60. If the run finishes in time then the returned run object will have a terminal status (e.g. SUCCEEDED), otherwise it will have a transitional status (e.g. RUNNING).",
+            "x-ms-summary": "Wait for finish",
+            "description": "Wait for the run to finish in seconds (0–60).",
             "maximum": 60,
             "default": 0
           },
@@ -419,9 +407,9 @@
             "name": "inputBody",
             "in": "body",
             "required": true,
+            "x-ms-summary": "Input body",
             "description": "Raw JSON object passed as INPUT to the Actor.",
             "x-ms-textarea": true,
-            "x-ms-summary": "Input Body",
             "schema": {
               "type": "object",
               "description": "Raw JSON object passed as INPUT to the Actor"
@@ -432,7 +420,12 @@
           "201": {
             "description": "Actor run created",
             "schema": {
-              "$ref": "#/definitions/ActorRunResponse"
+              "type": "object",
+              "properties": {
+                "data": {
+                  "$ref": "#/definitions/ActorRunResponse"
+                }
+              }
             }
           },
           "default": {
@@ -490,9 +483,9 @@
     "/actor-tasks/{taskId}/runs": {
       "post": {
         "summary": "Run Task",
+        "x-ms-summary": "Run Task",
         "description": "Runs an Actor task and immediately returns without waiting for the run to finish. To wait for the run to finish, use the waitForFinish query parameter. See docs: https://docs.apify.com/api/v2/actor-task-runs-post",
         "operationId": "RunTask",
-        "x-ms-summary": "Run Task",
         "x-ms-visibility": "important",
         "tags": [
           "Tasks"
@@ -506,8 +499,8 @@
             "in": "path",
             "required": true,
             "type": "string",
-            "description": "Task identifier to run.",
             "x-ms-summary": "Task",
+            "description": "Task identifier to run.",
             "x-ms-dynamic-values": {
               "operationId": "ListTasks",
               "value-collection": "data/items",
@@ -521,8 +514,8 @@
             "in": "query",
             "required": false,
             "type": "integer",
-            "x-ms-summary": "Wait for Finish (seconds)",
-            "description": "The maximum number of seconds the server waits for the run to finish. By default, it is 0, the maximum value is 60. If the run finishes in time then the returned run object will have a terminal status (e.g. SUCCEEDED), otherwise it will have a transitional status (e.g. RUNNING).",
+            "x-ms-summary": "Wait for finish",
+            "description": "Wait for the run to finish in seconds (0–60).",
             "maximum": 60,
             "default": 0
           },
@@ -531,16 +524,16 @@
             "in": "query",
             "required": false,
             "type": "integer",
-            "description": "Optional timeout for the run, in seconds. By default, the run uses a timeout specified in the default run configuration for the Task.",
-            "x-ms-summary": "Timeout (seconds)"
+            "x-ms-summary": "Timeout",
+            "description": "Timeout for the run in seconds."
           },
           {
             "name": "memory",
             "in": "query",
             "required": false,
             "type": "integer",
-            "description": "Memory limit for the run, in megabytes. The amount of memory can be set to a power of 2 with a minimum of 128. By default, the run uses a memory limit specified in the default run configuration for the Task.",
-            "x-ms-summary": "Memory (MB)",
+            "x-ms-summary": "Memory",
+            "description": "Memory limit in MB (power of 2, min 128).",
             "enum": [
               128,
               256,
@@ -556,12 +549,12 @@
             "name": "inputOverride",
             "in": "body",
             "required": false,
-            "description": "Optional. A raw JSON object to override the task's default input.",
+            "x-ms-summary": "Input override",
+            "description": "A raw JSON object to override the task's default input.",
             "x-ms-textarea": true,
-            "x-ms-summary": "Input Override",
             "schema": {
               "type": "object",
-              "description": "Optional. A raw JSON object to override the task's default input."
+              "description": "A raw JSON object to override the task's default input."
             }
           }
         ],
@@ -569,7 +562,12 @@
           "201": {
             "description": "Actor run created",
             "schema": {
-              "$ref": "#/definitions/ActorRunResponse"
+              "type": "object",
+              "properties": {
+                "data": {
+                  "$ref": "#/definitions/ActorRunResponse"
+                }
+              }
             }
           },
           "default": {
@@ -659,7 +657,7 @@
             "x-ms-visibility": "internal",
             "default": 1,
             "type": "integer",
-            "description": "Optional. Set limit to 1 for schema inference."
+            "description": "Set limit to 1 for schema inference."
           }
         ],
         "responses": {
@@ -680,9 +678,9 @@
     "/datasets/{datasetId}/items": {
       "get": {
         "summary": "Get Dataset Items",
+        "x-ms-summary": "Get Dataset Items",
         "description": "Retrieves items from one of your Apify datasets with optional pagination parameters.",
         "operationId": "GetDatasetItems",
-        "x-ms-summary": "Get Dataset Items",
         "x-ms-visibility": "important",
         "tags": [
           "Datasets"
@@ -711,7 +709,7 @@
             "required": false,
             "type": "integer",
             "x-ms-summary": "Limit",
-            "description": "Optional. The number of items to retrieve. Defaults to the API's default if not provided."
+            "description": "Maximum number of items to be returned."
           },
           {
             "name": "offset",
@@ -719,7 +717,7 @@
             "required": false,
             "type": "integer",
             "x-ms-summary": "Offset",
-            "description": "Optional. The number of items to skip from the beginning. Used for pagination."
+            "description": "Number of items to skip from the beginning of the list."
           }
         ],
         "responses": {
@@ -749,9 +747,9 @@
     "/acts/aYG0l9s7dbB7j3gbS/runs": {
       "post": {
         "summary": "Scrape Single URL",
+        "x-ms-summary": "Scrape Single URL",
         "description": "Scrapes a single URL using the Web Scraper actor. This action starts an asynchronous scrape and returns the run details immediately. Use the Actor Run Finished trigger to process results once the scrape is complete.",
         "operationId": "ScrapeSingleUrl",
-        "x-ms-summary": "Scrape Single URL",
         "x-ms-visibility": "important",
         "tags": [
           "Scraping"
@@ -766,16 +764,16 @@
             "required": true,
             "type": "string",
             "pattern": "^https?://[^\\s]+$",
-            "description": "The full URL of the single page to be scraped. Must be a valid URL format.",
-            "x-ms-summary": "URL to scrape"
+            "x-ms-summary": "URL to scrape",
+            "description": "The full URL of the single page to be scraped. Must be a valid URL format."
           },
           {
             "name": "crawler_type",
             "in": "query",
             "required": true,
             "type": "string",
-            "description": "Select the crawling engine to use for scraping the page.",
             "x-ms-summary": "Crawler type",
+            "description": "Select the crawling engine to use for scraping the page.",
             "default": "playwright:adaptive",
             "enum": [
               "playwright:adaptive",
@@ -814,15 +812,20 @@
             "x-ms-visibility": "internal",
             "default": 0,
             "type": "integer",
-            "description": "Optional timeout for the run, in seconds. By default, the run uses a timeout specified in the default run configuration for the Actor.",
-            "x-ms-summary": "Timeout (seconds)"
+            "x-ms-summary": "Timeout",
+            "description": "Timeout for the run in seconds."
           }
         ],
         "responses": {
           "201": {
             "description": "Scrape started successfully",
             "schema": {
-              "$ref": "#/definitions/ActorRunResponse"
+              "type": "object",
+              "properties": {
+                "data": {
+                  "$ref": "#/definitions/ActorRunResponse"
+                }
+              }
             }
           },
           "default": {
@@ -947,14 +950,16 @@
             "in": "path",
             "required": true,
             "type": "string",
-            "description": "Store ID"
+            "x-ms-summary": "Store",
+            "description": "Select a value"
           },
           {
             "name": "recordKey",
             "in": "path",
             "required": true,
             "type": "string",
-            "description": "Record Key"
+            "x-ms-summary": "Key",
+            "description": "Select a value"
           }
         ],
         "responses": {
@@ -974,9 +979,9 @@
     "/key-value-stores/{storeId}/records/{recordKey}": {
       "get": {
         "summary": "Get Key-Value Store Record",
+        "x-ms-summary": "Get Key-Value Store Record",
         "description": "Gets a value stored in the key-value store under a specific key.",
         "operationId": "GetKeyValueStoreRecord",
-        "x-ms-summary": "Get Key-Value Store Record",
         "x-ms-visibility": "important",
         "tags": [
           "KeyValueStores"
@@ -994,6 +999,7 @@
             "required": true,
             "type": "string",
             "x-ms-summary": "Store",
+            "description": "Select the key-value store from which to retrieve the record.",
             "x-ms-dynamic-values": {
               "operationId": "ListKeyValueStores",
               "value-collection": "data/items",
@@ -1006,7 +1012,8 @@
             "in": "path",
             "required": true,
             "type": "string",
-            "x-ms-summary": "Record Key",
+            "x-ms-summary": "Key",
+            "description": "Select the key from which to retrieve the record.",
             "x-ms-dynamic-values": {
               "operationId": "ListRecordKeys",
               "value-collection": "data/items",
@@ -1068,12 +1075,12 @@
           },
           {
             "name": "actorScope",
+            "x-ms-summary": "Select Actor from",
             "description": "Actor can be either yours or from the Apify Store.",
             "default": "RecentActors",
             "in": "query",
             "required": true,
             "type": "string",
-            "x-ms-summary": "Actor Scope",
             "enum": [
               "RecentActors",
               "StoreActors"
@@ -1105,8 +1112,8 @@
                 "eventTypes": {
                   "type": "array",
                   "x-ms-visibility": "important",
+                  "x-ms-summary": "Statuses",
                   "description": "Actor run statuses to trigger on",
-                  "x-ms-summary": "Trigger On",
                   "items": {
                     "type": "string",
                     "enum": [
@@ -1114,12 +1121,6 @@
                       "ACTOR.RUN.FAILED",
                       "ACTOR.RUN.TIMED_OUT",
                       "ACTOR.RUN.ABORTED"
-                    ],
-                    "x-ms-enum-values": [
-                      { "value": "ACTOR.RUN.SUCCEEDED", "displayName": "SUCCEEDED" },
-                      { "value": "ACTOR.RUN.FAILED", "displayName": "FAILED" },
-                      { "value": "ACTOR.RUN.TIMED_OUT", "displayName": "TIMED_OUT" },
-                      { "value": "ACTOR.RUN.ABORTED", "displayName": "ABORTED" }
                     ]
                   }
                 },
@@ -1129,8 +1130,8 @@
                     "actorId": { 
                       "type": "string",
                       "x-ms-visibility": "important",
-                      "description": "Actor identifier to run. Supply Actor ID or Actor name.",
                       "x-ms-summary": "Actor",
+                      "description": "Actor identifier to run. Supply Actor ID or Actor name.",
                       "x-ms-dynamic-values": {
                         "operationId": "ListActorsDropdown",
                         "value-collection": "data/items",
@@ -1231,8 +1232,8 @@
                 "eventTypes": {
                   "type": "array",
                   "x-ms-visibility": "important",
+                  "x-ms-summary": "Statuses",
                   "description": "Actor run statuses to trigger on",
-                  "x-ms-summary": "Trigger On",
                   "items": {
                     "type": "string",
                     "enum": [
@@ -1240,12 +1241,6 @@
                       "ACTOR.RUN.FAILED",
                       "ACTOR.RUN.TIMED_OUT",
                       "ACTOR.RUN.ABORTED"
-                    ],
-                    "x-ms-enum-values": [
-                      { "value": "ACTOR.RUN.SUCCEEDED", "displayName": "SUCCEEDED" },
-                      { "value": "ACTOR.RUN.FAILED", "displayName": "FAILED" },
-                      { "value": "ACTOR.RUN.TIMED_OUT", "displayName": "TIMED_OUT" },
-                      { "value": "ACTOR.RUN.ABORTED", "displayName": "ABORTED" }
                     ]
                   }
                 },
@@ -1254,8 +1249,8 @@
                   "properties": {
                     "actorTaskId": { 
                       "type": "string",
-                      "description": "Actor task identifier to monitor for run events.",
                       "x-ms-summary": "Task",
+                      "description": "Actor task identifier to monitor for run events.",
                       "x-ms-visibility": "important",
                       "x-ms-dynamic-values": {
                         "operationId": "ListTasks",
@@ -1509,6 +1504,21 @@
           "x-ms-summary": "Default Request Queue ID",
           "description": "Unique identifier of the default request queue used by the Actor."
         },
+        "platformUsageBillingModel": {
+          "type": "string",
+          "x-ms-summary": "Platform Usage Billing Model",
+          "description": "The billing model used for platform usage (e.g., USER, ORGANIZATION)."
+        },
+        "integrationTracking": {
+          "type": "object",
+          "x-ms-summary": "Integration Tracking",
+          "description": "Information about the integration platform and whether it's an AI tool."
+        },
+        "generalAccess": {
+          "type": "string",
+          "x-ms-summary": "General Access",
+          "description": "General access setting for the Actor run (e.g., FOLLOW_USER_SETTING)."
+        },
         "buildNumber": {
           "type": "string",
           "x-ms-summary": "Build Number",
@@ -1540,9 +1550,9 @@
           "description": "Total cost of the Actor run in USD."
         },
         "usageUsd": {
-          "type": "number",
+          "type": "object",
           "x-ms-summary": "Usage USD",
-          "description": "Usage cost in USD for this specific run."
+          "description": "Usage cost breakdown in USD by resource type (compute units, datasets, key-value stores, etc.)."
         }
       }
     },
