@@ -55,6 +55,8 @@
           "x-ms-apimTemplate-policySection": "Request"
         }
       }
-    ]
+    ],
+    "publisher": "Apify",
+    "stackOwner": "Apify"
   }
 }

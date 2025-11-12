@@ -8,50 +8,50 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 public class Script : ScriptBase {
-   /// <summary>
-   /// Main entry point for the Power Automate custom connector script.
-   /// Routes incoming requests to appropriate handlers based on the operation ID.
-   /// </summary>
-   /// <returns>
-   /// An <see cref="HttpResponseMessage"/> representing the HTTP response message including the status code and data.
-   /// </returns>
-   public override async Task<HttpResponseMessage> ExecuteAsync() {
-      switch (Context.OperationId) {
-        case "ListActorsDropdown":
-          return await HandleListActorsDropdown().ConfigureAwait(false);
-        case "ListTasks":
-          return await HandleListTasks().ConfigureAwait(false);
-        case "GetDatasetSchema":
-          return await HandleGetDatasetSchema().ConfigureAwait(false);
-        case "ScrapeSingleUrl":
-          return await HandleScrapeSingleUrl().ConfigureAwait(false);
-        case "GetKeyValueStoreRecordSchema":
-          return await HandleGetKeyValueStoreRecordSchema().ConfigureAwait(false);
-        case "DeleteTaskWebhook":
-          return await HandleDeleteTaskWebhook().ConfigureAwait(false);
-        case "ActorTaskFinishedTrigger":
-          return await HandleActorTaskFinishedTrigger().ConfigureAwait(false);
-        case "ActorRunFinishedTrigger":
-          return await HandleCreateWebhookWithLocation().ConfigureAwait(false);
-        case "DeleteActorWebhook":
-          return await HandleDeleteWebhook().ConfigureAwait(false);
-        case "RunActor":
-        case "RunTask":
-        case "GetUserInfo":
-        case "ListDatasets":
-        case "ListRecordKeys":
-        case "ListStoreActors":
-        case "GetDatasetItems":
-        case "ListRecentActors":
-        case "ListKeyValueStores":
-        case "GetKeyValueStoreRecord":
-          return await HandlePassthrough().ConfigureAwait(false);
-        default:
-          HttpResponseMessage response = new HttpResponseMessage(HttpStatusCode.BadRequest);
-          response.Content = CreateJsonContent($"Unknown operation ID '{Context.OperationId}'");
-          return response;
-      }
-   }
+  /// <summary>
+  /// Main entry point for the Power Automate custom connector script.
+  /// Routes incoming requests to appropriate handlers based on the operation ID.
+  /// </summary>
+  /// <returns>
+  /// An <see cref="HttpResponseMessage"/> representing the HTTP response message including the status code and data.
+  /// </returns>
+  public override async Task<HttpResponseMessage> ExecuteAsync() {
+    switch (Context.OperationId) {
+      case "ListActorsDropdown":
+        return await HandleListActorsDropdown().ConfigureAwait(false);
+      case "ListTasks":
+        return await HandleListTasks().ConfigureAwait(false);
+      case "GetDatasetSchema":
+        return await HandleGetDatasetSchema().ConfigureAwait(false);
+      case "ScrapeSingleUrl":
+        return await HandleScrapeSingleUrl().ConfigureAwait(false);
+      case "GetKeyValueStoreRecordSchema":
+        return await HandleGetKeyValueStoreRecordSchema().ConfigureAwait(false);
+      case "DeleteTaskWebhook":
+        return await HandleDeleteTaskWebhook().ConfigureAwait(false);
+      case "ActorTaskFinishedTrigger":
+        return await HandleActorTaskFinishedTrigger().ConfigureAwait(false);
+      case "ActorRunFinishedTrigger":
+        return await HandleCreateWebhookWithLocation().ConfigureAwait(false);
+      case "DeleteActorWebhook":
+        return await HandleDeleteWebhook().ConfigureAwait(false);
+      case "RunActor":
+      case "RunTask":
+      case "GetUserInfo":
+      case "ListDatasets":
+      case "ListRecordKeys":
+      case "ListStoreActors":
+      case "GetDatasetItems":
+      case "ListRecentActors":
+      case "ListKeyValueStores":
+      case "GetKeyValueStoreRecord":
+        return await HandlePassthrough().ConfigureAwait(false);
+      default:
+        HttpResponseMessage response = new HttpResponseMessage(HttpStatusCode.BadRequest);
+        response.Content = CreateJsonContent($"Unknown operation ID '{Context.OperationId}'");
+        return response;
+    }
+  }
 
   /// <summary>
   /// Handles passthrough operations by forwarding the original request to the Apify API.
@@ -67,22 +67,8 @@ public class Script : ScriptBase {
   /// <summary>
   /// Handles the ScrapeSingleUrl operation by configuring and executing a web scraping request
   /// using the Apify Web Scraper actor for a single URL.
+  /// Extracts URL and crawler type from the query string, builds a single-page scrape request, and forwards it.
   /// </summary>
-  /// <remarks>
-  /// This method extracts URL and crawler type parameters from the query string, constructs
-  /// a JSON input body with predefined scraping settings optimized for single URL scraping,
-  /// and forwards the request to the Apify API. The configuration includes:
-  /// - Maximum crawl depth of 0 (single page only)
-  /// - Maximum crawl pages of 1
-  /// - Maximum results of 1
-  /// - Apify proxy configuration enabled
-  /// - Cookie warnings removal enabled
-  /// - HTML and Markdown content saving enabled
-  /// 
-  /// Required query parameters:
-  /// - url: The URL to scrape
-  /// - crawler_type: The type of crawler to use (optional)
-  /// </remarks>
   /// <returns>
   /// An <see cref="HttpResponseMessage"/> representing the HTTP response from the Apify Web Scraper actor,
   /// containing the scraped data and metadata for the specified URL.
@@ -462,7 +448,6 @@ public class Script : ScriptBase {
   /// <summary>
   /// Handles the creation of webhooks for Power Automate triggers with proper Location header.
   /// Removes the helper actorScope parameter and forwards the request to Apify API.
-  /// The critical fix ensures webhook cleanup by intercepting the 201 response and adding
   /// the Location header manually since Apify API doesn't provide it by default.
   /// </summary>
   /// <returns>
