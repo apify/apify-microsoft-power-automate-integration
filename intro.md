@@ -1,15 +1,15 @@
 # Apify Connector
 
-The Apify connector enables you to automate web scraping and data extraction workflows directly in your flows. With this connector, you can run Actors and Tasks, retrieve scraped data from Datasets and Key-Value Stores, and create webhooks to trigger workflows when scraping jobs finish.
+The Apify connector enables you to automate web scraping and data extraction workflows directly in your flows. With this connector, you can run *Actors* and *tasks*, retrieve scraped data from *datasets* and *key-value stores*, and create *webhooks* to trigger workflows when scraping jobs finish.
 
 ## Prerequisites
 
 - An Apify account - Sign up for free at [apify.com](https://apify.com)
-- OAuth 2.0 authentication - The connector uses OAuth 2.0 for secure authentication
+- Sign in with Apify authentication [OAuth 2.0] - The connector uses Sign in with Apify for secure authentication
 
 ## How to get credentials
 
-The connector is pre-configured with OAuth 2.0 settings. When you create a connection, you will be redirected to the Apify Console to authorize the connection. No additional credential setup is required on your part.
+The connector is pre-configured with Sign in with Apify settings, including a shared client ID and client secret that all users can use. When you create a connection, you will be redirected to the Apify Console to authorize the connection. No additional credential setup is required on your part.
 
 The connector requires the following OAuth scopes:
 - `profile` - Access to your user profile
@@ -17,7 +17,7 @@ The connector requires the following OAuth scopes:
 
 ## Get started with your connector
 
-1. Create a connection to Apify using OAuth 2.0 authentication
+1. Create a connection to Apify using Sign in with Apify authentication [OAuth 2.0]
 2. Select an action from the available list:
    - **Run Actor** - Start an Actor run for web scraping
    - **Run Task** - Execute a pre-configured Actor Task

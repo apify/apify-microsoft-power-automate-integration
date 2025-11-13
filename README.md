@@ -18,7 +18,7 @@ This connector provides the following triggers and actions:
 
 Use the "Actor Run Finished" trigger to automatically execute your Power Automate flow when a specific Apify Actor run completes with a selected status.
 
-- **Authentication**: Use Apify API Key or OAuth 2.0 (scopes: `profile`, `full_api_access`).
+- **Authentication**: Use Apify API token or Sign in with Apify [OAuth 2.0] (scopes: `profile`, `full_api_access`).
 - **Headers**: All requests include `x-apify-integration-platform: microsoft-power-automate`.
 - **Inputs**:
   - `Actor Scope`: Choose between "Recently used Actors" or "From Store" (Apify Store actors).
@@ -35,7 +35,7 @@ How it works:
 
 Use the "Actor Task Finished" trigger to automatically execute your Power Automate flow when a specific Apify Actor task run completes with a selected status.
 
-- **Authentication**: Use Apify API Key or OAuth 2.0 (scopes: `profile`, `full_api_access`).
+- **Authentication**: Use Apify API token or Sign in with Apify [OAuth 2.0] (scopes: `profile`, `full_api_access`).
 - **Headers**: All requests include `x-apify-integration-platform: microsoft-power-automate`.
 - **Inputs**:
   - `Task`: Dynamic dropdown populated with your actor tasks.
@@ -52,7 +52,7 @@ How it works:
 
 Use the "Get Dataset Items" action to retrieve records from one of your Apify Datasets.
 
-- Authentication: Use Apify API Key or OAuth 2.0 (scopes: `profile`, `full_api_access`).
+- Authentication: Use Apify API token or Sign in with Apify [OAuth 2.0] (scopes: `profile`, `full_api_access`).
 - Headers: All requests include `x-apify-integration-platform: power-automate`.
 - Dataset (`datasetId`): Select a dataset from a dynamically populated dropdown of your datasets.
 - Optional query params:
@@ -72,7 +72,7 @@ Tips:
 
 Retrieve a record's content from a selected key-value store.
 
-- **Authentication**: API Key or OAuth 2.0 (scopes: `profile`, `full_api_access`).
+- **Authentication**: Apify API token or Sign in with Apify [OAuth 2.0] (scopes: `profile`, `full_api_access`).
 - **Headers**: All requests include `x-apify-integration-platform: power-automate`.
 - **Inputs**:
   - `Store` (`storeId`, required): Dynamic dropdown listing your stores.
@@ -88,7 +88,7 @@ This action calls `GET /v2/key-value-stores/{storeId}/records/{recordKey}` via A
 
 Use the "Scrape Single URL" action to scrape a single webpage using Apify's Web Scraper actor.
 
-- Authentication: Use Apify API Key or OAuth 2.0 (scopes: `profile`, `full_api_access`).
+- Authentication: Use Apify API token or Sign in with Apify [OAuth 2.0] (scopes: `profile`, `full_api_access`).
 - Headers: All requests include `x-apify-integration-platform: power-automate`.
 - URL (`url`): The full URL of the single page to be scraped. Must be a valid URL format.
 - Crawler Type (`crawler_type`): Select the crawling engine to use:
@@ -104,7 +104,7 @@ The connector invokes `POST /v2/acts/aYG0l9s7dbB7j3gbS/runs` (Web Scraper actor)
 
 Use the "Run Actor" action to start an Apify Actor run.
 
-- Authentication: Use Apify API Key or OAuth 2.0 (scopes: `profile`, `full_api_access`).
+- Authentication: Use Apify API token or Sign in with Apify [OAuth 2.0] (scopes: `profile`, `full_api_access`).
 - Headers: All requests include `x-apify-integration-platform: microsoft-power-automate`.
 - Actor Scope (`actorScope`): Choose "Recently used Actors" or "From Store".
   - If "Recently used Actors": pick from `Actor` populated by your account Actors.
@@ -122,7 +122,7 @@ The connector invokes `POST /v2/acts/{actorId}/runs` per Apify docs (see: https:
 
 Use the "Run Task" action to start an Apify task run.
 
-- Authentication: Use Apify API Key or OAuth 2.0 (scopes: `profile`, `full_api_access`).
+- Authentication: Use Apify API token or Sign in with Apify [OAuth 2.0] (scopes: `profile`, `full_api_access`).
 - Headers: All requests include `x-apify-integration-platform: microsoft-power-automate`.
 - Task (`taskId`): Select the task from a dynamic dropdown of your available tasks.
 - Input Body (`inputOverride`): Provide a raw JSON object to override the task's default input.

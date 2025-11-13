@@ -5,7 +5,7 @@
     "description": "Use Apify to run web scrapers and AI agents, manage Actors and tasks, schedule and monitor runs, retrieve datasets and results, and trigger flows from webhooks. Enable end-to-end data collection, enrichment, and automation in your workflows.",
     "version": "1.0.0",
     "contact": {
-      "name": "Apify Support",
+      "name": "Apify support",
       "url": "https://apify.com/contact",
       "email": "support@apify.com"
     },
@@ -78,44 +78,29 @@
         ],
         "responses": {
           "200": {
-            "description": "User information retrieved successfully.",
-            "schema": {
-              "$ref": "#/definitions/UserResponse"
-            }
+            "$ref": "#/responses/UserResponse"
           },
           "400": {
-            "description": "Bad Request",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+            "$ref": "#/responses/ErrorResponse400"
           },
           "404": {
-            "description": "Not Found",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+             "$ref": "#/responses/ErrorResponse404"
           },
           "401": {
-            "description": "Unauthorized",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+             "$ref": "#/responses/ErrorResponse401"
           },
-          "403": {
-            "description": "Forbidden",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+          "429": {
+             "$ref": "#/responses/ErrorResponse429"
+          },
+          "405": {
+             "$ref": "#/responses/ErrorResponse405"
           },
           "500": {
-            "description": "Internal Server Error. Unknown error occurred",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+             "$ref": "#/responses/ErrorResponse500"
           }
         },
-        "summary": "Get User Information",
-        "x-ms-summary": "Get User Information",
+        "summary": "Get user information",
+        "x-ms-summary": "Get user information",
         "description": "Returns information about the current user account, including both public and private information.",
         "operationId": "GetUserInfo",
         "x-ms-visibility": "internal",
@@ -144,115 +129,35 @@
         ],
         "responses": {
           "200": {
-            "description": "List of recently used Actors retrieved successfully.",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "data": {
-                  "type": "object",
-                  "properties": {
-                    "total": {
-                      "type": "integer",
-                      "format": "int32"
-                    },
-                    "count": {
-                      "type": "integer",
-                      "format": "int32"
-                    },
-                    "offset": {
-                      "type": "integer",
-                      "format": "int32"
-                    },
-                    "limit": {
-                      "type": "integer",
-                      "format": "int32"
-                    },
-                    "desc": {
-                      "type": "boolean"
-                    },
-                    "items": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "string"
-                          },
-                          "createdAt": {
-                            "type": "string"
-                          },
-                          "modifiedAt": {
-                            "type": "string"
-                          },
-                          "name": {
-                            "type": "string"
-                          },
-                          "username": {
-                            "type": "string"
-                          },
-                          "title": {
-                            "type": "string"
-                          },
-                          "stats": {
-                            "type": "object",
-                            "properties": {
-                              "totalRuns": {
-                                "type": "integer",
-                                "format": "int32"
-                              },
-                              "lastRunStartedAt": {
-                                "type": "string"
-                              }
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              },
-              "additionalProperties": true
-            }
+            "$ref": "#/responses/RecentlyUsedActorsListResponse"
           },
           "400": {
-            "description": "Bad Request",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+            "$ref": "#/responses/ErrorResponse400"
           },
           "404": {
-            "description": "Not Found",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+             "$ref": "#/responses/ErrorResponse404"
           },
           "401": {
-            "description": "Unauthorized",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+             "$ref": "#/responses/ErrorResponse401"
           },
-          "403": {
-            "description": "Forbidden",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+          "429": {
+             "$ref": "#/responses/ErrorResponse429"
+          },
+          "405": {
+             "$ref": "#/responses/ErrorResponse405"
           },
           "500": {
-            "description": "Internal Server Error. Unknown error occurred",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+             "$ref": "#/responses/ErrorResponse500"
           }
         }
       }
     },
     "/store": {
       "get": {
-        "summary": "List Store Actors (for dropdown)",
-        "description": "Fetches a list of Actors from the Apify Store.",
+        "summary": "List store Actors (for dropdown)",
+        "description": "Fetches a list of Actors from the Apify store.",
         "operationId": "ListStoreActors",
-        "x-ms-summary": "List Store Actors (for dropdown)",
+        "x-ms-summary": "List store Actors (for dropdown)",
         "x-ms-visibility": "internal",
         "tags": [
           "Actors"
@@ -270,67 +175,25 @@
         ],
         "responses": {
           "200": {
-            "description": "List of Actors from Apify Store retrieved successfully.",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "data": {
-                  "type": "object",
-                  "properties": {
-                    "items": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "string"
-                          },
-                          "name": {
-                            "type": "string"
-                          },
-                          "title": {
-                            "type": "string"
-                          },
-                          "username": {
-                            "type": "string"
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
+            "$ref": "#/responses/StoreActorsListResponse"
           },
           "400": {
-            "description": "Bad Request",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+            "$ref": "#/responses/ErrorResponse400"
           },
           "404": {
-            "description": "Not Found",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+             "$ref": "#/responses/ErrorResponse404"
           },
           "401": {
-            "description": "Unauthorized",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+             "$ref": "#/responses/ErrorResponse401"
           },
-          "403": {
-            "description": "Forbidden",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+          "429": {
+             "$ref": "#/responses/ErrorResponse429"
+          },
+          "405": {
+             "$ref": "#/responses/ErrorResponse405"
           },
           "500": {
-            "description": "Internal Server Error. Unknown error occurred",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+             "$ref": "#/responses/ErrorResponse500"
           }
         }
       }
@@ -338,7 +201,7 @@
     "/actors/dropdown": {
       "get": {
         "summary": "List Actors (dropdown)",
-        "description": "Fetches a list of Actors from recently used Actors or from Apify Store based on scope for dropdown selection.",
+        "description": "Fetches a list of Actors from recently used Actors or from Apify store based on scope for dropdown selection.",
         "operationId": "ListActorsDropdown",
         "x-ms-summary": "List Actors (dropdown)",
         "x-ms-visibility": "internal",
@@ -362,10 +225,10 @@
               },
               {
                 "value": "StoreActors",
-                "displayName": "From Store"
+                "displayName": "Apify store Actors"
               }
             ],
-            "description": "Select scope of Actors: recently used or from the Apify Store.",
+            "description": "Please select the source to search Actors from.",
             "x-ms-visibility": "internal"
           },
           {
@@ -377,61 +240,25 @@
         ],
         "responses": {
           "200": {
-            "description": "List of Actors for dropdown retrieved successfully.",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "data": {
-                  "type": "object",
-                  "properties": {
-                    "items": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "string"
-                          },
-                          "title": {
-                            "type": "string"
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
+            "$ref": "#/responses/ActorsDropdownResponse"
           },
           "400": {
-            "description": "Bad Request",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+            "$ref": "#/responses/ErrorResponse400"
           },
           "404": {
-            "description": "Not Found",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+             "$ref": "#/responses/ErrorResponse404"
           },
           "401": {
-            "description": "Unauthorized",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+             "$ref": "#/responses/ErrorResponse401"
           },
-          "403": {
-            "description": "Forbidden",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+          "429": {
+             "$ref": "#/responses/ErrorResponse429"
+          },
+          "405": {
+             "$ref": "#/responses/ErrorResponse405"
           },
           "500": {
-            "description": "Internal Server Error. Unknown error occurred",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+             "$ref": "#/responses/ErrorResponse500"
           }
         }
       }
@@ -453,7 +280,7 @@
           {
             "name": "actorScope",
             "x-ms-summary": "Select Actor from",
-            "description": "Actor can be either yours or from the Apify Store.",
+            "description": "Please select the source to search Actors from.",
             "default": "RecentActors",
             "in": "query",
             "required": true,
@@ -469,7 +296,7 @@
               },
               {
                 "value": "StoreActors",
-                "displayName": "From Store"
+                "displayName": "Apify store Actors"
               }
             ]
           },
@@ -526,55 +353,35 @@
         ],
         "responses": {
           "201": {
-            "description": "Actor run created",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "data": {
-                  "$ref": "#/definitions/ActorRunResponse"
-                }
-              }
-            }
+            "$ref": "#/responses/ActorRunCreatedResponse"
           },
           "400": {
-            "description": "Bad Request",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+            "$ref": "#/responses/ErrorResponse400"
           },
           "404": {
-            "description": "Not Found",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+             "$ref": "#/responses/ErrorResponse404"
           },
           "401": {
-            "description": "Unauthorized",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+             "$ref": "#/responses/ErrorResponse401"
           },
-          "403": {
-            "description": "Forbidden",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+          "429": {
+             "$ref": "#/responses/ErrorResponse429"
+          },
+          "405": {
+             "$ref": "#/responses/ErrorResponse405"
           },
           "500": {
-            "description": "Internal Server Error. Unknown error occurred",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+             "$ref": "#/responses/ErrorResponse500"
           }
         }
       }
     },
     "/actor-tasks": {
       "get": {
-        "summary": "List Tasks (for dropdown)",
+        "summary": "List tasks (for dropdown)",
         "description": "Fetches a list of the user's actor tasks.",
         "operationId": "ListTasks",
-        "x-ms-summary": "List Tasks (for dropdown)",
+        "x-ms-summary": "List tasks (for dropdown)",
         "x-ms-visibility": "internal",
         "tags": [
           "Tasks"
@@ -586,73 +393,33 @@
         ],
         "responses": {
           "200": {
-            "description": "List of Actor tasks retrieved successfully.",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "data": {
-                  "type": "object",
-                  "properties": {
-                    "items": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "string"
-                          },
-                          "name": {
-                            "type": "string"
-                          },
-                          "actName": {
-                            "type": "string"
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              },
-              "additionalProperties": true
-            }
+            "$ref": "#/responses/TasksListResponse"
           },
           "400": {
-            "description": "Bad Request",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+            "$ref": "#/responses/ErrorResponse400"
           },
           "404": {
-            "description": "Not Found",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+             "$ref": "#/responses/ErrorResponse404"
           },
           "401": {
-            "description": "Unauthorized",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+             "$ref": "#/responses/ErrorResponse401"
           },
-          "403": {
-            "description": "Forbidden",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+          "429": {
+             "$ref": "#/responses/ErrorResponse429"
+          },
+          "405": {
+             "$ref": "#/responses/ErrorResponse405"
           },
           "500": {
-            "description": "Internal Server Error. Unknown error occurred",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+             "$ref": "#/responses/ErrorResponse500"
           }
         }
       }
     },
     "/actor-tasks/{taskId}/runs": {
       "post": {
-        "summary": "Run Task",
-        "x-ms-summary": "Run Task",
+        "summary": "Run task",
+        "x-ms-summary": "Run task",
         "description": "Runs an Actor task and immediately returns without waiting for the run to finish. To wait for the run to finish, use the waitForFinish query parameter. See docs: https://docs.apify.com/api/v2/actor-task-runs-post.",
         "operationId": "RunTask",
         "x-ms-visibility": "important",
@@ -702,55 +469,35 @@
         ],
         "responses": {
           "201": {
-            "description": "Actor run created",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "data": {
-                  "$ref": "#/definitions/ActorRunResponse"
-                }
-              }
-            }
+            "$ref": "#/responses/ActorRunCreatedResponse"
           },
           "400": {
-            "description": "Bad Request",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+            "$ref": "#/responses/ErrorResponse400"
           },
           "404": {
-            "description": "Not Found",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+             "$ref": "#/responses/ErrorResponse404"
           },
           "401": {
-            "description": "Unauthorized",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+             "$ref": "#/responses/ErrorResponse401"
           },
-          "403": {
-            "description": "Forbidden",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+          "429": {
+             "$ref": "#/responses/ErrorResponse429"
+          },
+          "405": {
+             "$ref": "#/responses/ErrorResponse405"
           },
           "500": {
-            "description": "Internal Server Error. Unknown error occurred",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+             "$ref": "#/responses/ErrorResponse500"
           }
         }
       }
     },
     "/datasets": {
       "get": {
-        "summary": "List Datasets (for dropdown)",
+        "summary": "List datasets (for dropdown)",
         "description": "Fetches a list of the user's datasets.",
         "operationId": "ListDatasets",
-        "x-ms-summary": "List Datasets (for dropdown)",
+        "x-ms-summary": "List datasets (for dropdown)",
         "x-ms-visibility": "internal",
         "tags": [
           "Datasets"
@@ -762,105 +509,35 @@
         ],
         "responses": {
           "200": {
-            "description": "List of datasets retrieved successfully.",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "data": {
-                  "type": "object",
-                  "properties": {
-                    "total": {
-                      "type": "integer",
-                      "format": "int32"
-                    },
-                    "count": {
-                      "type": "integer",
-                      "format": "int32"
-                    },
-                    "offset": {
-                      "type": "integer",
-                      "format": "int32"
-                    },
-                    "limit": {
-                      "type": "integer",
-                      "format": "int32"
-                    },
-                    "desc": {
-                      "type": "boolean"
-                    },
-                    "items": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "string"
-                          },
-                          "createdAt": {
-                            "type": "string"
-                          },
-                          "modifiedAt": {
-                            "type": "string"
-                          },
-                          "name": {
-                            "type": "string"
-                          },
-                          "itemCount": {
-                            "type": "integer",
-                            "format": "int32"
-                          },
-                          "cleanItemCount": {
-                            "type": "integer",
-                            "format": "int32"
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              },
-              "additionalProperties": true
-            }
+            "$ref": "#/responses/DatasetListResponse"
           },
           "400": {
-            "description": "Bad Request",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+            "$ref": "#/responses/ErrorResponse400"
           },
           "404": {
-            "description": "Not Found",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+             "$ref": "#/responses/ErrorResponse404"
           },
           "401": {
-            "description": "Unauthorized",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+             "$ref": "#/responses/ErrorResponse401"
           },
-          "403": {
-            "description": "Forbidden",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+          "429": {
+             "$ref": "#/responses/ErrorResponse429"
+          },
+          "405": {
+             "$ref": "#/responses/ErrorResponse405"
           },
           "500": {
-            "description": "Internal Server Error. Unknown error occurred",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+             "$ref": "#/responses/ErrorResponse500"
           }
         }
       }
     },
     "/datasets/{datasetId}/itemsSchemaHelper": {
       "get": {
-        "summary": "Get Dataset Schema (for dynamic schema)",
+        "summary": "Get dataset schema (for dynamic schema)",
         "description": "Fetches one item from a dataset to infer the schema.",
         "operationId": "GetDatasetSchema",
-        "x-ms-summary": "Get Dataset Schema (for dynamic schema)",
+        "x-ms-summary": "Get dataset schema (for dynamic schema)",
         "x-ms-visibility": "internal",
         "tags": [
           "Datasets"
@@ -897,42 +574,30 @@
             }
           },
           "400": {
-            "description": "Bad Request",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+            "$ref": "#/responses/ErrorResponse400"
           },
           "404": {
-            "description": "Not Found",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+             "$ref": "#/responses/ErrorResponse404"
           },
           "401": {
-            "description": "Unauthorized",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+             "$ref": "#/responses/ErrorResponse401"
           },
-          "403": {
-            "description": "Forbidden",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+          "429": {
+             "$ref": "#/responses/ErrorResponse429"
+          },
+          "405": {
+             "$ref": "#/responses/ErrorResponse405"
           },
           "500": {
-            "description": "Internal Server Error. Unknown error occurred",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+             "$ref": "#/responses/ErrorResponse500"
           }
         }
       }
     },
     "/datasets/{datasetId}/items": {
       "get": {
-        "summary": "Get Dataset Items",
-        "x-ms-summary": "Get Dataset Items",
+        "summary": "Get dataset items",
+        "x-ms-summary": "Get dataset items",
         "description": "Retrieves items from one of your Apify datasets with optional pagination parameters.",
         "operationId": "GetDatasetItems",
         "x-ms-visibility": "important",
@@ -980,7 +645,7 @@
             "schema": {
               "type": "array",
               "items": {
-                "title": "Dataset Item",
+                "title": "Dataset item",
                 "x-ms-dynamic-schema": {
                   "operationId": "GetDatasetSchema",
                   "parameters": {
@@ -993,43 +658,31 @@
             }
           },
           "400": {
-            "description": "Bad Request",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+            "$ref": "#/responses/ErrorResponse400"
           },
           "404": {
-            "description": "Not Found",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+             "$ref": "#/responses/ErrorResponse404"
           },
           "401": {
-            "description": "Unauthorized",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+             "$ref": "#/responses/ErrorResponse401"
           },
-          "403": {
-            "description": "Forbidden",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+          "429": {
+             "$ref": "#/responses/ErrorResponse429"
+          },
+          "405": {
+             "$ref": "#/responses/ErrorResponse405"
           },
           "500": {
-            "description": "Internal Server Error. Unknown error occurred",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+             "$ref": "#/responses/ErrorResponse500"
           }
         }
       }
     },
     "/acts/aYG0l9s7dbB7j3gbS/runs": {
       "post": {
-        "summary": "Scrape Single URL",
-        "x-ms-summary": "Scrape Single URL",
-        "description": "Scrapes a single URL using the Web Scraper actor. This action starts an asynchronous scrape and returns the run details immediately. Use the Actor Run Finished trigger to process results once the scrape is complete.",
+        "summary": "Scrape single URL",
+        "x-ms-summary": "Scrape single URL",
+        "description": "Scrapes a single URL using the Web Scraper Actor. This action starts an asynchronous scrape and returns the run details immediately. Use the Actor run finished trigger to process results once the scrape is complete.",
         "operationId": "ScrapeSingleUrl",
         "x-ms-visibility": "important",
         "tags": [
@@ -1099,45 +752,25 @@
         ],
         "responses": {
           "201": {
-            "description": "Scrape started successfully",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "data": {
-                  "$ref": "#/definitions/ActorRunResponse"
-                }
-              }
-            }
+            "$ref": "#/responses/ScrapeStartedResponse"
           },
           "400": {
-            "description": "Bad Request",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+            "$ref": "#/responses/ErrorResponse400"
           },
           "404": {
-            "description": "Not Found",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+             "$ref": "#/responses/ErrorResponse404"
           },
           "401": {
-            "description": "Unauthorized",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+             "$ref": "#/responses/ErrorResponse401"
           },
-          "403": {
-            "description": "Forbidden",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+          "429": {
+             "$ref": "#/responses/ErrorResponse429"
+          },
+          "405": {
+             "$ref": "#/responses/ErrorResponse405"
           },
           "500": {
-            "description": "Internal Server Error. Unknown error occurred",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+             "$ref": "#/responses/ErrorResponse500"
           }
         }
       }
@@ -1159,65 +792,25 @@
         ],
         "responses": {
           "200": {
-            "description": "List of key-value stores retrieved successfully.",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "data": {
-                  "type": "object",
-                  "properties": {
-                    "items": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "string"
-                          },
-                          "name": {
-                            "type": "string"
-                          }
-                        }
-                      }
-                    }
-                  },
-                  "required": [
-                    "items"
-                  ]
-                }
-              },
-              "additionalProperties": true
-            }
+            "$ref": "#/responses/KeyValueStoresListResponse"
           },
           "400": {
-            "description": "Bad Request",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+            "$ref": "#/responses/ErrorResponse400"
           },
           "404": {
-            "description": "Not Found",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+             "$ref": "#/responses/ErrorResponse404"
           },
           "401": {
-            "description": "Unauthorized",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+             "$ref": "#/responses/ErrorResponse401"
           },
-          "403": {
-            "description": "Forbidden",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+          "429": {
+             "$ref": "#/responses/ErrorResponse429"
+          },
+          "405": {
+             "$ref": "#/responses/ErrorResponse405"
           },
           "500": {
-            "description": "Internal Server Error. Unknown error occurred",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+             "$ref": "#/responses/ErrorResponse500"
           }
         }
       }
@@ -1242,62 +835,25 @@
         ],
         "responses": {
           "200": {
-            "description": "List of record keys retrieved successfully.",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "data": {
-                  "type": "object",
-                  "properties": {
-                    "items": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "key": {
-                            "type": "string"
-                          }
-                        }
-                      }
-                    }
-                  },
-                  "required": [
-                    "items"
-                  ]
-                }
-              },
-              "additionalProperties": true
-            }
+            "$ref": "#/responses/RecordKeysListResponse"
           },
           "400": {
-            "description": "Bad Request",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+            "$ref": "#/responses/ErrorResponse400"
           },
           "404": {
-            "description": "Not Found",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+             "$ref": "#/responses/ErrorResponse404"
           },
           "401": {
-            "description": "Unauthorized",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+             "$ref": "#/responses/ErrorResponse401"
           },
-          "403": {
-            "description": "Forbidden",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+          "429": {
+             "$ref": "#/responses/ErrorResponse429"
+          },
+          "405": {
+             "$ref": "#/responses/ErrorResponse405"
           },
           "500": {
-            "description": "Internal Server Error. Unknown error occurred",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+             "$ref": "#/responses/ErrorResponse500"
           }
         }
       }
@@ -1337,34 +893,22 @@
             }
           },
           "400": {
-            "description": "Bad Request",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+            "$ref": "#/responses/ErrorResponse400"
           },
           "404": {
-            "description": "Not Found",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+             "$ref": "#/responses/ErrorResponse404"
           },
           "401": {
-            "description": "Unauthorized",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+             "$ref": "#/responses/ErrorResponse401"
           },
-          "403": {
-            "description": "Forbidden",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+          "429": {
+             "$ref": "#/responses/ErrorResponse429"
+          },
+          "405": {
+             "$ref": "#/responses/ErrorResponse405"
           },
           "500": {
-            "description": "Internal Server Error. Unknown error occurred",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+             "$ref": "#/responses/ErrorResponse500"
           }
         }
       }
@@ -1444,35 +988,32 @@
               }
             }
           },
-          "400": {
-            "description": "Bad Request",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
+          "302": {
+            "description": "Found",
+            "headers": {
+              "Location": {
+                "type": "string",
+                "description": "The URL to redirect to."
+              }
             }
+          },
+          "400": {
+            "$ref": "#/responses/ErrorResponse400"
           },
           "404": {
-            "description": "Not Found",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+             "$ref": "#/responses/ErrorResponse404"
           },
           "401": {
-            "description": "Unauthorized",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+             "$ref": "#/responses/ErrorResponse401"
           },
-          "403": {
-            "description": "Forbidden",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+          "429": {
+             "$ref": "#/responses/ErrorResponse429"
+          },
+          "405": {
+             "$ref": "#/responses/ErrorResponse405"
           },
           "500": {
-            "description": "Internal Server Error. Unknown error occurred",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+             "$ref": "#/responses/ErrorResponse500"
           }
         }
       }
@@ -1481,14 +1022,14 @@
       "x-ms-notification-content": {
         "description": "Payload received from Apify when the webhook fires",
         "schema": {
-          "$ref": "#/definitions/WebhookPayload"
+          "$ref": "#/definitions/WebhookPayloadSchema"
         }
       },
       "post": {
-        "summary": "Actor Run Finished",
+        "summary": "Actor run finished",
         "description": "Creates a webhook to subscribe to Actor run events. Triggers when the selected Actor run finishes with a specific status. See docs: https://docs.apify.com/api/v2/webhooks-post.",
         "operationId": "ActorRunFinishedTrigger",
-        "x-ms-summary": "Actor Run Finished",
+        "x-ms-summary": "Actor run finished",
         "x-ms-visibility": "important",
         "x-ms-trigger": "single",
         "tags": [
@@ -1501,7 +1042,7 @@
           {
             "name": "actorScope",
             "x-ms-summary": "Select Actor from",
-            "description": "Actor can be either yours or from the Apify Store.",
+            "description": "Please select the source to search Actors from.",
             "default": "RecentActors",
             "in": "query",
             "required": true,
@@ -1517,7 +1058,7 @@
               },
               {
                 "value": "StoreActors",
-                "displayName": "From Store"
+                "displayName": "Apify store Actors"
               }
             ]
           },
@@ -1525,7 +1066,7 @@
             "name": "body",
             "in": "body",
             "required": true,
-            "description": "Webhook subscription configuration including the callback URL and event types.",
+            "description": "Webhook subscription configuration including the callback URL and statuses.",
             "x-ms-visibility": "important",
             "schema": {
               "type": "object",
@@ -1596,47 +1137,35 @@
         ],
         "responses": {
           "201": {
-            "$ref": "#/responses/WebhookCreated"
+            "$ref": "#/responses/WebhookCreatedResponse"
           },
           "400": {
-            "description": "Bad Request",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+            "$ref": "#/responses/ErrorResponse400"
           },
           "404": {
-            "description": "Not Found",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+             "$ref": "#/responses/ErrorResponse404"
           },
           "401": {
-            "description": "Unauthorized",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+             "$ref": "#/responses/ErrorResponse401"
           },
-          "403": {
-            "description": "Forbidden",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+          "429": {
+             "$ref": "#/responses/ErrorResponse429"
+          },
+          "405": {
+             "$ref": "#/responses/ErrorResponse405"
           },
           "500": {
-            "description": "Internal Server Error. Unknown error occurred",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+             "$ref": "#/responses/ErrorResponse500"
           }
         }
       }
     },
     "/webhooks/{webhookId}": {
       "delete": {
-        "summary": "Delete Actor Webhook (for trigger)",
+        "summary": "Delete Actor webhook (for trigger)",
         "description": "Deletes an existing webhook subscription.",
         "operationId": "DeleteActorWebhook",
-        "x-ms-summary": "Delete Actor Webhook (for trigger)",
+        "x-ms-summary": "Delete Actor webhook (for trigger)",
         "x-ms-visibility": "internal",
         "tags": [
           "Webhooks"
@@ -1659,34 +1188,22 @@
             "description": "Webhook successfully deleted."
           },
           "400": {
-            "description": "Bad Request",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+            "$ref": "#/responses/ErrorResponse400"
           },
           "404": {
-            "description": "Not Found",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+             "$ref": "#/responses/ErrorResponse404"
           },
           "401": {
-            "description": "Unauthorized",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+             "$ref": "#/responses/ErrorResponse401"
           },
-          "403": {
-            "description": "Forbidden",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+          "429": {
+             "$ref": "#/responses/ErrorResponse429"
+          },
+          "405": {
+             "$ref": "#/responses/ErrorResponse405"
           },
           "500": {
-            "description": "Internal Server Error. Unknown error occurred",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+             "$ref": "#/responses/ErrorResponse500"
           }
         }
       }
@@ -1695,14 +1212,14 @@
       "x-ms-notification-content": {
         "description": "Payload received from Apify when the task webhook fires",
         "schema": {
-          "$ref": "#/definitions/WebhookPayload"
+          "$ref": "#/definitions/WebhookPayloadSchema"
         }
       },
       "post": {
-        "summary": "Actor Task Finished",
+        "summary": "Actor task finished",
         "description": "Creates a webhook to subscribe to Actor task run events. Triggers when the selected Actor task run finishes with a specific status. See docs: https://docs.apify.com/api/v2/webhooks-post.",
         "operationId": "ActorTaskFinishedTrigger",
-        "x-ms-summary": "Actor Task Finished",
+        "x-ms-summary": "Actor task finished",
         "x-ms-visibility": "important",
         "x-ms-trigger": "single",
         "tags": [
@@ -1716,7 +1233,7 @@
             "name": "body",
             "in": "body",
             "required": true,
-            "description": "Webhook subscription configuration for task run events including the callback URL and event types.",
+            "description": "Webhook subscription configuration for task run events including the callback URL and statuses.",
             "x-ms-visibility": "important",
             "schema": {
               "type": "object",
@@ -1747,7 +1264,7 @@
                     "actorTaskId": {
                       "type": "string",
                       "x-ms-summary": "Task",
-                      "description": "Actor task identifier to monitor for run events.",
+                      "description": "Please select the Actor task to monitor for events.",
                       "x-ms-visibility": "important",
                       "x-ms-dynamic-values": {
                         "operationId": "ListTasks",
@@ -1781,47 +1298,35 @@
         ],
         "responses": {
           "201": {
-            "$ref": "#/responses/WebhookCreated"
+            "$ref": "#/responses/WebhookCreatedResponse"
           },
           "400": {
-            "description": "Bad Request",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+            "$ref": "#/responses/ErrorResponse400"
           },
           "404": {
-            "description": "Not Found",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+             "$ref": "#/responses/ErrorResponse404"
           },
           "401": {
-            "description": "Unauthorized",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+             "$ref": "#/responses/ErrorResponse401"
           },
-          "403": {
-            "description": "Forbidden",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+          "429": {
+             "$ref": "#/responses/ErrorResponse429"
+          },
+          "405": {
+             "$ref": "#/responses/ErrorResponse405"
           },
           "500": {
-            "description": "Internal Server Error. Unknown error occurred",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+             "$ref": "#/responses/ErrorResponse500"
           }
         }
       }
     },
     "/webhooks/task/{webhookId}": {
       "delete": {
-        "summary": "Delete Task Webhook (for trigger)",
+        "summary": "Delete task webhook (for trigger)",
         "description": "Deletes an existing task webhook subscription.",
         "operationId": "DeleteTaskWebhook",
-        "x-ms-summary": "Delete Task Webhook (for trigger)",
+        "x-ms-summary": "Delete task webhook (for trigger)",
         "x-ms-visibility": "internal",
         "tags": [
           "Webhooks"
@@ -1844,142 +1349,58 @@
             "description": "Task webhook successfully deleted."
           },
           "400": {
-            "description": "Bad Request",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+            "$ref": "#/responses/ErrorResponse400"
           },
           "404": {
-            "description": "Not Found",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+             "$ref": "#/responses/ErrorResponse404"
           },
           "401": {
-            "description": "Unauthorized",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+             "$ref": "#/responses/ErrorResponse401"
           },
-          "403": {
-            "description": "Forbidden",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+          "429": {
+             "$ref": "#/responses/ErrorResponse429"
+          },
+          "405": {
+             "$ref": "#/responses/ErrorResponse405"
           },
           "500": {
-            "description": "Internal Server Error. Unknown error occurred",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
+             "$ref": "#/responses/ErrorResponse500"
           }
         }
       }
     }
   },
   "definitions": {
-    "UserResponse": {
-      "type": "object",
-      "x-ms-summary": "Represents information about the authenticated Apify user.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "x-ms-summary": "User ID"
-        },
-        "username": {
-          "type": "string",
-          "x-ms-summary": "Username"
-        },
-        "email": {
-          "type": "string",
-          "x-ms-summary": "Email"
-        },
-        "name": {
-          "type": "string",
-          "x-ms-summary": "Full Name"
-        },
-        "createdAt": {
-          "type": "string",
-          "format": "date-time",
-          "x-ms-summary": "Created At"
-        },
-        "subscription": {
-          "type": "object",
-          "x-ms-summary": "Subscription",
-          "properties": {
-            "plan": {
-              "type": "string",
-              "x-ms-summary": "Plan"
-            },
-            "planId": {
-              "type": "string",
-              "x-ms-summary": "Plan ID"
-            },
-            "isActive": {
-              "type": "boolean",
-              "x-ms-summary": "Is Active"
-            }
-          }
-        },
-        "profile": {
-          "type": "object",
-          "x-ms-summary": "User Profile",
-          "description": "User's profile information.",
-          "properties": {
-            "pictureUrl": {
-              "type": "string",
-              "x-ms-summary": "Profile Picture URL",
-              "description": "URL to the user's profile picture."
-            },
-            "githubUsername": {
-              "type": "string",
-              "x-ms-summary": "GitHub Username",
-              "description": "User's GitHub username."
-            },
-            "websiteUrl": {
-              "type": "string",
-              "x-ms-summary": "Website URL",
-              "description": "URL to the user's personal website."
-            },
-            "bio": {
-              "type": "string",
-              "x-ms-summary": "User's bio",
-              "description": "User's biographical information."
-            }
-          }
-        }
-      }
-    },
-    "ErrorResponse": {
+    "ErrorResponseSchema": {
       "type": "object",
       "x-ms-summary": "Represents an error response from the Apify API",
       "properties": {
         "error": {
           "type": "object",
-          "x-ms-summary": "Error Details",
+          "x-ms-summary": "Error details",
           "properties": {
             "type": {
               "type": "string",
-              "description": "Error Type",
-              "x-ms-summary": "Error Type"
+              "description": "Error type",
+              "x-ms-summary": "Error type"
             },
             "message": {
               "type": "string",
               "description": "Error message",
-              "x-ms-summary": "Error Message"
+              "x-ms-summary": "Error message"
             }
           }
         }
       }
     },
-    "ActorRunResponse": {
+    "ActorRunResponseSchema": {
       "type": "object",
-      "x-ms-summary": "Actor Run Response",
+      "x-ms-summary": "Actor run response",
       "description": "Complete information about an executed Actor run.",
       "properties": {
         "id": {
           "type": "string",
-          "x-ms-summary": "Actor Run ID",
+          "x-ms-summary": "Actor run ID",
           "description": "Unique identifier of the Actor run."
         },
         "actId": {
@@ -1994,19 +1415,19 @@
         },
         "actorTaskId": {
           "type": "string",
-          "x-ms-summary": "Actor Task ID",
+          "x-ms-summary": "Actor task ID",
           "description": "Unique identifier of the Actor task (if the run was started from a task)."
         },
         "startedAt": {
           "type": "string",
           "format": "date-time",
-          "x-ms-summary": "Started At",
+          "x-ms-summary": "Started at",
           "description": "Timestamp when the Actor run started."
         },
         "finishedAt": {
           "type": "string",
           "format": "date-time",
-          "x-ms-summary": "Finished At",
+          "x-ms-summary": "Finished at",
           "description": "Timestamp when the Actor run finished."
         },
         "status": {
@@ -2016,12 +1437,12 @@
         },
         "statusMessage": {
           "type": "string",
-          "x-ms-summary": "Status Message",
+          "x-ms-summary": "Status message",
           "description": "Detailed status message from the Actor run, including processing summary and results."
         },
         "isStatusMessageTerminal": {
           "type": "boolean",
-          "x-ms-summary": "Is Status Message Terminal",
+          "x-ms-summary": "Is status message terminal",
           "description": "Whether the status message is terminal (final) or may change during the run."
         },
         "meta": {
@@ -2032,7 +1453,7 @@
         },
         "pricingInfo": {
           "type": "object",
-          "x-ms-summary": "Pricing Info",
+          "x-ms-summary": "Pricing info",
           "description": "Detailed pricing information including pricing model, events, and cost breakdown.",
           "additionalProperties": true
         },
@@ -2044,7 +1465,7 @@
         },
         "chargedEventCounts": {
           "type": "object",
-          "x-ms-summary": "Charged Event Counts",
+          "x-ms-summary": "Charged event counts",
           "description": "Count of billable events that occurred during the Actor run.",
           "additionalProperties": true
         },
@@ -2061,27 +1482,27 @@
         },
         "exitCode": {
           "type": "number",
-          "x-ms-summary": "Exit Code",
+          "x-ms-summary": "Exit code",
           "description": "Exit code returned by the Actor process (0 indicates success)."
         },
         "defaultKeyValueStoreId": {
           "type": "string",
-          "x-ms-summary": "Default KV Store ID",
+          "x-ms-summary": "Default key-value store ID",
           "description": "Unique identifier of the default key-value store associated with this run."
         },
         "defaultDatasetId": {
           "type": "string",
-          "x-ms-summary": "Default Dataset ID",
+          "x-ms-summary": "Default dataset ID",
           "description": "Unique identifier of the default dataset where the Actor stored its results."
         },
         "defaultRequestQueueId": {
           "type": "string",
-          "x-ms-summary": "Default Request Queue ID",
+          "x-ms-summary": "Default request queue ID",
           "description": "Unique identifier of the default request queue used by the Actor."
         },
         "buildNumber": {
           "type": "string",
-          "x-ms-summary": "Build Number",
+          "x-ms-summary": "Build number",
           "description": "Build number of the Actor version used for this run."
         },
         "containerUrl": {
@@ -2091,24 +1512,24 @@
         },
         "isContainerServerReady": {
           "type": "boolean",
-          "x-ms-summary": "Is Container Server Ready",
+          "x-ms-summary": "Is container server ready",
           "description": "Whether the container server is ready and accessible."
         },
         "gitBranchName": {
           "type": "string",
-          "x-ms-summary": "Git Branch Name",
+          "x-ms-summary": "Git branch name",
           "description": "Name of the Git branch used for this Actor run (if applicable)."
         },
         "usageTotalUsd": {
           "type": "number",
-          "x-ms-summary": "Usage Total USD",
+          "x-ms-summary": "Usage total USD",
           "description": "Total cost of the Actor run in USD."
         }
       }
     },
-    "WebhookPayload": {
+    "WebhookPayloadSchema": {
       "type": "object",
-      "x-ms-summary": "Webhook Payload",
+      "x-ms-summary": "Webhook payload",
       "description": "Event payload sent by webhook when an Actor run finishes.",
       "properties": {
         "userId": {
@@ -2147,27 +1568,7 @@
         },
         "resource": {
           "description": "Detailed information about the Actor run resource.",
-          "$ref": "#/definitions/ActorRunResponse"
-        }
-      },
-      "additionalProperties": true
-    },
-    "WebhookCreateResponse": {
-      "type": "object",
-      "x-ms-summary": "Webhook Create Response",
-      "description": "Response from webhook creation containing the webhook ID.",
-      "properties": {
-        "data": {
-          "type": "object",
-          "x-ms-summary": "Webhook Data",
-          "description": "Webhook creation response data.",
-          "properties": {
-            "id": {
-              "type": "string",
-              "description": "Unique identifier of the created webhook."
-            }
-          },
-          "additionalProperties": true
+          "$ref": "#/definitions/ActorRunResponseSchema"
         }
       },
       "additionalProperties": true
@@ -2250,7 +1651,378 @@
     }
   },
   "responses": {
-    "WebhookCreated": {
+    "UserResponse": {
+      "description": "User information retrieved successfully.",
+      "schema": {
+        "type": "object",
+        "x-ms-summary": "Represents information about the authenticated Apify user.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "x-ms-summary": "User ID"
+          },
+          "username": {
+            "type": "string",
+            "x-ms-summary": "Username"
+          },
+          "email": {
+            "type": "string",
+            "x-ms-summary": "Email"
+          },
+          "name": {
+            "type": "string",
+            "x-ms-summary": "Full name"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "x-ms-summary": "Created at"
+          },
+          "subscription": {
+            "type": "object",
+            "x-ms-summary": "Subscription",
+            "properties": {
+              "plan": {
+                "type": "string",
+                "x-ms-summary": "Plan"
+              },
+              "planId": {
+                "type": "string",
+                "x-ms-summary": "Plan ID"
+              },
+              "isActive": {
+                "type": "boolean",
+                "x-ms-summary": "Is active"
+              }
+            }
+          },
+          "profile": {
+            "type": "object",
+            "x-ms-summary": "User profile",
+            "description": "User's profile information.",
+            "properties": {
+              "pictureUrl": {
+                "type": "string",
+                "x-ms-summary": "Profile picture URL",
+                "description": "URL to the user's profile picture."
+              },
+              "githubUsername": {
+                "type": "string",
+                "x-ms-summary": "GitHub username",
+                "description": "User's GitHub username."
+              },
+              "websiteUrl": {
+                "type": "string",
+                "x-ms-summary": "Website URL",
+                "description": "URL to the user's personal website."
+              },
+              "bio": {
+                "type": "string",
+                "x-ms-summary": "User's bio",
+                "description": "User's biographical information."
+              }
+            }
+          }
+        }
+      }
+    },
+    "DatasetListResponse": {
+      "description": "List of datasets retrieved successfully.",
+      "schema": {
+        "type": "object",
+        "x-ms-summary": "Dataset list response",
+        "description": "Response containing a list of datasets with pagination information.",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "total": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "count": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "offset": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "limit": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "desc": {
+                "type": "boolean"
+              },
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "type": "string"
+                    },
+                    "modifiedAt": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "itemCount": {
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "cleanItemCount": {
+                      "type": "integer",
+                      "format": "int32"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "RecordKeysListResponse": {
+      "description": "List of record keys retrieved successfully.",
+      "schema": {
+        "type": "object",
+        "x-ms-summary": "Record keys list response",
+        "description": "Response containing a list of record keys from a key-value store.",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "key": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            },
+            "required": [
+              "items"
+            ]
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "KeyValueStoresListResponse": {
+      "description": "List of key-value stores retrieved successfully.",
+      "schema": {
+        "type": "object",
+        "x-ms-summary": "Key-value stores list response",
+        "description": "Response containing a list of key-value stores.",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            },
+            "required": [
+              "items"
+            ]
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "TasksListResponse": {
+      "description": "List of Actor tasks retrieved successfully.",
+      "schema": {
+        "type": "object",
+        "x-ms-summary": "Tasks list response",
+        "description": "Response containing a list of Actor tasks.",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "actName": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "ActorsDropdownResponse": {
+      "description": "List of Actors for dropdown retrieved successfully.",
+      "schema": {
+        "type": "object",
+        "x-ms-summary": "Actors dropdown response",
+        "description": "Response containing a list of Actors for dropdown selection.",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "StoreActorsListResponse": {
+      "description": "List of Actors from Apify store retrieved successfully.",
+      "schema": {
+        "type": "object",
+        "x-ms-summary": "Store Actors list response",
+        "description": "Response containing a list of Actors from the Apify store.",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "username": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "RecentlyUsedActorsListResponse": {
+      "description": "List of recently used Actors retrieved successfully.",
+      "schema": {
+        "type": "object",
+        "x-ms-summary": "Recently used Actors list response",
+        "description": "Response containing a list of recently used Actors with pagination information.",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "total": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "count": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "offset": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "limit": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "desc": {
+                "type": "boolean"
+              },
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "type": "string"
+                    },
+                    "modifiedAt": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "username": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "stats": {
+                      "type": "object",
+                      "properties": {
+                        "totalRuns": {
+                          "type": "integer",
+                          "format": "int32"
+                        },
+                        "lastRunStartedAt": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "WebhookCreatedResponse": {
       "description": "Webhook created",
       "headers": {
         "Location": {
@@ -2259,13 +2031,82 @@
         }
       },
       "schema": {
-        "$ref": "#/definitions/WebhookCreateResponse"
+        "type": "object",
+        "x-ms-summary": "Webhook create response",
+        "description": "Response from webhook creation containing the webhook ID.",
+        "properties": {
+          "data": {
+            "type": "object",
+            "x-ms-summary": "Webhook data",
+            "description": "Webhook creation response data.",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Unique identifier of the created webhook."
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "additionalProperties": true
       }
     },
-    "ErrorResponse": {
-      "description": "Error response",
+    "ActorRunCreatedResponse": {
+      "description": "Actor run created",
       "schema": {
-        "$ref": "#/definitions/ErrorResponse"
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/definitions/ActorRunResponseSchema"
+          }
+        }
+      }
+    },
+    "ScrapeStartedResponse": {
+      "description": "Scrape started successfully",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/definitions/ActorRunResponseSchema"
+          }
+        }
+      }
+    },
+    "ErrorResponse400": {
+      "description": "Invalid request",
+      "schema": {
+        "$ref": "#/definitions/ErrorResponseSchema"
+      }
+    },
+    "ErrorResponse404": {
+      "description": "Record not found",
+      "schema": {
+        "$ref": "#/definitions/ErrorResponseSchema"
+      }
+    },
+    "ErrorResponse401": {
+      "description": "Unauthorized",
+      "schema": {
+        "$ref": "#/definitions/ErrorResponseSchema"
+      }
+    },
+    "ErrorResponse429": {
+      "description": "Rate limit exceeded",
+      "schema": {
+        "$ref": "#/definitions/ErrorResponseSchema"
+      }
+    },
+    "ErrorResponse405": {
+      "description": "Method not allowed",
+      "schema": {
+        "$ref": "#/definitions/ErrorResponseSchema"
+      }
+    },
+    "ErrorResponse500": {
+      "description": "Server error",
+      "schema": {
+        "$ref": "#/definitions/ErrorResponseSchema"
       }
     }
   },
@@ -2293,6 +2134,10 @@
     {
       "name": "Scraping",
       "description": "Operations related to web scraping"
+    },
+    {
+      "name": "Webhooks",
+      "description": "Operations related to webhooks"
     }
   ]
 }
