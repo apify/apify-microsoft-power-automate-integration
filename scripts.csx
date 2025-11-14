@@ -32,7 +32,7 @@ public class Script : ScriptBase {
       case "ActorTaskFinishedTrigger":
         return await HandleActorTaskFinishedTrigger().ConfigureAwait(false);
       case "ActorRunFinishedTrigger":
-        return await HandleCreateWebhookWithLocation().ConfigureAwait(false);
+        return await HandleCreateWebhook().ConfigureAwait(false);
       case "DeleteActorWebhook":
         return await HandleDeleteWebhook().ConfigureAwait(false);
       case "RunActor":
@@ -77,7 +77,7 @@ public class Script : ScriptBase {
     try {
       var request = Context.Request;
       var queryParams = System.Web.HttpUtility.ParseQueryString(request.RequestUri.Query);
-      
+
       var url = queryParams["url"];
       var crawlerType = queryParams["crawler_type"];
 
@@ -150,7 +150,7 @@ public class Script : ScriptBase {
   private HttpRequestMessage BuildActorRequest() {
     var request = Context.Request;
     if (request?.RequestUri == null) return request;
-    
+
     var originalUri = request.RequestUri;
     var queryParams = System.Web.HttpUtility.ParseQueryString(originalUri.Query);
     var actorScope = queryParams["actorScope"];
@@ -175,8 +175,8 @@ public class Script : ScriptBase {
   /// <param name="actorScope">The actor scope from the query parameters.</param>
   /// <returns>The API path to use for the request.</returns>
   private static string DetermineApiPath(string actorScope) {
-    return string.Equals(actorScope, "StoreActors", StringComparison.OrdinalIgnoreCase) 
-      ? "/v2/store" 
+    return string.Equals(actorScope, "StoreActors", StringComparison.OrdinalIgnoreCase)
+      ? "/v2/store"
       : "/v2/acts";
   }
 
@@ -196,7 +196,7 @@ public class Script : ScriptBase {
       // Read and parse the JSON response
       var jsonContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
       var jsonObject = JObject.Parse(jsonContent);
-      
+
       // Apply formatting to items array if it exists
       var items = jsonObject["data"]?["items"] as JArray;
       if (items != null) {
@@ -239,7 +239,7 @@ public class Script : ScriptBase {
   /// <param name="formatter">Function to apply formatting to each JObject item</param>
   private void FormatItems(JArray items, Action<JObject> formatter) {
     if (items == null || items.Count == 0) return;
-    
+
     for (int i = 0; i < items.Count; i++) {
       var item = items[i] as JObject;
       if (item == null) continue;
@@ -289,10 +289,10 @@ public class Script : ScriptBase {
   private void ModifyRequestPath(string oldPattern, string newPattern) {
     var request = Context.Request;
     if (request?.RequestUri == null) return;
-    
+
     var originalUri = request.RequestUri;
     var uriBuilder = new UriBuilder(originalUri);
-    
+
     uriBuilder.Path = uriBuilder.Path.Replace(oldPattern, newPattern);
     request.RequestUri = uriBuilder.Uri;
   }
@@ -306,7 +306,7 @@ public class Script : ScriptBase {
     try {
       requestModifier();
       var upstreamResponse = await HandlePassthrough().ConfigureAwait(false);
-      
+
       if (!upstreamResponse.IsSuccessStatusCode) {
         return upstreamResponse; // Return error responses as-is
       }
@@ -393,7 +393,7 @@ public class Script : ScriptBase {
         return new JObject { ["type"] = "string" };
     }
   }
- 
+
   /// <summary>
   /// Infers an OpenAPI object schema from a JSON object by analyzing its properties.
   /// Recursively processes each property to build a complete schema definition.
@@ -446,17 +446,16 @@ public class Script : ScriptBase {
   }
 
   /// <summary>
-  /// Handles the creation of webhooks for Power Automate triggers with proper Location header.
-  /// Removes the helper actorScope parameter and forwards the request to Apify API.
-  /// the Location header manually since Apify API doesn't provide it by default.
-  /// </summary>
+  /// Handles the creation of webhooks for Power Automate triggers.
+  /// Location header is provided by Apify API.
+  /// Removes the helper actorScope parameter and forwards the request to Apify API.  /// </summary>
   /// <returns>
   /// An <see cref="HttpResponseMessage"/> representing the HTTP response message with proper Location header for webhook deletion.
   /// </returns>
-  private async Task<HttpResponseMessage> HandleCreateWebhookWithLocation() {
+  private async Task<HttpResponseMessage> HandleCreateWebhook() {
     var originalUri = Context.Request.RequestUri;
     var queryParams = System.Web.HttpUtility.ParseQueryString(originalUri.Query);
-    
+
     // Remove helper parameter from query string
     queryParams.Remove("actorScope");
     Context.Request.RequestUri = new UriBuilder(originalUri) { Query = queryParams.ToString() }.Uri;
@@ -467,9 +466,17 @@ public class Script : ScriptBase {
 
   /// <summary>
   /// Handles webhook deletion by forwarding the delete request to the Apify API.
+  /// Converts 204 No Content responses to 200 OK.
   /// </summary>
   private async Task<HttpResponseMessage> HandleDeleteWebhook() {
-    return await Context.SendAsync(Context.Request, CancellationToken).ConfigureAwait(false);
+    var response = await Context.SendAsync(Context.Request, CancellationToken).ConfigureAwait(false);
+
+    // Convert 204 No Content to 200 OK (for Power Automate compatibility)
+    if (response.StatusCode == HttpStatusCode.NoContent) {
+      response.StatusCode = HttpStatusCode.OK;
+    }
+
+    return response;
   }
 
   /// <summary>
