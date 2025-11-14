@@ -15,7 +15,7 @@
     }
   },
   "externalDocs": {
-    "description": "Find more information about Apify",
+    "description": "Find more information about Apify.",
     "url": "https://docs.apify.com"
   },
   "host": "api.apify.com",
@@ -347,7 +347,7 @@
             "x-ms-textarea": true,
             "schema": {
               "type": "object",
-              "description": "Raw JSON object passed as INPUT to the Actor"
+              "description": "Raw JSON object passed as INPUT to the Actor."
             }
           }
         ],
@@ -641,7 +641,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Dataset items retrieved successfully",
+            "description": "Dataset items retrieved successfully.",
             "schema": {
               "type": "array",
               "items": {
@@ -989,7 +989,7 @@
             }
           },
           "302": {
-            "description": "Found",
+            "description": "Found.",
             "headers": {
               "Location": {
                 "type": "string",
@@ -1020,7 +1020,7 @@
     },
     "/webhooks": {
       "x-ms-notification-content": {
-        "description": "Payload received from Apify when the webhook fires",
+        "description": "Payload received from Apify when the webhook fires.",
         "schema": {
           "$ref": "#/definitions/WebhookPayloadSchema"
         }
@@ -1184,8 +1184,11 @@
           }
         ],
         "responses": {
+          "200": {
+            "description": "Webhook deleted successfully."
+          },
           "204": {
-            "description": "Webhook successfully deleted."
+            "description": "Webhook deleted successfully."
           },
           "400": {
             "$ref": "#/responses/ErrorResponse400"
@@ -1210,7 +1213,7 @@
     },
     "/webhooks/task": {
       "x-ms-notification-content": {
-        "description": "Payload received from Apify when the task webhook fires",
+        "description": "Payload received from Apify when the task webhook fires.",
         "schema": {
           "$ref": "#/definitions/WebhookPayloadSchema"
         }
@@ -1345,8 +1348,11 @@
           }
         ],
         "responses": {
+          "200": {
+            "description": "Task webhook deleted successfully."
+          },
           "204": {
-            "description": "Task webhook successfully deleted."
+            "description": "Task webhook deleted successfully."
           },
           "400": {
             "$ref": "#/responses/ErrorResponse400"
@@ -1381,12 +1387,12 @@
           "properties": {
             "type": {
               "type": "string",
-              "description": "Error type",
+              "description": "Error type.",
               "x-ms-summary": "Error type"
             },
             "message": {
               "type": "string",
-              "description": "Error message",
+              "description": "Error message.",
               "x-ms-summary": "Error message"
             }
           }
@@ -1567,7 +1573,6 @@
           "additionalProperties": true
         },
         "resource": {
-          "description": "Detailed information about the Actor run resource.",
           "$ref": "#/definitions/ActorRunResponseSchema"
         }
       },
@@ -1581,7 +1586,7 @@
       "required": true,
       "type": "string",
       "default": "microsoft-power-automate",
-      "description": "Integration platform identifier",
+      "description": "Integration platform identifier.",
       "x-ms-visibility": "internal"
     },
     "StoreIdParameter": {
@@ -2023,11 +2028,11 @@
       }
     },
     "WebhookCreatedResponse": {
-      "description": "Webhook created",
+      "description": "Webhook created.",
       "headers": {
         "Location": {
           "type": "string",
-          "description": "New webhook URL"
+          "description": "New webhook URL."
         }
       },
       "schema": {
@@ -2052,7 +2057,7 @@
       }
     },
     "ActorRunCreatedResponse": {
-      "description": "Actor run created",
+      "description": "Actor run created.",
       "schema": {
         "type": "object",
         "properties": {
@@ -2063,7 +2068,7 @@
       }
     },
     "ScrapeStartedResponse": {
-      "description": "Scrape started successfully",
+      "description": "Scrape started successfully.",
       "schema": {
         "type": "object",
         "properties": {
@@ -2074,37 +2079,37 @@
       }
     },
     "ErrorResponse400": {
-      "description": "Invalid request",
+      "description": "Invalid request error.",
       "schema": {
         "$ref": "#/definitions/ErrorResponseSchema"
       }
     },
     "ErrorResponse404": {
-      "description": "Record not found",
+      "description": "Record not found error.",
       "schema": {
         "$ref": "#/definitions/ErrorResponseSchema"
       }
     },
     "ErrorResponse401": {
-      "description": "Unauthorized",
+      "description": "Unauthorized error.",
       "schema": {
         "$ref": "#/definitions/ErrorResponseSchema"
       }
     },
     "ErrorResponse429": {
-      "description": "Rate limit exceeded",
+      "description": "Rate limit exceeded error.",
       "schema": {
         "$ref": "#/definitions/ErrorResponseSchema"
       }
     },
     "ErrorResponse405": {
-      "description": "Method not allowed",
+      "description": "Method not allowed error.",
       "schema": {
         "$ref": "#/definitions/ErrorResponseSchema"
       }
     },
     "ErrorResponse500": {
-      "description": "Server error",
+      "description": "Server error.",
       "schema": {
         "$ref": "#/definitions/ErrorResponseSchema"
       }
@@ -2113,31 +2118,31 @@
   "tags": [
     {
       "name": "Users",
-      "description": "Operations related to Apify Users"
+      "description": "Operations related to Apify users."
     },
     {
       "name": "Actors",
-      "description": "Operations related to Apify Actors"
+      "description": "Operations related to Apify Actors."
     },
     {
       "name": "Tasks",
-      "description": "Operations related to Apify Tasks"
+      "description": "Operations related to Apify tasks."
     },
     {
       "name": "Datasets",
-      "description": "Operations related to Apify Datasets"
+      "description": "Operations related to Apify datasets."
     },
     {
       "name": "KeyValueStores",
-      "description": "Operations related to Apify key-value stores"
+      "description": "Operations related to Apify key-value stores."
     },
     {
       "name": "Scraping",
-      "description": "Operations related to web scraping"
+      "description": "Operations related to web scraping."
     },
     {
       "name": "Webhooks",
-      "description": "Operations related to webhooks"
+      "description": "Operations related to webhooks."
     }
   ]
 }
