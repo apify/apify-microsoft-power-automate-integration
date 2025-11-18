@@ -568,12 +568,8 @@
           "200": {
             "description": "Dataset schema inferred successfully.",
             "schema": {
-              "type": "array",
-                "items": {
-                  "type": "object",
-                  "description": "An OpenAPI schema object representing a single dataset item. The schema may include a wrapper if the sample isn't an object.",
-                  "additionalProperties": true
-              }
+                "description": "An OpenAPI schema object representing a single dataset item. The schema may include a wrapper if the sample isn't an object.",
+                "additionalProperties": true
             }
           },
           "400": {

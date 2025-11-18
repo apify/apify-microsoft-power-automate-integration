@@ -327,7 +327,7 @@ public class Script : ScriptBase {
   /// <summary>
   /// Handles the GetDatasetSchema operation by fetching sample dataset items and inferring an OpenAPI schema.
   /// </summary>
-  /// <returns>An <see cref="HttpResponseMessage"/> containing the inferred OpenAPI schema as JSON wrapped in an array.</returns>
+  /// <returns>An <see cref="HttpResponseMessage"/> containing an OpenAPI schema that describes an array of items.</returns>
   private async Task<HttpResponseMessage> HandleGetDatasetSchema() {
     var schemaResponse = await HandleSchemaGeneration(() => ModifyRequestPath("/itemsSchemaHelper", "/items")).ConfigureAwait(false);
     
@@ -338,13 +338,17 @@ public class Script : ScriptBase {
     try {
       // Extract the schema JSON from the response
       var schemaJson = await schemaResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
-      var schemaObject = JObject.Parse(schemaJson);
+      var itemSchema = JObject.Parse(schemaJson);
       
-      // Modify the existing schema object - wrap it in an array structure
-      var arrayResponse = new JArray { schemaObject };
+      // Modify the schema to describe an array of items (not wrap the schema in an array)
+      var arraySchema = new JObject
+      {
+        ["type"] = "array",
+        ["items"] = itemSchema
+      };
       
-      // Update the response content with the modified object
-      schemaResponse.Content = CreateJsonContent(arrayResponse.ToString(Newtonsoft.Json.Formatting.None));
+      // Update the response content with the array schema
+      schemaResponse.Content = CreateJsonContent(arraySchema.ToString(Newtonsoft.Json.Formatting.None));
       
       return schemaResponse;
     }
