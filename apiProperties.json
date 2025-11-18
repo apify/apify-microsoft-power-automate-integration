@@ -8,9 +8,9 @@
       "token": {
         "type": "oauthSetting",
         "uiDefinition": {
-          "displayName": "Apify OAuth 2.0",
-          "description": "Authenticate with Apify using OAuth 2.0",
-          "tooltip": "Authenticate with Apify using OAuth 2.0",
+          "displayName": "Sign in with Apify",
+          "description": "Authenticate with Apify using Sign in with Apify",
+          "tooltip": "Authenticate with Apify using Sign in with Apify",
           "constraints": {
             "required": "true",
             "hidden": false
@@ -55,6 +55,8 @@
           "x-ms-apimTemplate-policySection": "Request"
         }
       }
-    ]
+    ],
+    "publisher": "Apify",
+    "stackOwner": "Apify"
   }
 }
