@@ -568,9 +568,12 @@
           "200": {
             "description": "Dataset schema inferred successfully.",
             "schema": {
-              "type": "object",
-              "description": "An OpenAPI schema object representing a single dataset item. The schema may include a wrapper if the sample isn't an object.",
-              "additionalProperties": true
+              "type": "array",
+                "items": {
+                  "type": "object",
+                  "description": "An OpenAPI schema object representing a single dataset item. The schema may include a wrapper if the sample isn't an object.",
+                  "additionalProperties": true
+              }
             }
           },
           "400": {
@@ -643,15 +646,12 @@
           "200": {
             "description": "Dataset items retrieved successfully.",
             "schema": {
-              "type": "array",
-              "items": {
-                "title": "Dataset item",
-                "x-ms-dynamic-schema": {
-                  "operationId": "GetDatasetSchema",
-                  "parameters": {
-                    "datasetId": {
-                      "parameter": "datasetId"
-                    }
+              "title": "Dataset items",
+              "x-ms-dynamic-schema": {
+                "operationId": "GetDatasetSchema",
+                "parameters": {
+                  "datasetId": {
+                    "parameter": "datasetId"
                   }
                 }
               }
