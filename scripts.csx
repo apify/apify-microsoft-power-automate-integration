@@ -8,50 +8,50 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 public class Script : ScriptBase {
-   /// <summary>
-   /// Main entry point for the Power Automate custom connector script.
-   /// Routes incoming requests to appropriate handlers based on the operation ID.
-   /// </summary>
-   /// <returns>
-   /// An <see cref="HttpResponseMessage"/> representing the HTTP response message including the status code and data.
-   /// </returns>
-   public override async Task<HttpResponseMessage> ExecuteAsync() {
-      switch (Context.OperationId) {
-        case "ListActorsDropdown":
-          return await HandleListActorsDropdown().ConfigureAwait(false);
-        case "ListTasks":
-          return await HandleListTasks().ConfigureAwait(false);
-        case "GetDatasetSchema":
-          return await HandleGetDatasetSchema().ConfigureAwait(false);
-        case "ScrapeSingleUrl":
-          return await HandleScrapeSingleUrl().ConfigureAwait(false);
-        case "GetKeyValueStoreRecordSchema":
-          return await HandleGetKeyValueStoreRecordSchema().ConfigureAwait(false);
-        case "DeleteTaskWebhook":
-          return await HandleDeleteTaskWebhook().ConfigureAwait(false);
-        case "ActorTaskFinishedTrigger":
-          return await HandleActorTaskFinishedTrigger().ConfigureAwait(false);
-        case "ActorRunFinishedTrigger":
-          return await HandleCreateWebhookWithLocation().ConfigureAwait(false);
-        case "DeleteActorWebhook":
-          return await HandleDeleteWebhook().ConfigureAwait(false);
-        case "RunActor":
-        case "RunTask":
-        case "GetUserInfo":
-        case "ListDatasets":
-        case "ListRecordKeys":
-        case "ListStoreActors":
-        case "GetDatasetItems":
-        case "ListRecentActors":
-        case "ListKeyValueStores":
-        case "GetKeyValueStoreRecord":
-          return await HandlePassthrough().ConfigureAwait(false);
-        default:
-          HttpResponseMessage response = new HttpResponseMessage(HttpStatusCode.BadRequest);
-          response.Content = CreateJsonContent($"Unknown operation ID '{Context.OperationId}'");
-          return response;
-      }
-   }
+  /// <summary>
+  /// Main entry point for the Power Automate custom connector script.
+  /// Routes incoming requests to appropriate handlers based on the operation ID.
+  /// </summary>
+  /// <returns>
+  /// An <see cref="HttpResponseMessage"/> representing the HTTP response message including the status code and data.
+  /// </returns>
+  public override async Task<HttpResponseMessage> ExecuteAsync() {
+    switch (Context.OperationId) {
+      case "ListActorsDropdown":
+        return await HandleListActorsDropdown().ConfigureAwait(false);
+      case "ListTasks":
+        return await HandleListTasks().ConfigureAwait(false);
+      case "GetDatasetSchema":
+        return await HandleGetDatasetSchema().ConfigureAwait(false);
+      case "ScrapeSingleUrl":
+        return await HandleScrapeSingleUrl().ConfigureAwait(false);
+      case "GetKeyValueStoreRecordSchema":
+        return await HandleGetKeyValueStoreRecordSchema().ConfigureAwait(false);
+      case "DeleteTaskWebhook":
+        return await HandleDeleteTaskWebhook().ConfigureAwait(false);
+      case "ActorTaskFinishedTrigger":
+        return await HandleActorTaskFinishedTrigger().ConfigureAwait(false);
+      case "ActorRunFinishedTrigger":
+        return await HandleCreateWebhook().ConfigureAwait(false);
+      case "DeleteActorWebhook":
+        return await HandleDeleteWebhook().ConfigureAwait(false);
+      case "RunActor":
+      case "RunTask":
+      case "GetUserInfo":
+      case "ListDatasets":
+      case "ListRecordKeys":
+      case "ListStoreActors":
+      case "GetDatasetItems":
+      case "ListRecentActors":
+      case "ListKeyValueStores":
+      case "GetKeyValueStoreRecord":
+        return await HandlePassthrough().ConfigureAwait(false);
+      default:
+        HttpResponseMessage response = new HttpResponseMessage(HttpStatusCode.BadRequest);
+        response.Content = CreateJsonContent($"Unknown operation ID '{Context.OperationId}'");
+        return response;
+    }
+  }
 
   /// <summary>
   /// Handles passthrough operations by forwarding the original request to the Apify API.
@@ -67,22 +67,8 @@ public class Script : ScriptBase {
   /// <summary>
   /// Handles the ScrapeSingleUrl operation by configuring and executing a web scraping request
   /// using the Apify Web Scraper actor for a single URL.
+  /// Extracts URL and crawler type from the query string, builds a single-page scrape request, and forwards it.
   /// </summary>
-  /// <remarks>
-  /// This method extracts URL and crawler type parameters from the query string, constructs
-  /// a JSON input body with predefined scraping settings optimized for single URL scraping,
-  /// and forwards the request to the Apify API. The configuration includes:
-  /// - Maximum crawl depth of 0 (single page only)
-  /// - Maximum crawl pages of 1
-  /// - Maximum results of 1
-  /// - Apify proxy configuration enabled
-  /// - Cookie warnings removal enabled
-  /// - HTML and Markdown content saving enabled
-  /// 
-  /// Required query parameters:
-  /// - url: The URL to scrape
-  /// - crawler_type: The type of crawler to use (optional)
-  /// </remarks>
   /// <returns>
   /// An <see cref="HttpResponseMessage"/> representing the HTTP response from the Apify Web Scraper actor,
   /// containing the scraped data and metadata for the specified URL.
@@ -91,7 +77,7 @@ public class Script : ScriptBase {
     try {
       var request = Context.Request;
       var queryParams = System.Web.HttpUtility.ParseQueryString(request.RequestUri.Query);
-      
+
       var url = queryParams["url"];
       var crawlerType = queryParams["crawler_type"];
 
@@ -164,7 +150,7 @@ public class Script : ScriptBase {
   private HttpRequestMessage BuildActorRequest() {
     var request = Context.Request;
     if (request?.RequestUri == null) return request;
-    
+
     var originalUri = request.RequestUri;
     var queryParams = System.Web.HttpUtility.ParseQueryString(originalUri.Query);
     var actorScope = queryParams["actorScope"];
@@ -189,8 +175,8 @@ public class Script : ScriptBase {
   /// <param name="actorScope">The actor scope from the query parameters.</param>
   /// <returns>The API path to use for the request.</returns>
   private static string DetermineApiPath(string actorScope) {
-    return string.Equals(actorScope, "StoreActors", StringComparison.OrdinalIgnoreCase) 
-      ? "/v2/store" 
+    return string.Equals(actorScope, "StoreActors", StringComparison.OrdinalIgnoreCase)
+      ? "/v2/store"
       : "/v2/acts";
   }
 
@@ -210,7 +196,7 @@ public class Script : ScriptBase {
       // Read and parse the JSON response
       var jsonContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
       var jsonObject = JObject.Parse(jsonContent);
-      
+
       // Apply formatting to items array if it exists
       var items = jsonObject["data"]?["items"] as JArray;
       if (items != null) {
@@ -253,7 +239,7 @@ public class Script : ScriptBase {
   /// <param name="formatter">Function to apply formatting to each JObject item</param>
   private void FormatItems(JArray items, Action<JObject> formatter) {
     if (items == null || items.Count == 0) return;
-    
+
     for (int i = 0; i < items.Count; i++) {
       var item = items[i] as JObject;
       if (item == null) continue;
@@ -303,10 +289,10 @@ public class Script : ScriptBase {
   private void ModifyRequestPath(string oldPattern, string newPattern) {
     var request = Context.Request;
     if (request?.RequestUri == null) return;
-    
+
     var originalUri = request.RequestUri;
     var uriBuilder = new UriBuilder(originalUri);
-    
+
     uriBuilder.Path = uriBuilder.Path.Replace(oldPattern, newPattern);
     request.RequestUri = uriBuilder.Uri;
   }
@@ -320,7 +306,7 @@ public class Script : ScriptBase {
     try {
       requestModifier();
       var upstreamResponse = await HandlePassthrough().ConfigureAwait(false);
-      
+
       if (!upstreamResponse.IsSuccessStatusCode) {
         return upstreamResponse; // Return error responses as-is
       }
@@ -407,7 +393,7 @@ public class Script : ScriptBase {
         return new JObject { ["type"] = "string" };
     }
   }
- 
+
   /// <summary>
   /// Infers an OpenAPI object schema from a JSON object by analyzing its properties.
   /// Recursively processes each property to build a complete schema definition.
@@ -460,18 +446,16 @@ public class Script : ScriptBase {
   }
 
   /// <summary>
-  /// Handles the creation of webhooks for Power Automate triggers with proper Location header.
-  /// Removes the helper actorScope parameter and forwards the request to Apify API.
-  /// The critical fix ensures webhook cleanup by intercepting the 201 response and adding
-  /// the Location header manually since Apify API doesn't provide it by default.
-  /// </summary>
+  /// Handles the creation of webhooks for Power Automate triggers.
+  /// Location header is provided by Apify API.
+  /// Removes the helper actorScope parameter and forwards the request to Apify API.  /// </summary>
   /// <returns>
   /// An <see cref="HttpResponseMessage"/> representing the HTTP response message with proper Location header for webhook deletion.
   /// </returns>
-  private async Task<HttpResponseMessage> HandleCreateWebhookWithLocation() {
+  private async Task<HttpResponseMessage> HandleCreateWebhook() {
     var originalUri = Context.Request.RequestUri;
     var queryParams = System.Web.HttpUtility.ParseQueryString(originalUri.Query);
-    
+
     // Remove helper parameter from query string
     queryParams.Remove("actorScope");
     Context.Request.RequestUri = new UriBuilder(originalUri) { Query = queryParams.ToString() }.Uri;
@@ -481,17 +465,17 @@ public class Script : ScriptBase {
   }
 
   /// <summary>
-  /// Handles webhook deletion.
+  /// Handles webhook deletion by forwarding the delete request to the Apify API.
   /// Converts 204 No Content responses to 200 OK.
   /// </summary>
   private async Task<HttpResponseMessage> HandleDeleteWebhook() {
     var response = await Context.SendAsync(Context.Request, CancellationToken).ConfigureAwait(false);
-    
+
     // Convert 204 No Content to 200 OK (for Power Automate compatibility)
     if (response.StatusCode == HttpStatusCode.NoContent) {
       response.StatusCode = HttpStatusCode.OK;
     }
-    
+
     return response;
   }
 
