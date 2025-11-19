@@ -327,9 +327,35 @@ public class Script : ScriptBase {
   /// <summary>
   /// Handles the GetDatasetSchema operation by fetching sample dataset items and inferring an OpenAPI schema.
   /// </summary>
-  /// <returns>An <see cref="HttpResponseMessage"/> containing the inferred OpenAPI schema as JSON.</returns>
+  /// <returns>An <see cref="HttpResponseMessage"/> containing an OpenAPI schema that describes an array of items.</returns>
   private async Task<HttpResponseMessage> HandleGetDatasetSchema() {
-    return await HandleSchemaGeneration(() => ModifyRequestPath("/itemsSchemaHelper", "/items")).ConfigureAwait(false);
+    var schemaResponse = await HandleSchemaGeneration(() => ModifyRequestPath("/itemsSchemaHelper", "/items")).ConfigureAwait(false);
+    
+    if (!schemaResponse.IsSuccessStatusCode) {
+      return schemaResponse; // Return error responses as-is
+    }
+
+    try {
+      // Extract the schema JSON from the response
+      var schemaJson = await schemaResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
+      var itemSchema = JObject.Parse(schemaJson);
+      
+      // Modify the schema to describe an array of items (not wrap the schema in an array)
+      var arraySchema = new JObject
+      {
+        ["type"] = "array",
+        ["items"] = itemSchema
+      };
+      
+      // Update the response content with the array schema
+      schemaResponse.Content = CreateJsonContent(arraySchema.ToString(Newtonsoft.Json.Formatting.None));
+      
+      return schemaResponse;
+    }
+    catch (Exception ex) {
+      // Return original response on any error
+      return schemaResponse;
+    }
   }
 
   /// <summary>
@@ -365,15 +391,8 @@ public class Script : ScriptBase {
         // Wrap arrays in an object to ensure the returned schema is always an object
         return new JObject
         {
-          ["type"] = "object",
-          ["properties"] = new JObject
-          {
-            ["value"] = new JObject
-            {
-              ["type"] = "array",
-              ["items"] = InferOpenApiSchemaFromSample(((JArray)sample).FirstOrDefault())
-            }
-          }
+          ["type"] = "array",
+          ["items"] = InferOpenApiSchemaFromSample(((JArray)sample).FirstOrDefault()) 
         };
       case JTokenType.Integer:
         return new JObject { ["type"] = "integer", ["format"] = "int64" };
