@@ -9,6 +9,29 @@ using Newtonsoft.Json.Linq;
 
 public class Script : ScriptBase {
   /// <summary>
+  /// Holds validation results with error collection.
+  /// </summary>
+  private class ValidationResult {
+    public bool IsValid { get; set; }
+    public List<string> Errors { get; set; }
+    
+    public ValidationResult() {
+      IsValid = true;
+      Errors = new List<string>();
+    }
+    
+    public void AddError(string error) {
+      IsValid = false;
+      Errors.Add(error);
+    }
+  }
+
+  /// <summary>
+  /// Delegate for parameter validation functions.
+  /// </summary>
+  private delegate ValidationResult ParameterValidator(string paramName, string paramValue);
+
+  /// <summary>
   /// Main entry point for the Power Automate custom connector script.
   /// Routes incoming requests to appropriate handlers based on the operation ID.
   /// </summary>
@@ -56,11 +79,21 @@ public class Script : ScriptBase {
   /// <summary>
   /// Handles passthrough operations by forwarding the original request to the Apify API.
   /// Used for operations that don't require any special processing or transformation.
+  /// Validates query parameters before forwarding if validation rules exist for the operation.
   /// </summary>
   /// <returns>
   /// An <see cref="HttpResponseMessage"/> representing the HTTP response message including the status code and data from the forwarded request.
   /// </returns>
   private async Task<HttpResponseMessage> HandlePassthrough() {
+    // Validate query parameters if rules exist for this operation
+    if (Context.Request?.RequestUri != null) {
+      var queryParams = System.Web.HttpUtility.ParseQueryString(Context.Request.RequestUri.Query);
+      var validation = ValidateQueryParameters(Context.OperationId, queryParams);
+      if (!validation.IsValid) {
+        return CreateValidationErrorResponse(validation);
+      }
+    }
+    
     return await Context.SendAsync(Context.Request, CancellationToken).ConfigureAwait(false);
   }
 
@@ -78,10 +111,16 @@ public class Script : ScriptBase {
       var request = Context.Request;
       var queryParams = System.Web.HttpUtility.ParseQueryString(request.RequestUri.Query);
 
+      // Validate query parameters
+      var validation = ValidateQueryParameters("ScrapeSingleUrl", queryParams);
+      if (!validation.IsValid) {
+        return CreateValidationErrorResponse(validation);
+      }
+
       var url = queryParams["url"];
       var crawlerType = queryParams["crawler_type"];
 
-      // Validate required parameters
+      // Check for required parameters
       if (string.IsNullOrEmpty(url) || string.IsNullOrEmpty(crawlerType)) {
         var errorResponse = new HttpResponseMessage(HttpStatusCode.BadRequest);
         errorResponse.Content = CreateJsonContent("Missing required parameter: url or crawler_type");
@@ -479,8 +518,8 @@ public class Script : ScriptBase {
     queryParams.Remove("actorScope");
     Context.Request.RequestUri = new UriBuilder(originalUri) { Query = queryParams.ToString() }.Uri;
 
-    // Forward request to Apify API
-    return await HandlePassthrough().ConfigureAwait(false);
+    // Forward request to Apify API (bypass validation in passthrough since we already validated)
+    return await Context.SendAsync(Context.Request, CancellationToken).ConfigureAwait(false);
   }
 
   /// <summary>
@@ -517,5 +556,207 @@ public class Script : ScriptBase {
     ModifyRequestPath("/webhooks/task/{webhookId}", "/webhooks/{webhookId}");
 
     return await HandleDeleteWebhook().ConfigureAwait(false);
+  }
+
+  /// <summary>
+  /// Validates that a parameter value is a valid URL.
+  /// </summary>
+  /// <param name="paramName">The name of the parameter being validated</param>
+  /// <param name="paramValue">The value to validate</param>
+  /// <returns>ValidationResult indicating success or failure with error message</returns>
+  private ValidationResult ValidateUrl(string paramName, string paramValue) {
+    var result = new ValidationResult();
+    
+    if (Uri.TryCreate(paramValue, UriKind.Absolute, out var uri) && 
+        (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps)) {
+      return result; // Valid URL
+    }
+    
+    result.AddError($"Parameter '{paramName}' must be a valid URL.");
+    return result;
+  }
+
+  /// <summary>
+  /// Validates that a parameter value is a positive integer (greater than 0).
+  /// </summary>
+  /// <param name="paramName">The name of the parameter being validated</param>
+  /// <param name="paramValue">The value to validate</param>
+  /// <returns>ValidationResult indicating success or failure with error message</returns>
+  private ValidationResult ValidatePositiveInteger(string paramName, string paramValue) {
+    var result = new ValidationResult();
+    
+    if (int.TryParse(paramValue, out var value) && value > 0) {
+      return result; // Valid positive integer
+    }
+    
+    result.AddError($"Parameter '{paramName}' must be a positive integer");
+    return result;
+  }
+
+  /// <summary>
+  /// Validates that a parameter value is a non-negative integer (greater than or equal to 0).
+  /// </summary>
+  /// <param name="paramName">The name of the parameter being validated</param>
+  /// <param name="paramValue">The value to validate</param>
+  /// <returns>ValidationResult indicating success or failure with error message</returns>
+  private ValidationResult ValidateNonNegativeInteger(string paramName, string paramValue) {
+    var result = new ValidationResult();
+    
+    if (int.TryParse(paramValue, out var value) && value >= 0) {
+      return result; // Valid non-negative integer
+    }
+    
+    result.AddError($"Parameter '{paramName}' must be a non-negative integer");
+    return result;
+  }
+
+  /// <summary>
+  /// Validates that a parameter value is an integer within a specified range.
+  /// </summary>
+  /// <param name="paramName">The name of the parameter being validated</param>
+  /// <param name="paramValue">The value to validate</param>
+  /// <param name="min">Minimum allowed value (inclusive)</param>
+  /// <param name="max">Maximum allowed value (inclusive)</param>
+  /// <returns>ValidationResult indicating success or failure with error message</returns>
+  private ValidationResult ValidateIntegerRange(string paramName, string paramValue, int min, int max) {
+    var result = new ValidationResult();
+    
+    if (int.TryParse(paramValue, out var value) && value >= min && value <= max) {
+      return result; // Valid integer in range
+    }
+    
+    result.AddError($"Parameter '{paramName}' must be an integer between {min} and {max}");
+    return result;
+  }
+
+  /// <summary>
+  /// TODO: check if the memory can be any positive integer
+  /// Validates that a parameter value is a valid memory size (power of 2 between 128 and 32768).
+  /// </summary>
+  /// <param name="paramName">The name of the parameter being validated</param>
+  /// <param name="paramValue">The value to validate</param>
+  /// <returns>ValidationResult indicating success or failure with error message</returns>
+  private ValidationResult ValidateMemory(string paramName, string paramValue) {
+    var result = new ValidationResult();
+    var validMemorySizes = new[] { 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768 };
+    
+    if (int.TryParse(paramValue, out var value) && validMemorySizes.Contains(value)) {
+      return result; // Valid memory size
+    }
+    
+    result.AddError($"Parameter '{paramName}' must be a power of 2 between 128 and 32768 (128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768)");
+    return result;
+  }
+
+  /// <summary>
+  /// Validates that a parameter value is one of the allowed enum values.
+  /// </summary>
+  /// <param name="paramName">The name of the parameter being validated</param>
+  /// <param name="paramValue">The value to validate</param>
+  /// <param name="allowedValues">Array of allowed values</param>
+  /// <returns>ValidationResult indicating success or failure with error message</returns>
+  private ValidationResult ValidateEnum(string paramName, string paramValue, string[] allowedValues) {
+    var result = new ValidationResult();
+    
+    if (allowedValues.Any(v => string.Equals(v, paramValue, StringComparison.OrdinalIgnoreCase))) {
+      return result; // Valid enum value
+    }
+    
+    result.AddError($"Parameter '{paramName}' must be one of: {string.Join(", ", allowedValues)}");
+    return result;
+  }
+
+  /// <summary>
+  /// Validates that a parameter value is valid JSON.
+  /// </summary>
+  /// <param name="paramName">The name of the parameter being validated</param>
+  /// <param name="paramValue">The value to validate</param>
+  /// <returns>ValidationResult indicating success or failure with error message</returns>
+  private ValidationResult ValidateJson(string paramName, string paramValue) {
+    var result = new ValidationResult();
+    
+    try {
+      JToken.Parse(paramValue);
+      return result; // Valid JSON
+    }
+    catch (Exception ex) {
+      result.AddError($"Parameter '{paramName}' must be valid JSON: {ex.Message}");
+      return result;
+    }
+  }
+
+  /// <summary>
+  /// Returns validation rules for each operation that requires query parameter validation.
+  /// Maps operation IDs to their parameter validation rules.
+  /// </summary>
+  /// <returns>Dictionary mapping operation IDs to parameter validators</returns>
+  private Dictionary<string, Dictionary<string, ParameterValidator>> GetValidationRules() {
+    return new Dictionary<string, Dictionary<string, ParameterValidator>> {
+      ["RunActor"] = new Dictionary<string, ParameterValidator> {
+        ["waitForFinish"] = (n, v) => ValidateIntegerRange(n, v, 0, 60),
+        ["timeout"] = ValidatePositiveInteger,
+        ["memory"] = ValidateMemory,
+        ["input"] = ValidateJson
+      },
+      ["RunTask"] = new Dictionary<string, ParameterValidator> {
+        ["waitForFinish"] = (n, v) => ValidateIntegerRange(n, v, 0, 60),
+        ["timeout"] = ValidatePositiveInteger,
+        ["memory"] = ValidateMemory,
+        ["input"] = ValidateJson
+      },
+      ["ScrapeSingleUrl"] = new Dictionary<string, ParameterValidator> {
+        ["url"] = ValidateUrl,
+        ["crawler_type"] = (n, v) => ValidateEnum(n, v, new[] { 
+          "playwright:adaptive", "playwright:firefox", "cheerio", "jsdom", "playwright:chrome" 
+        })
+      },
+      ["GetDatasetItems"] = new Dictionary<string, ParameterValidator> {
+        ["limit"] = ValidatePositiveInteger,
+        ["offset"] = ValidateNonNegativeInteger
+      }
+    };
+  }
+
+  /// <summary>
+  /// Validates query parameters for a given operation based on configured validation rules.
+  /// </summary>
+  /// <param name="operationId">The operation ID to validate parameters for</param>
+  /// <param name="queryParams">The query parameters collection to validate</param>
+  /// <returns>ValidationResult containing all validation errors, if any</returns>
+  private ValidationResult ValidateQueryParameters(string operationId, System.Collections.Specialized.NameValueCollection queryParams) {
+    var result = new ValidationResult();
+    var rules = GetValidationRules();
+    
+    if (!rules.ContainsKey(operationId)) {
+      return result; // No validation rules for this operation
+    }
+    
+    foreach (var rule in rules[operationId]) {
+      var paramValue = queryParams[rule.Key];
+      if (!string.IsNullOrEmpty(paramValue)) {
+        var validationResult = rule.Value(rule.Key, paramValue);
+        if (!validationResult.IsValid) {
+          result.IsValid = false;
+          result.Errors.AddRange(validationResult.Errors);
+        }
+      }
+    }
+    
+    return result;
+  }
+
+  /// <summary>
+  /// Creates a standardized HTTP 400 Bad Request response for validation errors.
+  /// </summary>
+  /// <param name="validation">The validation result containing error details</param>
+  /// <returns>HttpResponseMessage with validation error details</returns>
+  private HttpResponseMessage CreateValidationErrorResponse(ValidationResult validation) {
+    var errorResponse = new HttpResponseMessage(HttpStatusCode.BadRequest);
+    var errorObject = new JObject {
+      ["error"] = "Query parameter validation failed",
+      ["details"] = new JArray(validation.Errors)
+    };
+    errorResponse.Content = CreateJsonContent(errorObject.ToString(Newtonsoft.Json.Formatting.None));
+    return errorResponse;
   }
 }
