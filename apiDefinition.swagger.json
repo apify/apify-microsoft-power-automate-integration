@@ -1638,7 +1638,46 @@
         2048,
         4096,
         8192,
-        16384
+        16384,
+        32768
+      ],
+      "x-ms-enum-values": [
+        {
+          "value": 128,
+          "displayName": "1. 128 MB"
+        },
+        {
+          "value": 256,
+          "displayName": "2. 256 MB"
+        },
+        {
+          "value": 512,
+          "displayName": "3. 512 MB"
+        },
+        {
+          "value": 1024,
+          "displayName": "4. 1024 MB (1 GB)"
+        },
+        {
+          "value": 2048,
+          "displayName": "5. 2048 MB (2 GB)"
+        },
+        {
+          "value": 4096,
+          "displayName": "6. 4096 MB (4 GB)"
+        },
+        {
+          "value": 8192,
+          "displayName": "7. 8192 MB (8 GB)"
+        },
+        {
+          "value": 16384,
+          "displayName": "8. 16384 MB (16 GB)"
+        },
+        {
+          "value": 32768,
+          "displayName": "9. 32768 MB (32 GB)"
+        }
       ]
     },
     "LimitDropdownParameter": {
