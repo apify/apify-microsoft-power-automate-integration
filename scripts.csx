@@ -483,7 +483,8 @@ public class Script : ScriptBase {
   /// <summary>
   /// Handles the creation of webhooks for Power Automate triggers.
   /// Location header is provided by Apify API.
-  /// Removes the helper actorScope parameter and forwards the request to Apify API.  /// </summary>
+  /// Removes the helper actorScope parameter and forwards the request to Apify API.  
+  /// </summary>
   /// <returns>
   /// An <see cref="HttpResponseMessage"/> representing the HTTP response message with proper Location header for webhook deletion.
   /// </returns>
@@ -495,7 +496,7 @@ public class Script : ScriptBase {
     queryParams.Remove("actorScope");
     Context.Request.RequestUri = new UriBuilder(originalUri) { Query = queryParams.ToString() }.Uri;
 
-    // Forward request to Apify API (bypass validation in passthrough since we already validated)
+    // Forward request to Apify API
     return await Context.SendAsync(Context.Request, CancellationToken).ConfigureAwait(false);
   }
 
@@ -561,9 +562,9 @@ public class Script : ScriptBase {
   /// <summary>
   /// Validates that a parameter value is a valid URL.
   /// </summary>
-  /// <param name="paramName">The name of the parameter being validated</param>
-  /// <param name="paramValue">The value to validate</param>
-  /// <returns>ValidationResult indicating success or failure with error message</returns>
+  /// <param name="paramName">The name of the parameter being validated.</param>
+  /// <param name="paramValue">The value to validate.</param>
+  /// <returns>ValidationResult indicating success or failure with error message.</returns>
   private ValidationResult ValidateUrl(string paramName, string paramValue) {
     var result = new ValidationResult();
     
@@ -579,9 +580,9 @@ public class Script : ScriptBase {
   /// <summary>
   /// Validates that a parameter value is a positive integer (greater than 0).
   /// </summary>
-  /// <param name="paramName">The name of the parameter being validated</param>
-  /// <param name="paramValue">The value to validate</param>
-  /// <returns>ValidationResult indicating success or failure with error message</returns>
+  /// <param name="paramName">The name of the parameter being validated.</param>
+  /// <param name="paramValue">The value to validate.</param>
+  /// <returns>ValidationResult indicating success or failure with error message.</returns>
   private ValidationResult ValidatePositiveInteger(string paramName, string paramValue) {
     var result = new ValidationResult();
     
@@ -596,9 +597,9 @@ public class Script : ScriptBase {
   /// <summary>
   /// Validates that a parameter value is a non-negative integer (greater than or equal to 0).
   /// </summary>
-  /// <param name="paramName">The name of the parameter being validated</param>
-  /// <param name="paramValue">The value to validate</param>
-  /// <returns>ValidationResult indicating success or failure with error message</returns>
+  /// <param name="paramName">The name of the parameter being validated.</param>
+  /// <param name="paramValue">The value to validate.</param>
+  /// <returns>ValidationResult indicating success or failure with error message.</returns>
   private ValidationResult ValidateNonNegativeInteger(string paramName, string paramValue) {
     var result = new ValidationResult();
     
@@ -613,10 +614,10 @@ public class Script : ScriptBase {
   /// <summary>
   /// Validates that a parameter value is an integer within a specified range.
   /// </summary>
-  /// <param name="paramName">The name of the parameter being validated</param>
-  /// <param name="paramValue">The value to validate</param>
-  /// <param name="min">Minimum allowed value (inclusive)</param>
-  /// <param name="max">Maximum allowed value (inclusive)</param>
+  /// <param name="paramName">The name of the parameter being validated.</param>
+  /// <param name="paramValue">The value to validate.</param>
+  /// <param name="min">Minimum allowed value.</param>
+  /// <param name="max">Maximum allowed value.</param>
   /// <returns>ValidationResult indicating success or failure with error message</returns>
   private ValidationResult ValidateIntegerRange(string paramName, string paramValue, int min, int max) {
     var result = new ValidationResult();
@@ -632,9 +633,9 @@ public class Script : ScriptBase {
   /// <summary>
   /// Validates that a parameter value is a valid wait for finish value (0-60).
   /// </summary>
-  /// <param name="paramName">The name of the parameter being validated</param>
-  /// <param name="paramValue">The value to validate</param>
-  /// <returns>ValidationResult indicating success or failure with error message</returns>
+  /// <param name="paramName">The name of the parameter being validated.</param>
+  /// <param name="paramValue">The value to validate.</param>
+  /// <returns>ValidationResult indicating success or failure with error message.</returns>
   private ValidationResult ValidateWaitForFinish(string paramName, string paramValue) {
     return ValidateIntegerRange(paramName, paramValue, 0, 60);
   }
@@ -643,7 +644,7 @@ public class Script : ScriptBase {
   /// Returns validation rules for each operation that requires query parameter validation.
   /// Maps operation IDs to their parameter validation rules.
   /// </summary>
-  /// <returns>Dictionary mapping operation IDs to parameter validators</returns>
+  /// <returns>Dictionary mapping operation IDs to parameter validators.</returns>
   private Dictionary<string, Dictionary<string, ParameterValidator>> GetValidationRules() {
     return new Dictionary<string, Dictionary<string, ParameterValidator>> {
       ["RunActor"] = new Dictionary<string, ParameterValidator> {
@@ -667,9 +668,9 @@ public class Script : ScriptBase {
   /// <summary>
   /// Validates query parameters for a given operation based on configured validation rules.
   /// </summary>
-  /// <param name="operationId">The operation ID to validate parameters for</param>
-  /// <param name="queryParams">The query parameters collection to validate</param>
-  /// <returns>ValidationResult containing all validation errors, if any</returns>
+  /// <param name="operationId">The operation ID to validate parameters for.</param>
+  /// <param name="queryParams">The query parameters collection to validate.</param>
+  /// <returns>ValidationResult containing all validation errors, if any.</returns>
   private ValidationResult ValidateQueryParameters(string operationId, System.Collections.Specialized.NameValueCollection queryParams) {
     var result = new ValidationResult();
     var rules = GetValidationRules();
@@ -696,8 +697,8 @@ public class Script : ScriptBase {
   /// <summary>
   /// Creates a standardized HTTP 400 Bad Request response for validation errors.
   /// </summary>
-  /// <param name="validation">The validation result containing error details</param>
-  /// <returns>HttpResponseMessage with validation error details</returns>
+  /// <param name="validation">The validation result containing error details.</param>
+  /// <returns>HttpResponseMessage with validation error details.</returns>
   private HttpResponseMessage CreateValidationErrorResponse(ValidationResult validation) {
     var errorResponse = new HttpResponseMessage(HttpStatusCode.BadRequest);
     var errorObject = new JObject {
