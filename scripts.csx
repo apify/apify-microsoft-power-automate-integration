@@ -584,23 +584,6 @@ public class Script : ScriptBase {
   }
 
   /// <summary>
-  /// Validates that a parameter value is a positive integer (greater than 0).
-  /// </summary>
-  /// <param name="paramName">The name of the parameter being validated.</param>
-  /// <param name="paramValue">The value to validate.</param>
-  /// <returns>ValidationResult indicating success or failure with error message.</returns>
-  private ValidationResult ValidatePositiveInteger(string paramName, string paramValue) {
-    var result = new ValidationResult();
-    
-    if (int.TryParse(paramValue, out var value) && value > 0) {
-      return result;
-    }
-    
-    result.AddError($"Parameter '{paramName}' must be a positive integer");
-    return result;
-  }
-
-  /// <summary>
   /// Validates that a parameter value is a non-negative integer (greater than or equal to 0).
   /// </summary>
   /// <param name="paramName">The name of the parameter being validated.</param>
@@ -655,17 +638,17 @@ public class Script : ScriptBase {
     return new Dictionary<string, Dictionary<string, ParameterValidator>> {
       [OP_RUN_ACTOR_ID] = new Dictionary<string, ParameterValidator> {
         ["waitForFinish"] = ValidateWaitForFinish,
-        ["timeout"] = ValidatePositiveInteger
+        ["timeout"] = ValidateNonNegativeInteger
       },
       [OP_RUN_TASK_ID] = new Dictionary<string, ParameterValidator> {
         ["waitForFinish"] = ValidateWaitForFinish,
-        ["timeout"] = ValidatePositiveInteger
+        ["timeout"] = ValidateNonNegativeInteger
       },
       [OP_SCRAPE_SINGLE_URL_ID] = new Dictionary<string, ParameterValidator> {
         ["url"] = ValidateUrl
       },
       [OP_GET_DATASET_ITEMS_ID] = new Dictionary<string, ParameterValidator> {
-        ["limit"] = ValidatePositiveInteger,
+        ["limit"] = ValidateNonNegativeInteger,
         ["offset"] = ValidateNonNegativeInteger
       }
     };
