@@ -322,15 +322,10 @@
             "x-ms-visibility": "important"
           },
           {
-            "name": "build",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "x-ms-summary": "Build",
-            "description": "Actor build to run (tag or build number). Default is latest."
+            "$ref": "#/parameters/TimeoutParameter"
           },
           {
-            "$ref": "#/parameters/TimeoutParameter"
+            "$ref": "#/parameters/BuildIdParameter"
           },
           {
             "$ref": "#/parameters/MemoryParameter"
@@ -447,6 +442,9 @@
           },
           {
             "$ref": "#/parameters/WaitForFinishParameter"
+          },
+          {
+            "$ref": "#/parameters/BuildIdParameter"
           },
           {
             "$ref": "#/parameters/TimeoutParameter"
@@ -1600,6 +1598,14 @@
       "type": "integer",
       "x-ms-summary": "Timeout",
       "description": "Timeout for the run in seconds."
+    },
+    "BuildIdParameter": {
+      "name": "build",
+      "in": "query",
+      "required": false,
+      "type": "string",
+      "x-ms-summary": "Build",
+      "description": "Actor build to run (tag or build number). Default is latest."
     },
     "ActorScopeParameter": {
       "name": "actorScope",
