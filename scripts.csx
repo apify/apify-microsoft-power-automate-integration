@@ -8,6 +8,12 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 public class Script : ScriptBase {
+  /// Constants
+  private const string OP_RUN_ACTOR_ID = "RunActor";
+  private const string OP_RUN_TASK_ID = "RunTask";
+  private const string OP_SCRAPE_SINGLE_URL_ID = "ScrapeSingleUrl";
+  private const string OP_GET_DATASET_ITEMS_ID = "GetDatasetItems";
+
   /// <summary>
   /// Main entry point for the Power Automate custom connector script.
   /// Routes incoming requests to appropriate handlers based on the operation ID.
@@ -23,7 +29,7 @@ public class Script : ScriptBase {
         return await HandleListTasks().ConfigureAwait(false);
       case "GetDatasetSchema":
         return await HandleGetDatasetSchema().ConfigureAwait(false);
-      case "ScrapeSingleUrl":
+      case OP_SCRAPE_SINGLE_URL_ID:
         return await HandleScrapeSingleUrl().ConfigureAwait(false);
       case "GetKeyValueStoreRecordSchema":
         return await HandleGetKeyValueStoreRecordSchema().ConfigureAwait(false);
@@ -35,13 +41,13 @@ public class Script : ScriptBase {
         return await HandleCreateWebhook().ConfigureAwait(false);
       case "DeleteActorWebhook":
         return await HandleDeleteWebhook().ConfigureAwait(false);
-      case "RunActor":
-      case "RunTask":
+      case OP_GET_DATASET_ITEMS_ID:
+      case OP_RUN_ACTOR_ID:
+      case OP_RUN_TASK_ID:
       case "GetUserInfo":
       case "ListDatasets":
       case "ListRecordKeys":
       case "ListStoreActors":
-      case "GetDatasetItems":
       case "ListRecentActors":
       case "ListKeyValueStores":
       case "GetKeyValueStoreRecord":
@@ -89,7 +95,7 @@ public class Script : ScriptBase {
       var queryParams = System.Web.HttpUtility.ParseQueryString(request.RequestUri.Query);
 
       // Validate query parameters
-      var validation = ValidateQueryParameters("ScrapeSingleUrl", queryParams);
+      var validation = ValidateQueryParameters(OP_SCRAPE_SINGLE_URL_ID, queryParams);
       if (!validation.IsValid) {
         return CreateValidationErrorResponse(validation);
       }
@@ -647,18 +653,18 @@ public class Script : ScriptBase {
   /// <returns>Dictionary mapping operation IDs to parameter validators.</returns>
   private Dictionary<string, Dictionary<string, ParameterValidator>> GetValidationRules() {
     return new Dictionary<string, Dictionary<string, ParameterValidator>> {
-      ["RunActor"] = new Dictionary<string, ParameterValidator> {
+      [OP_RUN_ACTOR_ID] = new Dictionary<string, ParameterValidator> {
         ["waitForFinish"] = ValidateWaitForFinish,
         ["timeout"] = ValidatePositiveInteger
       },
-      ["RunTask"] = new Dictionary<string, ParameterValidator> {
+      [OP_RUN_TASK_ID] = new Dictionary<string, ParameterValidator> {
         ["waitForFinish"] = ValidateWaitForFinish,
         ["timeout"] = ValidatePositiveInteger
       },
-      ["ScrapeSingleUrl"] = new Dictionary<string, ParameterValidator> {
+      [OP_SCRAPE_SINGLE_URL_ID] = new Dictionary<string, ParameterValidator> {
         ["url"] = ValidateUrl
       },
-      ["GetDatasetItems"] = new Dictionary<string, ParameterValidator> {
+      [OP_GET_DATASET_ITEMS_ID] = new Dictionary<string, ParameterValidator> {
         ["limit"] = ValidatePositiveInteger,
         ["offset"] = ValidateNonNegativeInteger
       }
