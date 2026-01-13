@@ -84,19 +84,19 @@
             "$ref": "#/responses/ErrorResponse400"
           },
           "404": {
-             "$ref": "#/responses/ErrorResponse404"
+            "$ref": "#/responses/ErrorResponse404"
           },
           "401": {
-             "$ref": "#/responses/ErrorResponse401"
+            "$ref": "#/responses/ErrorResponse401"
           },
           "429": {
-             "$ref": "#/responses/ErrorResponse429"
+            "$ref": "#/responses/ErrorResponse429"
           },
           "405": {
-             "$ref": "#/responses/ErrorResponse405"
+            "$ref": "#/responses/ErrorResponse405"
           },
           "500": {
-             "$ref": "#/responses/ErrorResponse500"
+            "$ref": "#/responses/ErrorResponse500"
           }
         },
         "summary": "Get user information",
@@ -135,19 +135,19 @@
             "$ref": "#/responses/ErrorResponse400"
           },
           "404": {
-             "$ref": "#/responses/ErrorResponse404"
+            "$ref": "#/responses/ErrorResponse404"
           },
           "401": {
-             "$ref": "#/responses/ErrorResponse401"
+            "$ref": "#/responses/ErrorResponse401"
           },
           "429": {
-             "$ref": "#/responses/ErrorResponse429"
+            "$ref": "#/responses/ErrorResponse429"
           },
           "405": {
-             "$ref": "#/responses/ErrorResponse405"
+            "$ref": "#/responses/ErrorResponse405"
           },
           "500": {
-             "$ref": "#/responses/ErrorResponse500"
+            "$ref": "#/responses/ErrorResponse500"
           }
         }
       }
@@ -181,19 +181,19 @@
             "$ref": "#/responses/ErrorResponse400"
           },
           "404": {
-             "$ref": "#/responses/ErrorResponse404"
+            "$ref": "#/responses/ErrorResponse404"
           },
           "401": {
-             "$ref": "#/responses/ErrorResponse401"
+            "$ref": "#/responses/ErrorResponse401"
           },
           "429": {
-             "$ref": "#/responses/ErrorResponse429"
+            "$ref": "#/responses/ErrorResponse429"
           },
           "405": {
-             "$ref": "#/responses/ErrorResponse405"
+            "$ref": "#/responses/ErrorResponse405"
           },
           "500": {
-             "$ref": "#/responses/ErrorResponse500"
+            "$ref": "#/responses/ErrorResponse500"
           }
         }
       }
@@ -246,19 +246,19 @@
             "$ref": "#/responses/ErrorResponse400"
           },
           "404": {
-             "$ref": "#/responses/ErrorResponse404"
+            "$ref": "#/responses/ErrorResponse404"
           },
           "401": {
-             "$ref": "#/responses/ErrorResponse401"
+            "$ref": "#/responses/ErrorResponse401"
           },
           "429": {
-             "$ref": "#/responses/ErrorResponse429"
+            "$ref": "#/responses/ErrorResponse429"
           },
           "405": {
-             "$ref": "#/responses/ErrorResponse405"
+            "$ref": "#/responses/ErrorResponse405"
           },
           "500": {
-             "$ref": "#/responses/ErrorResponse500"
+            "$ref": "#/responses/ErrorResponse500"
           }
         }
       }
@@ -354,19 +354,19 @@
             "$ref": "#/responses/ErrorResponse400"
           },
           "404": {
-             "$ref": "#/responses/ErrorResponse404"
+            "$ref": "#/responses/ErrorResponse404"
           },
           "401": {
-             "$ref": "#/responses/ErrorResponse401"
+            "$ref": "#/responses/ErrorResponse401"
           },
           "429": {
-             "$ref": "#/responses/ErrorResponse429"
+            "$ref": "#/responses/ErrorResponse429"
           },
           "405": {
-             "$ref": "#/responses/ErrorResponse405"
+            "$ref": "#/responses/ErrorResponse405"
           },
           "500": {
-             "$ref": "#/responses/ErrorResponse500"
+            "$ref": "#/responses/ErrorResponse500"
           }
         }
       }
@@ -394,19 +394,19 @@
             "$ref": "#/responses/ErrorResponse400"
           },
           "404": {
-             "$ref": "#/responses/ErrorResponse404"
+            "$ref": "#/responses/ErrorResponse404"
           },
           "401": {
-             "$ref": "#/responses/ErrorResponse401"
+            "$ref": "#/responses/ErrorResponse401"
           },
           "429": {
-             "$ref": "#/responses/ErrorResponse429"
+            "$ref": "#/responses/ErrorResponse429"
           },
           "405": {
-             "$ref": "#/responses/ErrorResponse405"
+            "$ref": "#/responses/ErrorResponse405"
           },
           "500": {
-             "$ref": "#/responses/ErrorResponse500"
+            "$ref": "#/responses/ErrorResponse500"
           }
         }
       }
@@ -473,19 +473,19 @@
             "$ref": "#/responses/ErrorResponse400"
           },
           "404": {
-             "$ref": "#/responses/ErrorResponse404"
+            "$ref": "#/responses/ErrorResponse404"
           },
           "401": {
-             "$ref": "#/responses/ErrorResponse401"
+            "$ref": "#/responses/ErrorResponse401"
           },
           "429": {
-             "$ref": "#/responses/ErrorResponse429"
+            "$ref": "#/responses/ErrorResponse429"
           },
           "405": {
-             "$ref": "#/responses/ErrorResponse405"
+            "$ref": "#/responses/ErrorResponse405"
           },
           "500": {
-             "$ref": "#/responses/ErrorResponse500"
+            "$ref": "#/responses/ErrorResponse500"
           }
         }
       }
@@ -513,19 +513,19 @@
             "$ref": "#/responses/ErrorResponse400"
           },
           "404": {
-             "$ref": "#/responses/ErrorResponse404"
+            "$ref": "#/responses/ErrorResponse404"
           },
           "401": {
-             "$ref": "#/responses/ErrorResponse401"
+            "$ref": "#/responses/ErrorResponse401"
           },
           "429": {
-             "$ref": "#/responses/ErrorResponse429"
+            "$ref": "#/responses/ErrorResponse429"
           },
           "405": {
-             "$ref": "#/responses/ErrorResponse405"
+            "$ref": "#/responses/ErrorResponse405"
           },
           "500": {
-             "$ref": "#/responses/ErrorResponse500"
+            "$ref": "#/responses/ErrorResponse500"
           }
         }
       }
@@ -566,27 +566,27 @@
           "200": {
             "description": "Dataset schema inferred successfully.",
             "schema": {
-                "description": "An OpenAPI schema object representing a single dataset item. The schema may include a wrapper if the sample isn't an object.",
-                "additionalProperties": true
+              "description": "An OpenAPI schema object representing a single dataset item. The schema may include a wrapper if the sample isn't an object.",
+              "additionalProperties": true
             }
           },
           "400": {
             "$ref": "#/responses/ErrorResponse400"
           },
           "404": {
-             "$ref": "#/responses/ErrorResponse404"
+            "$ref": "#/responses/ErrorResponse404"
           },
           "401": {
-             "$ref": "#/responses/ErrorResponse401"
+            "$ref": "#/responses/ErrorResponse401"
           },
           "429": {
-             "$ref": "#/responses/ErrorResponse429"
+            "$ref": "#/responses/ErrorResponse429"
           },
           "405": {
-             "$ref": "#/responses/ErrorResponse405"
+            "$ref": "#/responses/ErrorResponse405"
           },
           "500": {
-             "$ref": "#/responses/ErrorResponse500"
+            "$ref": "#/responses/ErrorResponse500"
           }
         }
       }
@@ -655,19 +655,19 @@
             "$ref": "#/responses/ErrorResponse400"
           },
           "404": {
-             "$ref": "#/responses/ErrorResponse404"
+            "$ref": "#/responses/ErrorResponse404"
           },
           "401": {
-             "$ref": "#/responses/ErrorResponse401"
+            "$ref": "#/responses/ErrorResponse401"
           },
           "429": {
-             "$ref": "#/responses/ErrorResponse429"
+            "$ref": "#/responses/ErrorResponse429"
           },
           "405": {
-             "$ref": "#/responses/ErrorResponse405"
+            "$ref": "#/responses/ErrorResponse405"
           },
           "500": {
-             "$ref": "#/responses/ErrorResponse500"
+            "$ref": "#/responses/ErrorResponse500"
           }
         }
       }
@@ -706,9 +706,7 @@
             "enum": [
               "playwright:adaptive",
               "playwright:firefox",
-              "cheerio",
-              "jsdom",
-              "playwright:chrome"
+              "cheerio"
             ],
             "x-ms-enum-values": [
               {
@@ -722,14 +720,6 @@
               {
                 "value": "cheerio",
                 "displayName": "Cheerio (Raw HTTP)"
-              },
-              {
-                "value": "jsdom",
-                "displayName": "JSDOM (Raw HTTP with JS)"
-              },
-              {
-                "value": "playwright:chrome",
-                "displayName": "Chrome (Headless Browser) [DEPRECATED]"
               }
             ]
           },
@@ -752,19 +742,19 @@
             "$ref": "#/responses/ErrorResponse400"
           },
           "404": {
-             "$ref": "#/responses/ErrorResponse404"
+            "$ref": "#/responses/ErrorResponse404"
           },
           "401": {
-             "$ref": "#/responses/ErrorResponse401"
+            "$ref": "#/responses/ErrorResponse401"
           },
           "429": {
-             "$ref": "#/responses/ErrorResponse429"
+            "$ref": "#/responses/ErrorResponse429"
           },
           "405": {
-             "$ref": "#/responses/ErrorResponse405"
+            "$ref": "#/responses/ErrorResponse405"
           },
           "500": {
-             "$ref": "#/responses/ErrorResponse500"
+            "$ref": "#/responses/ErrorResponse500"
           }
         }
       }
@@ -792,19 +782,19 @@
             "$ref": "#/responses/ErrorResponse400"
           },
           "404": {
-             "$ref": "#/responses/ErrorResponse404"
+            "$ref": "#/responses/ErrorResponse404"
           },
           "401": {
-             "$ref": "#/responses/ErrorResponse401"
+            "$ref": "#/responses/ErrorResponse401"
           },
           "429": {
-             "$ref": "#/responses/ErrorResponse429"
+            "$ref": "#/responses/ErrorResponse429"
           },
           "405": {
-             "$ref": "#/responses/ErrorResponse405"
+            "$ref": "#/responses/ErrorResponse405"
           },
           "500": {
-             "$ref": "#/responses/ErrorResponse500"
+            "$ref": "#/responses/ErrorResponse500"
           }
         }
       }
@@ -835,19 +825,19 @@
             "$ref": "#/responses/ErrorResponse400"
           },
           "404": {
-             "$ref": "#/responses/ErrorResponse404"
+            "$ref": "#/responses/ErrorResponse404"
           },
           "401": {
-             "$ref": "#/responses/ErrorResponse401"
+            "$ref": "#/responses/ErrorResponse401"
           },
           "429": {
-             "$ref": "#/responses/ErrorResponse429"
+            "$ref": "#/responses/ErrorResponse429"
           },
           "405": {
-             "$ref": "#/responses/ErrorResponse405"
+            "$ref": "#/responses/ErrorResponse405"
           },
           "500": {
-             "$ref": "#/responses/ErrorResponse500"
+            "$ref": "#/responses/ErrorResponse500"
           }
         }
       }
@@ -890,19 +880,19 @@
             "$ref": "#/responses/ErrorResponse400"
           },
           "404": {
-             "$ref": "#/responses/ErrorResponse404"
+            "$ref": "#/responses/ErrorResponse404"
           },
           "401": {
-             "$ref": "#/responses/ErrorResponse401"
+            "$ref": "#/responses/ErrorResponse401"
           },
           "429": {
-             "$ref": "#/responses/ErrorResponse429"
+            "$ref": "#/responses/ErrorResponse429"
           },
           "405": {
-             "$ref": "#/responses/ErrorResponse405"
+            "$ref": "#/responses/ErrorResponse405"
           },
           "500": {
-             "$ref": "#/responses/ErrorResponse500"
+            "$ref": "#/responses/ErrorResponse500"
           }
         }
       }
@@ -995,19 +985,19 @@
             "$ref": "#/responses/ErrorResponse400"
           },
           "404": {
-             "$ref": "#/responses/ErrorResponse404"
+            "$ref": "#/responses/ErrorResponse404"
           },
           "401": {
-             "$ref": "#/responses/ErrorResponse401"
+            "$ref": "#/responses/ErrorResponse401"
           },
           "429": {
-             "$ref": "#/responses/ErrorResponse429"
+            "$ref": "#/responses/ErrorResponse429"
           },
           "405": {
-             "$ref": "#/responses/ErrorResponse405"
+            "$ref": "#/responses/ErrorResponse405"
           },
           "500": {
-             "$ref": "#/responses/ErrorResponse500"
+            "$ref": "#/responses/ErrorResponse500"
           }
         }
       }
@@ -1137,19 +1127,19 @@
             "$ref": "#/responses/ErrorResponse400"
           },
           "404": {
-             "$ref": "#/responses/ErrorResponse404"
+            "$ref": "#/responses/ErrorResponse404"
           },
           "401": {
-             "$ref": "#/responses/ErrorResponse401"
+            "$ref": "#/responses/ErrorResponse401"
           },
           "429": {
-             "$ref": "#/responses/ErrorResponse429"
+            "$ref": "#/responses/ErrorResponse429"
           },
           "405": {
-             "$ref": "#/responses/ErrorResponse405"
+            "$ref": "#/responses/ErrorResponse405"
           },
           "500": {
-             "$ref": "#/responses/ErrorResponse500"
+            "$ref": "#/responses/ErrorResponse500"
           }
         }
       }
@@ -1188,19 +1178,19 @@
             "$ref": "#/responses/ErrorResponse400"
           },
           "404": {
-             "$ref": "#/responses/ErrorResponse404"
+            "$ref": "#/responses/ErrorResponse404"
           },
           "401": {
-             "$ref": "#/responses/ErrorResponse401"
+            "$ref": "#/responses/ErrorResponse401"
           },
           "429": {
-             "$ref": "#/responses/ErrorResponse429"
+            "$ref": "#/responses/ErrorResponse429"
           },
           "405": {
-             "$ref": "#/responses/ErrorResponse405"
+            "$ref": "#/responses/ErrorResponse405"
           },
           "500": {
-             "$ref": "#/responses/ErrorResponse500"
+            "$ref": "#/responses/ErrorResponse500"
           }
         }
       }
@@ -1301,19 +1291,19 @@
             "$ref": "#/responses/ErrorResponse400"
           },
           "404": {
-             "$ref": "#/responses/ErrorResponse404"
+            "$ref": "#/responses/ErrorResponse404"
           },
           "401": {
-             "$ref": "#/responses/ErrorResponse401"
+            "$ref": "#/responses/ErrorResponse401"
           },
           "429": {
-             "$ref": "#/responses/ErrorResponse429"
+            "$ref": "#/responses/ErrorResponse429"
           },
           "405": {
-             "$ref": "#/responses/ErrorResponse405"
+            "$ref": "#/responses/ErrorResponse405"
           },
           "500": {
-             "$ref": "#/responses/ErrorResponse500"
+            "$ref": "#/responses/ErrorResponse500"
           }
         }
       }
@@ -1352,19 +1342,19 @@
             "$ref": "#/responses/ErrorResponse400"
           },
           "404": {
-             "$ref": "#/responses/ErrorResponse404"
+            "$ref": "#/responses/ErrorResponse404"
           },
           "401": {
-             "$ref": "#/responses/ErrorResponse401"
+            "$ref": "#/responses/ErrorResponse401"
           },
           "429": {
-             "$ref": "#/responses/ErrorResponse429"
+            "$ref": "#/responses/ErrorResponse429"
           },
           "405": {
-             "$ref": "#/responses/ErrorResponse405"
+            "$ref": "#/responses/ErrorResponse405"
           },
           "500": {
-             "$ref": "#/responses/ErrorResponse500"
+            "$ref": "#/responses/ErrorResponse500"
           }
         }
       }
