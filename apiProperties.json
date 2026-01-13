@@ -1,9 +1,5 @@
 {
   "properties": {
-    "capabilities": [
-      "actions",
-      "triggers"
-    ],
     "connectionParameters": {
       "token": {
         "type": "oauthSetting",
