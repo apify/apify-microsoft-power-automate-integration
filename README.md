@@ -171,9 +171,9 @@ The connector itself is free to use, but Apify charges for compute resources bas
 
 ### Prerequisites
 
-* [Apify account](https://apify.com)
-* [Power Automate environment](https://make.powerautomate.com/)
-* [Python](https://www.python.org/downloads) 3.5 or later installed
+- [Apify account](https://apify.com)
+- [Power Automate environment](https://make.powerautomate.com/)
+- [Python](https://www.python.org/downloads) 3.5 or later installed
 
 ### Clone Repository
 
@@ -241,10 +241,10 @@ paconn update --settings settings.json
 
 Apify's custom connector consists of the following core files:
 
-* **apiDefinition.swagger.json** – The API description in OpenAPI/Swagger format, listing endpoints, inputs, and outputs that determine what actions and triggers appear in Power Automate.
-* **apiProperties.json** – Connector metadata such as display name, authentication settings, host, and other configuration details.
-* **scripts.csx** – A C# script for custom request/response logic not covered by the API definition.
-* **icon.png** – The image shown as the connector’s icon in the Power Automate UI.
+- **apiDefinition.swagger.json** – The API description in OpenAPI/Swagger format, listing endpoints, inputs, and outputs that determine what actions and triggers appear in Power Automate.
+- **apiProperties.json** – Connector metadata such as display name, authentication settings, host, and other configuration details.
+- **scripts.csx** – A C# script for custom request/response logic not covered by the API definition.
+- **icon.png** – The image shown as the connector’s icon in the Power Automate UI.
 
 These definitions are stored locally and pushed to the Power Platform environment with paconn commands.
 
@@ -308,17 +308,17 @@ paconn update -e <ENV_ID> -c <CONNECTOR_ID> --api-prop apiProperties.json --api-
 
 The repository includes GitHub Actions workflows:
 
-* **Validation**: Validates connector files on pull requests
-* **Deployment**: There is no deployment workflow yet, due to limitations of the Power Platform Connectors CLI.
+- **Validation**: Validates connector files on pull requests
+- **Deployment**: There is no deployment workflow yet, due to limitations of the Power Platform Connectors CLI.
 
 ---
 
 ## Resources
 
-* [Apify API Documentation](https://docs.apify.com/api/v2)
-* [Microsoft Power Automate Documentation](https://docs.microsoft.com/en-us/power-automate/)
-* [Power Platform Connectors Documentation](https://docs.microsoft.com/en-us/connectors/custom-connectors/)
-* [Power Platform Connectors CLI Documentation](https://learn.microsoft.com/en-us/connectors/custom-connectors/paconn-cli)
+- [Apify API Documentation](https://docs.apify.com/api/v2)
+- [Microsoft Power Automate Documentation](https://docs.microsoft.com/en-us/power-automate/)
+- [Power Platform Connectors Documentation](https://docs.microsoft.com/en-us/connectors/custom-connectors/)
+- [Power Platform Connectors CLI Documentation](https://learn.microsoft.com/en-us/connectors/custom-connectors/paconn-cli)
 
 ---
 
