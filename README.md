@@ -66,7 +66,7 @@ How it works:
 Use the *Get dataset items* action to retrieve records from one of your Apify datasets.
 
 - Authentication: Use *Sign in with Apify* [OAuth 2.0] (scopes: `profile`, `full_api_access`).
-- Headers: All requests include `x-apify-integration-platform: power-automate`.
+- Headers: All requests include `x-apify-integration-platform: microsoft-power-automate`.
 - Dataset (`datasetId`): Select a dataset from a dynamically populated dropdown of your datasets.
 - Optional query params:
   - `limit`: number of items to return.
@@ -86,7 +86,7 @@ Tips:
 Retrieve a record's content from a selected key-value store.
 
 - **Authentication**: Use *Sign in with Apify* [OAuth 2.0] (scopes: `profile`, `full_api_access`).
-- **Headers**: All requests include `x-apify-integration-platform: power-automate`.
+- **Headers**: All requests include `x-apify-integration-platform: microsoft-power-automate`.
 - **Inputs**:
   - `Store` (`storeId`, required): Dynamic dropdown listing your stores.
   - `Record Key` (`recordKey`, required): Dependent dropdown listing keys for the selected store.
@@ -101,14 +101,12 @@ This action calls `GET /v2/key-value-stores/{storeId}/records/{recordKey}` via A
 Use the *Scrape single URL* action to scrape a single webpage using Apify's Web Scraper Actor.
 
 - Authentication: Use *Sign in with Apify* [OAuth 2.0] (scopes: `profile`, `full_api_access`).
-- Headers: All requests include `x-apify-integration-platform: power-automate`.
+- Headers: All requests include `x-apify-integration-platform: microsoft-power-automate`.
 - URL (`url`): The full URL of the single page to be scraped. Must be a valid URL format.
 - Crawler Type (`crawler_type`): Select the crawling engine to use:
   - `playwright:adaptive` (Adaptive - recommended)
   - `playwright:firefox` (Firefox Headless Browser)
   - `cheerio` (Cheerio - Raw HTTP, fastest)
-  - `jsdom` (JSDOM - Raw HTTP with JS support)
-  - `playwright:chrome` (Chrome Headless Browser - deprecated)
 
 The connector invokes `POST /v2/acts/aYG0l9s7dbB7j3gbS/runs` (Web Scraper Actor). This action starts an asynchronous scrape and returns the run details immediately. Use the *Actor run finished* trigger to process results once the scrape is complete.
 
@@ -125,7 +123,7 @@ Use the *Run Actor* action to start an Apify Actor run.
 - Optional query params:
   - `build`: specific build tag or id
   - `timeout` (seconds)
-  - `memory` (MB): 512, 1024, 2048, 4096, 8192, 16384
+  - `memory` (MB): 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768
   - `waitForFinish` (seconds, max 60): set 0 to no limit
 
 The connector invokes `POST /v2/acts/{actorId}/runs` per Apify docs (see: https://docs.apify.com/api/v2/act-runs-post). The `actorId` path segment is chosen automatically based on your `actorScope` selection.
@@ -137,10 +135,11 @@ Use the *Run task* action to start an Apify task run.
 - Authentication: Use *Sign in with Apify* [OAuth 2.0] (scopes: `profile`, `full_api_access`).
 - Headers: All requests include `x-apify-integration-platform: microsoft-power-automate`.
 - Task (`taskId`): Select the task from a dynamic dropdown of your available tasks.
-- Input Body (`inputOverride`): Provide a raw JSON object to override the task's default input.
+- Input Body (`inputOverride`): (Optional) provide a raw JSON object to override the task's default input.
 - Optional query params:
   - `timeout` (seconds)
-  - `memory` (MB): 512, 1024, 2048, 4096, 8192, 16384
+  - `build`: specific build tag or id
+  - `memory` (MB): 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768
   - `waitForFinish` (seconds, max 60). If empty or 0, the call is asynchronous (does not wait).
 
 The connector invokes `POST /v2/actor-tasks/{taskId}/runs` per Apify docs (see: https://docs.apify.com/api/v2/actor-task-runs-post). The `taskId` path segment is selected directly from the dropdown.
@@ -170,6 +169,12 @@ The connector itself is free to use, but Apify charges for compute resources bas
 
 ## Development Setup
 
+### Prerequisites
+
+* [Apify account](https://apify.com)
+* [Power Automate environment](https://make.powerautomate.com/)
+* [Python](https://www.python.org/downloads) 3.5 or later installed
+
 ### Clone Repository
 
 ```bash
@@ -177,212 +182,145 @@ git clone https://github.com/apify/apify-microsoft-power-automate-integration.gi
 cd apify-microsoft-power-automate-integration
 ```
 
-### Install .NET SDK
+### Install Python and Power Platform Connectors CLI
 
-The Power Platform CLI requires .NET SDK to be installed on your system. 
+`paconn` requires Python and is installed via pip:
 
-1. Download and install the latest .NET SDK from the [official .NET download page](https://dotnet.microsoft.com/en-us/download/dotnet).
-   - For Windows, Linux, or MacOS, select the appropriate installer for your operating system
-   - The recommended version is .NET 8.0 (LTS) or later
-   - After installation, verify by running `dotnet --version` in your terminal
+1. Verify Python installation:
 
-### Install Power Platform CLI
-
-The Power Platform CLI (pac) is required for development and deployment of the connector. There are three ways to install it:
-
-1. **Visual Studio Code Extension** (Windows, Linux, MacOS):
-   - Install the [Power Platform Tools extension](https://marketplace.visualstudio.com/items?itemName=microsoft-IsvExpTools.powerplatform-vscode)
-   - This makes pac CLI available within VS Code terminals
-
-2. **.NET Tool** (Windows, Linux, MacOS):
    ```bash
-   dotnet tool install -g Microsoft.PowerApps.CLI.Tool
+   python --version
    ```
-   - Requires .NET SDK to be installed first
 
-3. **Windows MSI** (Windows only):
-   - Download and install from [Microsoft Download Center](https://aka.ms/PowerAppsCLI)
-   - Enables all commands on Windows
+2. Install `paconn`:
+
+   ```bash
+   pip install paconn
+   ```
+
+> **Note:** Using a Python virtual environment is recommended to isolate dependencies.
 
 ### Verify Installation
 
-To verify the installation:
-
 ```bash
-# Check if pac is installed and the version (second row)
-pac
+paconn
 ```
 
-### Authentication Setup
+You should see usage help output, confirming the CLI is installed.
 
-Authenticate with the Power Platform CLI to create a saved profile that stores credentials and selects the environment for subsequent `pac` commands:
+### Authentication
 
-```bash
-# Create a profile for a specific environment (use --deviceCode for CLI auth)
-pac auth create --environment "<ENV_ID-or-URL>"
-
-# Manage profiles
-pac auth list
-pac auth select --profile "<profileName>"
-```
-
-- **Important:** Omitting `--environment` can leave no active environment set and cause later `pac` commands to fail.
-- **Find ENV_ID:** copy it from the Maker portal URL, e.g. `https://make.powerapps.com/environments/<ENV_ID>/...` (the `<ENV_ID>` segment is your Environment ID).
-
-Verify connectivity with `pac connector list`.
-
-### Using Settings File
-
-The repository includes a `settings.json` file that simplifies connector operations by storing configuration parameters. This eliminates the need to specify all parameters in each command.
-
-1. **Update the settings file:**
-   
-   Before using the settings file, make sure to update the following fields.
-   
-   ```json
-   {
-     "connectorId": "YOUR-CONNECTOR-ID",
-     "environment": "YOUR-ENVIRONMENT-ID",
-     "apiProperties": "apiProperties.json",
-     "apiDefinition": "apiDefinition.swagger.json",
-     "icon": "icon.png",
-     "script": "scripts.csx"
-   }
-   ```
-   
-   - Replace `YOUR-CONNECTOR-ID` with your actual connector ID (if you already have one, otherwise leave it be)
-   - Replace `YOUR-ENVIRONMENT-ID` with your Power Platform environment ID
-
-### Initial Setup
-
-Before you start development, you need to either create a new connector or download an existing one:
-
-#### Create a New Connector
-
-If you don't have an Apify connector in your Power Automate environment yet:
+Authenticate with your Power Platform environment using device code login:
 
 ```bash
-pac connector create --settings-file settings.json --solution-unique-name <your_solution_unique_name>
+paconn login
 ```
 
-After creation, list your connectors to get the ID for future operations:
+Follow the prompt to open [https://microsoft.com/devicelogin](https://microsoft.com/devicelogin) and enter the code shown in your terminal.
+
+To logout:
 
 ```bash
-pac connector list
+paconn logout
 ```
 
-Find your new Apify connector in the list and note its `ConnectorId`.
+### `settings.json` for paconn
 
-### Download an Existing Connector
+You can use a settings.json file in this project root to store arguments for paconn commands. This simplifies repeated operations because the CLI reads environment, connector ID, file paths, and other parameters from this file when provided.
 
-If you already have an Apify connector in your environment and want to work on it:
+This makes subsequent commands shorter:
 
-1. First, list available connectors to find the ID:
+```bash
+paconn create --settings settings.json
+paconn update --settings settings.json
+```
 
-   ```bash
-   pac connector list
-   ```
+---
 
-2. Download the connector files to your local environment:
+## Connector Files Explained
 
-   ```bash
-   pac connector download \
-     --connector-id <connector-id> \
-     --outputDirectory ./
-   ```
+Apify's custom connector consists of the following core files:
 
-## Deployment Instructions
+* **apiDefinition.swagger.json** – The API description in OpenAPI/Swagger format, listing endpoints, inputs, and outputs that determine what actions and triggers appear in Power Automate.
+* **apiProperties.json** – Connector metadata such as display name, authentication settings, host, and other configuration details.
+* **scripts.csx** – A C# script for custom request/response logic not covered by the API definition.
+* **icon.png** – The image shown as the connector’s icon in the Power Automate UI.
 
-### Creating a New Connector
+These definitions are stored locally and pushed to the Power Platform environment with paconn commands.
 
-To deploy this connector as a custom connector in Power Automate:
+---
 
-1. Ensure you have completed the [Prerequisites](#prerequisites) and [Development Setup](#development-setup)
-2. Update the `settings.json` file with your environment ID
-3. Create the connector:
+## Creating and Updating the Connector
 
-   ```bash
-   pac connector create --settings-file settings.json --solution-unique-name <your_solution_unique_name>
-   ```
+### When to Create
 
-4. After creation, note the `ConnectorId` from `pac connector list`
+If the connector does not yet exist in your Power Automate environment, create it once:
 
-### Updating an Existing Connector
+```bash
+paconn create --settings settings.json --secret <oauth-client-secret>
+```
 
-To update an existing connector:
+or explicitly without settings:
 
-1. Make your changes to the connector files locally
-2. Update the connector:
+```bash
+paconn create -e <ENV_ID> --api-prop apiProperties.json --api-def apiDefinition.swagger.json --icon icon.png --script scripts.csx --secret <oauth-client-secret>
+```
 
-   ```bash
-   pac connector update --settings-file settings.json
-   ```
+After creation, paconn prints the `connector ID`. Save this value in your `settings.json` for future updates.
 
-### CI/CD
+### When to Update
 
-The repository includes GitHub Actions workflows for:
+Once the connector is created and you are modifying its definition locally, use the update command:
 
-1. **Validation**: Validates the connector files on every pull request
-2. **Deployment**: Deploys the connector to the development environment on merge to main branch
+```bash
+paconn update --settings settings.json --secret <oauth-client-secret>
+```
 
-#### Workflow Files
+or explicitly:
 
-- `.github/workflows/validate.yml`: Validates the connector files
+```bash
+paconn update -e <ENV_ID> -c <CONNECTOR_ID> --api-prop apiProperties.json --api-def apiDefinition.swagger.json --icon icon.png --script scripts.csx --secret <oauth-client-secret>
+```
+
+---
 
 ## Development Cycle
 
-Once you have your connector set up and uploaded, follow this development cycle:
-
 1. **Edit Locally**
+   Update `apiDefinition.swagger.json`, `apiProperties.json`, and `scripts.csx` in your IDE.
 
-   Make changes to the connector files in your local IDE:
-   - `apiDefinition.swagger.json` - OpenAPI definition
-   - `apiProperties.json` - Connector properties
-   - `scripts.csx` - Custom scripts
-
-2. **Update the Connector**
-
-   Push your changes to Power Automate:
+2. **Deploy Updates**
+   Push changes:
 
    ```bash
-   pac connector update --settings-file settings.json
+   paconn update --settings settings.json --secret <oauth-client-secret>
    ```
+3. **Check for Errors**
+   Go to custom connector edit mode in Power Automate and try saving the connector. If there are errors, check the error message, fix them localy and repeat.
+4. **Test Changes**
+   Run flows using your connector’s actions and triggers to verify behavior.
+5. **Repeat**
+   Fix issues locally, then update and test again.
 
-3. **Test Your Changes**
+---
 
-   Before testing, you need a valid connection:
-   - Go to `Connections -> New connection` and create a connection to your connector
-   - Ensure the connection shows as `Connected`
-   - Alternatively, create the connection directly in the `Test tab`
+## CI/CD Integration
 
-   Test your connector in Power Automate:
-   - Navigate to `Custom connectors -> Apify -> Test tab`
-   - Try different operations to verify your changes
-   - You can also use the `Swagger editor` for testing and fine-tuning
+The repository includes GitHub Actions workflows:
 
-   Create test flows in Power Automate to validate each action and trigger:
-   - Verify authentication works correctly
-   - Test with various input parameters and edge cases
-   - Validate output schema matches expectations
+* **Validation**: Validates connector files on pull requests
+* **Deployment**: There is no deployment workflow yet, due to limitations of the Power Platform Connectors CLI.
 
-4. **Iterate**
-
-   - If you find issues, return to your local IDE
-   - Make necessary fixes to the files
-   - Update the connector again using the `pac connector update` command
-   - Repeat the testing process
-
+---
 
 ## Resources
 
-- [Apify API Documentation](https://docs.apify.com/api/v2)
-- [Microsoft Power Automate Documentation](https://docs.microsoft.com/en-us/power-automate/)
-- [Power Platform Connectors Documentation](https://docs.microsoft.com/en-us/connectors/custom-connectors/)
-- [Power Platform CLI Documentation](https://learn.microsoft.com/en-us/power-platform/developer/cli/introduction)
-- [Custom Connector OpenAPI Definition](https://learn.microsoft.com/en-us/connectors/custom-connectors/define-openapi-definition)
+* [Apify API Documentation](https://docs.apify.com/api/v2)
+* [Microsoft Power Automate Documentation](https://docs.microsoft.com/en-us/power-automate/)
+* [Power Platform Connectors Documentation](https://docs.microsoft.com/en-us/connectors/custom-connectors/)
+* [Power Platform Connectors CLI Documentation](https://learn.microsoft.com/en-us/connectors/custom-connectors/paconn-cli)
 
 ---
 
 Maintained by: Apify Team
-
 Support: [GitHub Issues](https://github.com/apify/apify-microsoft-power-automate-integration/issues)
