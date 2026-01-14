@@ -62,7 +62,7 @@ When creating a connection in Power Automate, select *Sign in with Apify*. You w
 Use the *Actor run finished* trigger to automatically execute your Power Automate flow when a specific Apify Actor run completes with a selected status.
 
 - **Authentication**: Use *Sign in with Apify* [OAuth 2.0] (scopes: `profile`, `full_api_access`).
-- **Headers**: All requests include `x-apify-integration-platform: microsoft-power-automate`.
+- **Headers**: `x-apify-integration-platform: microsoft-power-automate`.
 - **Inputs**:
   - `Actor Scope`: Choose between *Recently used Actors* or *From store* (Apify store Actors).
   - `Actor`: Dynamic dropdown populated with Actors based on the selected scope.
@@ -79,7 +79,7 @@ Use the *Actor run finished* trigger to automatically execute your Power Automat
 Use the *Actor task finished* trigger to automatically execute your Power Automate flow when a specific Apify Actor task run completes with a selected status.
 
 - **Authentication**: Use *Sign in with Apify* [OAuth 2.0] (scopes: `profile`, `full_api_access`).
-- **Headers**: All requests include `x-apify-integration-platform: microsoft-power-automate`.
+- **Headers**: `x-apify-integration-platform: microsoft-power-automate`.
 - **Inputs**:
   - `Task`: Dynamic dropdown populated with your Actor tasks.
   - `Trigger On`: Select which run statuses should trigger the flow (SUCCEEDED, FAILED, TIMED_OUT, ABORTED).
@@ -96,7 +96,7 @@ Use the *Actor task finished* trigger to automatically execute your Power Automa
 Use the *Get dataset items* action to retrieve records from one of your Apify datasets.
 
 - **Authentication**: Use *Sign in with Apify* [OAuth 2.0] (scopes: `profile`, `full_api_access`).
-- **Headers**: All requests include `x-apify-integration-platform: microsoft-power-automate`.
+- **Headers**: `x-apify-integration-platform: microsoft-power-automate`.
 - **Inputs**:
   - `Dataset`: Select a dataset from a dynamically populated dropdown of your datasets.
   - `Limit` (optional): Number of items to return.
@@ -116,7 +116,7 @@ Use the *Get dataset items* action to retrieve records from one of your Apify da
 Retrieve a record's content from a selected key-value store.
 
 - **Authentication**: Use *Sign in with Apify* [OAuth 2.0] (scopes: `profile`, `full_api_access`).
-- **Headers**: All requests include `x-apify-integration-platform: microsoft-power-automate`.
+- **Headers**: `x-apify-integration-platform: microsoft-power-automate`.
 - **Inputs**:
   - `Store` (`storeId`, required): Dynamic dropdown listing your stores.
   - `Record Key` (`recordKey`, required): Dependent dropdown listing keys for the selected store.
@@ -131,7 +131,7 @@ This action calls `GET /v2/key-value-stores/{storeId}/records/{recordKey}` via A
 Use the *Scrape single URL* action to scrape a single webpage using Apify's Web Scraper Actor.
 
 - **Authentication**: Use *Sign in with Apify* [OAuth 2.0] (scopes: `profile`, `full_api_access`).
-- **Headers**: All requests include `x-apify-integration-platform: microsoft-power-automate`.
+- **Headers**: `x-apify-integration-platform: microsoft-power-automate`.
 - **Inputs**:
   - `URL`: The full URL of the single page to be scraped. Must be a valid URL format.
   - `Crawler Type`: Select the crawling engine to use:
@@ -146,7 +146,7 @@ The connector invokes `POST /v2/acts/aYG0l9s7dbB7j3gbS/runs` (Web Scraper Actor)
 Use the *Run Actor* action to start an Apify Actor run.
 
 - **Authentication**: Use *Sign in with Apify* [OAuth 2.0] (scopes: `profile`, `full_api_access`).
-- **Headers**: All requests include `x-apify-integration-platform: microsoft-power-automate`.
+- **Headers**: `x-apify-integration-platform: microsoft-power-automate`.
 - **Inputs**:
   - `Actor Scope`: Choose *Recently used Actors* or *From store*.
     - If *Recently used Actors*: pick from `Actor` populated by your account Actors.
@@ -166,7 +166,7 @@ The connector invokes `POST /v2/acts/{actorId}/runs` per [Apify docs](https://do
 Use the *Run task* action to start an Apify task run.
 
 - **Authentication**: Use *Sign in with Apify* [OAuth 2.0] (scopes: `profile`, `full_api_access`).
-- **Headers**: All requests include `x-apify-integration-platform: microsoft-power-automate`.
+- **Headers**: `x-apify-integration-platform: microsoft-power-automate`.
 - **Inputs**:
   - `Task`: Select the task from a dynamic dropdown of your available tasks.
   - `Input Body` (optional): Provide a raw JSON object to override the task's default input.
@@ -254,16 +254,19 @@ cd apify-microsoft-power-automate-integration
    ```bash
    python --version
    ```
+2. *(optional)* Create and activate a Python virtual environment:
+   ```bash
+   python -m venv .venv
+   source .venv/bin/activate
+   ```
 
-2. Install `paconn`:
+3. Install `paconn`:
 
    ```bash
    pip install paconn
    ```
 
-> **Note:** Using a Python virtual environment is recommended to isolate dependencies.
-
-3. Verify installation:
+4. Verify installation:
 
    ```bash
    paconn
@@ -387,7 +390,6 @@ paconn update -e <ENV_ID> -c <CONNECTOR_ID> --api-prop apiProperties.json --api-
 The repository includes GitHub Actions workflows:
 
 - **Validation**: Validates connector files on pull requests
-- **Deployment**: There is no deployment workflow yet, due to limitations of the Power Platform Connectors CLI.
 
 ## Resources
 
