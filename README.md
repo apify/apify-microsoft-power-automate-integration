@@ -1,6 +1,6 @@
 # Apify Connector
 
-Apify is a web scraping and automation platform that provides serverless computing infrastructure for running reusable automation scripts called Actors. This connector enables Microsoft Power Automate users to integrate Apify's web scraping capabilities directly into their workflows. Run Actors and Tasks, fetch data from Datasets and Key-Value Stores, and create webhooks to trigger flows when scraping jobs complete.
+Apify is a web scraping platform. Use this connector to run scrapers (called Actors), fetch results from datasets and key-value stores, and trigger flows when scraping jobs finish.
 
 > **About This Document**
 >
@@ -46,8 +46,8 @@ Before using this connector, you need:
 
 The connector supports **OAuth 2.0** authentication with the following scopes:
 
-- `profile`: Allows the connector to view your Apify account details and profile information.
-- `full_api_access`: Grants the connector complete access to all Apify API features, including running Actors, managing tasks, and accessing datasets.
+- `profile`: Read your Apify username and account ID to identify the connection.
+- `full_api_access`: Run Actors, start Tasks, read Datasets and Key-Value Stores, and manage webhooks.
 
 When creating a connection in Power Automate, select *Sign in with Apify*. You will be redirected to Apify to authorize access to your account.
 
@@ -181,11 +181,10 @@ The connector invokes `POST /v2/actor-tasks/{taskId}/runs` per [Apify docs](http
 
 ## Common Use Cases
 
-- **Automated lead generation**: Run a web scraper on a schedule and sync results to your CRM or Excel
-- **Price monitoring**: Trigger flows when product data changes on e-commerce sites
-- **Content aggregation**: Collect data from multiple sources and push to SharePoint or Teams
-- **Competitor monitoring**: Schedule regular scrapes and receive email or Teams notifications
-- **Data enrichment**: Scrape additional data and merge it with existing records in your workflows
+- **Price drop alerts**: Run a price scraper on a schedule, then notify via Teams when prices drop
+- **CRM enrichment**: Scrape company websites and push the data to Dynamics 365 or SharePoint
+- **Competitor tracking**: Detect changes on competitor pages and log them to Excel
+- **Lead generation**: Scrape directories, filter results, and add leads to your CRM
 
 ## Known Issues and Limitations
 
@@ -215,7 +214,7 @@ The connector invokes `POST /v2/actor-tasks/{taskId}/runs` per [Apify docs](http
 ## Frequently Asked Questions
 
 **How much does it cost?**
-The connector itself is free to use, but Apify charges for compute resources based on runtime, memory allocation, and proxy usage. Apify offers a free tier with monthly credits. For pricing details, visit [apify.com/pricing](https://apify.com/pricing).
+The connector is free. Apify charges for compute (runtime, memory, proxies). There's a free tier with monthly credits. For pricing details, visit [apify.com/pricing](https://apify.com/pricing).
 
 **Where can I get help?**
 - **Apify documentation**: [docs.apify.com](https://docs.apify.com)
@@ -228,7 +227,7 @@ The connector itself is free to use, but Apify charges for compute resources bas
 
 # Developer Guide
 
-This section is for developers who want to contribute to, customize, or deploy this connector.
+For developers contributing to or deploying this connector.
 
 ## Prerequisites
 
