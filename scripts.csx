@@ -8,6 +8,12 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 public class Script : ScriptBase {
+  /// Constants
+  private const string OP_RUN_ACTOR_ID = "RunActor";
+  private const string OP_RUN_TASK_ID = "RunTask";
+  private const string OP_SCRAPE_SINGLE_URL_ID = "ScrapeSingleUrl";
+  private const string OP_GET_DATASET_ITEMS_ID = "GetDatasetItems";
+
   /// <summary>
   /// Main entry point for the Power Automate custom connector script.
   /// Routes incoming requests to appropriate handlers based on the operation ID.
@@ -23,7 +29,7 @@ public class Script : ScriptBase {
         return await HandleListTasks().ConfigureAwait(false);
       case "GetDatasetSchema":
         return await HandleGetDatasetSchema().ConfigureAwait(false);
-      case "ScrapeSingleUrl":
+      case OP_SCRAPE_SINGLE_URL_ID:
         return await HandleScrapeSingleUrl().ConfigureAwait(false);
       case "GetKeyValueStoreRecordSchema":
         return await HandleGetKeyValueStoreRecordSchema().ConfigureAwait(false);
@@ -35,13 +41,13 @@ public class Script : ScriptBase {
         return await HandleCreateWebhook().ConfigureAwait(false);
       case "DeleteActorWebhook":
         return await HandleDeleteWebhook().ConfigureAwait(false);
-      case "RunActor":
-      case "RunTask":
+      case OP_GET_DATASET_ITEMS_ID:
+      case OP_RUN_ACTOR_ID:
+      case OP_RUN_TASK_ID:
       case "GetUserInfo":
       case "ListDatasets":
       case "ListRecordKeys":
       case "ListStoreActors":
-      case "GetDatasetItems":
       case "ListRecentActors":
       case "ListKeyValueStores":
       case "GetKeyValueStoreRecord":
@@ -56,11 +62,21 @@ public class Script : ScriptBase {
   /// <summary>
   /// Handles passthrough operations by forwarding the original request to the Apify API.
   /// Used for operations that don't require any special processing or transformation.
+  /// Validates query parameters before forwarding if validation rules exist for the operation.
   /// </summary>
   /// <returns>
   /// An <see cref="HttpResponseMessage"/> representing the HTTP response message including the status code and data from the forwarded request.
   /// </returns>
   private async Task<HttpResponseMessage> HandlePassthrough() {
+    // Validate query parameters if rules exist for this operation
+    if (Context.Request?.RequestUri != null) {
+      var queryParams = System.Web.HttpUtility.ParseQueryString(Context.Request.RequestUri.Query);
+      var validation = ValidateQueryParameters(Context.OperationId, queryParams);
+      if (!validation.IsValid) {
+        return CreateValidationErrorResponse(validation);
+      }
+    }
+    
     return await Context.SendAsync(Context.Request, CancellationToken).ConfigureAwait(false);
   }
 
@@ -78,10 +94,16 @@ public class Script : ScriptBase {
       var request = Context.Request;
       var queryParams = System.Web.HttpUtility.ParseQueryString(request.RequestUri.Query);
 
+      // Validate query parameters
+      var validation = ValidateQueryParameters(OP_SCRAPE_SINGLE_URL_ID, queryParams);
+      if (!validation.IsValid) {
+        return CreateValidationErrorResponse(validation);
+      }
+
       var url = queryParams["url"];
       var crawlerType = queryParams["crawler_type"];
 
-      // Validate required parameters
+      // Check for required parameters
       if (string.IsNullOrEmpty(url) || string.IsNullOrEmpty(crawlerType)) {
         var errorResponse = new HttpResponseMessage(HttpStatusCode.BadRequest);
         errorResponse.Content = CreateJsonContent("Missing required parameter: url or crawler_type");
@@ -467,7 +489,8 @@ public class Script : ScriptBase {
   /// <summary>
   /// Handles the creation of webhooks for Power Automate triggers.
   /// Location header is provided by Apify API.
-  /// Removes the helper actorScope parameter and forwards the request to Apify API.  /// </summary>
+  /// Removes the helper actorScope parameter and forwards the request to Apify API.  
+  /// </summary>
   /// <returns>
   /// An <see cref="HttpResponseMessage"/> representing the HTTP response message with proper Location header for webhook deletion.
   /// </returns>
@@ -480,7 +503,7 @@ public class Script : ScriptBase {
     Context.Request.RequestUri = new UriBuilder(originalUri) { Query = queryParams.ToString() }.Uri;
 
     // Forward request to Apify API
-    return await HandlePassthrough().ConfigureAwait(false);
+    return await Context.SendAsync(Context.Request, CancellationToken).ConfigureAwait(false);
   }
 
   /// <summary>
@@ -517,5 +540,163 @@ public class Script : ScriptBase {
     ModifyRequestPath("/webhooks/task/{webhookId}", "/webhooks/{webhookId}");
 
     return await HandleDeleteWebhook().ConfigureAwait(false);
+  }
+
+  /// <summary>
+  /// Holds validation results with error collection.
+  /// </summary>
+  private class ValidationResult {
+    public bool IsValid { get; set; }
+    public List<string> Errors { get; set; }
+    
+    public ValidationResult() {
+      IsValid = true;
+      Errors = new List<string>();
+    }
+    
+    public void AddError(string error) {
+      IsValid = false;
+      Errors.Add(error);
+    }
+  }
+
+  /// <summary>
+  /// Delegate for parameter validation functions.
+  /// </summary>
+  private delegate ValidationResult ParameterValidator(string paramName, string paramValue);
+
+  /// <summary>
+  /// Validates that a parameter value is a valid URL.
+  /// </summary>
+  /// <param name="paramName">The name of the parameter being validated.</param>
+  /// <param name="paramValue">The value to validate.</param>
+  /// <returns>ValidationResult indicating success or failure with error message.</returns>
+  private ValidationResult ValidateUrl(string paramName, string paramValue) {
+    var result = new ValidationResult();
+    
+    if (Uri.TryCreate(paramValue, UriKind.Absolute, out var uri) && 
+        (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps)) {
+      return result;
+    }
+    
+    result.AddError($"Parameter '{paramName}' must be a valid URL.");
+    return result;
+  }
+
+  /// <summary>
+  /// Validates that a parameter value is a non-negative integer (greater than or equal to 0).
+  /// </summary>
+  /// <param name="paramName">The name of the parameter being validated.</param>
+  /// <param name="paramValue">The value to validate.</param>
+  /// <returns>ValidationResult indicating success or failure with error message.</returns>
+  private ValidationResult ValidateNonNegativeInteger(string paramName, string paramValue) {
+    var result = new ValidationResult();
+    
+    if (int.TryParse(paramValue, out var value) && value >= 0) {
+      return result;
+    }
+    
+    result.AddError($"Parameter '{paramName}' must be a non-negative integer");
+    return result;
+  }
+
+  /// <summary>
+  /// Validates that a parameter value is an integer within a specified range.
+  /// </summary>
+  /// <param name="paramName">The name of the parameter being validated.</param>
+  /// <param name="paramValue">The value to validate.</param>
+  /// <param name="min">Minimum allowed value.</param>
+  /// <param name="max">Maximum allowed value.</param>
+  /// <returns>ValidationResult indicating success or failure with error message</returns>
+  private ValidationResult ValidateIntegerRange(string paramName, string paramValue, int min, int max) {
+    var result = new ValidationResult();
+    
+    if (int.TryParse(paramValue, out var value) && value >= min && value <= max) {
+      return result;
+    }
+    
+    result.AddError($"Parameter '{paramName}' must be an integer between {min} and {max}");
+    return result;
+  }
+
+  /// <summary>
+  /// Validates that a parameter value is a valid wait for finish value (0-60).
+  /// </summary>
+  /// <param name="paramName">The name of the parameter being validated.</param>
+  /// <param name="paramValue">The value to validate.</param>
+  /// <returns>ValidationResult indicating success or failure with error message.</returns>
+  private ValidationResult ValidateWaitForFinish(string paramName, string paramValue) {
+    return ValidateIntegerRange(paramName, paramValue, 0, 60);
+  }
+
+  /// <summary>
+  /// Returns validation rules for each operation that requires query parameter validation.
+  /// Maps operation IDs to their parameter validation rules.
+  /// </summary>
+  /// <returns>Dictionary mapping operation IDs to parameter validators.</returns>
+  private Dictionary<string, Dictionary<string, ParameterValidator>> GetValidationRules() {
+    return new Dictionary<string, Dictionary<string, ParameterValidator>> {
+      [OP_RUN_ACTOR_ID] = new Dictionary<string, ParameterValidator> {
+        ["waitForFinish"] = ValidateWaitForFinish,
+        ["timeout"] = ValidateNonNegativeInteger
+      },
+      [OP_RUN_TASK_ID] = new Dictionary<string, ParameterValidator> {
+        ["waitForFinish"] = ValidateWaitForFinish,
+        ["timeout"] = ValidateNonNegativeInteger
+      },
+      [OP_SCRAPE_SINGLE_URL_ID] = new Dictionary<string, ParameterValidator> {
+        ["url"] = ValidateUrl
+      },
+      [OP_GET_DATASET_ITEMS_ID] = new Dictionary<string, ParameterValidator> {
+        ["limit"] = ValidateNonNegativeInteger,
+        ["offset"] = ValidateNonNegativeInteger
+      }
+    };
+  }
+
+  /// <summary>
+  /// Validates query parameters for a given operation based on configured validation rules.
+  /// </summary>
+  /// <param name="operationId">The operation ID to validate parameters for.</param>
+  /// <param name="queryParams">The query parameters collection to validate.</param>
+  /// <returns>ValidationResult containing all validation errors, if any.</returns>
+  private ValidationResult ValidateQueryParameters(string operationId, System.Collections.Specialized.NameValueCollection queryParams) {
+    var result = new ValidationResult();
+    var rules = GetValidationRules();
+    
+    // Check if the operation has validation rules
+    if (!rules.ContainsKey(operationId)) {
+      return result;
+    }
+    
+    foreach (var rule in rules[operationId]) {
+      var paramValue = queryParams[rule.Key];
+      if (!string.IsNullOrEmpty(paramValue)) {
+        var validationResult = rule.Value(rule.Key, paramValue);
+        if (!validationResult.IsValid) {
+          result.IsValid = false;
+          result.Errors.AddRange(validationResult.Errors);
+        }
+      }
+    }
+    
+    return result;
+  }
+
+  /// <summary>
+  /// Creates a standardized HTTP 400 Bad Request response for validation errors.
+  /// </summary>
+  /// <param name="validation">The validation result containing error details.</param>
+  /// <returns>HttpResponseMessage with validation error details.</returns>
+  private HttpResponseMessage CreateValidationErrorResponse(ValidationResult validation) {
+    var errorResponse = new HttpResponseMessage(HttpStatusCode.BadRequest);
+    var errorObject = new JObject {
+      ["error"] = new JObject {
+        ["type"] = "VALIDATION_ERROR",
+        ["message"] = $"Query parameter validation failed: {string.Join("; ", validation.Errors)}"
+      }
+    };
+    errorResponse.Content = CreateJsonContent(errorObject.ToString(Newtonsoft.Json.Formatting.None));
+    return errorResponse;
   }
 }
