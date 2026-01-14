@@ -23,6 +23,19 @@ This section is for Power Automate users who want to use the Apify connector in 
 
 For detailed instructions, visit the [Apify Microsoft Power Automate documentation](https://docs.apify.com/platform/integrations/microsoft-power-automate).
 
+## Key Capabilities
+
+**Triggers:**
+- **[Actor Run Finished](#actor-run-finished)** – Start a flow when an Actor completes
+- **[Actor Task Finished](#actor-task-finished)** – Start a flow when a Task completes
+
+**Actions:**
+- **[Run Actor](#run-actor)** – Execute any Apify Actor
+- **[Run Task](#run-task)** – Execute a saved Actor Task
+- **[Get Dataset Items](#get-dataset-items)** – Retrieve scraped data from datasets
+- **[Get Key-Value Store Record](#get-key-value-store-record)** – Fetch stored data
+- **[Scrape Single URL](#scrape-single-url)** – Quick single-page scraping
+
 ## Prerequisites
 
 Before using this connector, you need:
@@ -85,7 +98,7 @@ Use the *Get dataset items* action to retrieve records from one of your Apify da
 - **Authentication**: Use *Sign in with Apify* [OAuth 2.0] (scopes: `profile`, `full_api_access`).
 - **Headers**: All requests include `x-apify-integration-platform: microsoft-power-automate`.
 - **Inputs**:
-  - `Dataset` (`datasetId`): Select a dataset from a dynamically populated dropdown of your datasets.
+  - `Dataset`: Select a dataset from a dynamically populated dropdown of your datasets.
   - `Limit` (optional): Number of items to return.
   - `Offset` (optional): Number of items to skip (for pagination).
 - **Output**: An array of dataset items. The item shape is dynamic and depends on the selected dataset.
@@ -120,8 +133,8 @@ Use the *Scrape single URL* action to scrape a single webpage using Apify's Web 
 - **Authentication**: Use *Sign in with Apify* [OAuth 2.0] (scopes: `profile`, `full_api_access`).
 - **Headers**: All requests include `x-apify-integration-platform: microsoft-power-automate`.
 - **Inputs**:
-  - `URL` (`url`): The full URL of the single page to be scraped. Must be a valid URL format.
-  - `Crawler Type` (`crawler_type`): Select the crawling engine to use:
+  - `URL`: The full URL of the single page to be scraped. Must be a valid URL format.
+  - `Crawler Type`: Select the crawling engine to use:
     - `playwright:adaptive` (Adaptive - recommended)
     - `playwright:firefox` (Firefox Headless Browser)
     - `cheerio` (Cheerio - Raw HTTP, fastest)
@@ -135,10 +148,10 @@ Use the *Run Actor* action to start an Apify Actor run.
 - **Authentication**: Use *Sign in with Apify* [OAuth 2.0] (scopes: `profile`, `full_api_access`).
 - **Headers**: All requests include `x-apify-integration-platform: microsoft-power-automate`.
 - **Inputs**:
-  - `Actor Scope` (`actorScope`): Choose *Recently used Actors* or *From store*.
+  - `Actor Scope`: Choose *Recently used Actors* or *From store*.
     - If *Recently used Actors*: pick from `Actor` populated by your account Actors.
     - If *From store*: pick from `Actor` populated by Apify Store (limit 1000).
-  - `Input Body` (`inputBody`): Provide JSON for the Actor input.
+  - `Input Body`: Provide JSON for the Actor input.
   - `Build` (optional): Specific build tag or id.
   - `Timeout` (optional): Timeout in seconds.
   - `Memory` (optional): Memory in MB (128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768).
@@ -155,8 +168,8 @@ Use the *Run task* action to start an Apify task run.
 - **Authentication**: Use *Sign in with Apify* [OAuth 2.0] (scopes: `profile`, `full_api_access`).
 - **Headers**: All requests include `x-apify-integration-platform: microsoft-power-automate`.
 - **Inputs**:
-  - `Task` (`taskId`): Select the task from a dynamic dropdown of your available tasks.
-  - `Input Body` (`inputOverride`, optional): Provide a raw JSON object to override the task's default input.
+  - `Task`: Select the task from a dynamic dropdown of your available tasks.
+  - `Input Body` (optional): Provide a raw JSON object to override the task's default input.
   - `Timeout` (optional): Timeout in seconds.
   - `Build` (optional): Specific build tag or id.
   - `Memory` (optional): Memory in MB (128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768).
@@ -165,6 +178,14 @@ Use the *Run task* action to start an Apify task run.
 The connector invokes `POST /v2/actor-tasks/{taskId}/runs` per [Apify docs](https://docs.apify.com/api/v2/actor-task-runs-post). The `taskId` path segment is selected directly from the dropdown.
 
 > **Note:** Available memory options depend on your Apify subscription plan. For more information, see your [account limits](https://console.apify.com/billing/limits).
+
+## Common Use Cases
+
+- **Automated lead generation**: Run a web scraper on a schedule and sync results to your CRM or Excel
+- **Price monitoring**: Trigger flows when product data changes on e-commerce sites
+- **Content aggregation**: Collect data from multiple sources and push to SharePoint or Teams
+- **Competitor monitoring**: Schedule regular scrapes and receive email or Teams notifications
+- **Data enrichment**: Scrape additional data and merge it with existing records in your workflows
 
 ## Known Issues and Limitations
 
