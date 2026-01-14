@@ -325,7 +325,7 @@
             "$ref": "#/parameters/TimeoutParameter"
           },
           {
-            "$ref": "#/parameters/BuildIdParameter"
+            "$ref": "#/parameters/BuildOrTagParameter"
           },
           {
             "$ref": "#/parameters/MemoryParameter"
@@ -444,7 +444,7 @@
             "$ref": "#/parameters/WaitForFinishParameter"
           },
           {
-            "$ref": "#/parameters/BuildIdParameter"
+            "$ref": "#/parameters/BuildOrTagParameter"
           },
           {
             "$ref": "#/parameters/TimeoutParameter"
@@ -1589,7 +1589,7 @@
       "x-ms-summary": "Timeout",
       "description": "Timeout for the run in seconds."
     },
-    "BuildIdParameter": {
+    "BuildOrTagParameter": {
       "name": "build",
       "in": "query",
       "required": false,
