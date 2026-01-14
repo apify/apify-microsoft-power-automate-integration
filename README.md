@@ -1,33 +1,50 @@
 # Apify Connector
 
-Apify is a web scraping and automation platform that provides serverless computing infrastructure for running data extraction tasks called Actors. This connector enables Microsoft Power Automate users to integrate Apify's web scraping capabilities directly into their workflows. Run Actors and Tasks, fetch data from Datasets and Key-Value Stores, and create webhooks to trigger flows when scraping jobs complete.
+Apify is a web scraping and automation platform that provides serverless computing infrastructure for running reusable automation scripts called Actors. This connector enables Microsoft Power Automate users to integrate Apify's web scraping capabilities directly into their workflows. Run Actors and Tasks, fetch data from Datasets and Key-Value Stores, and create webhooks to trigger flows when scraping jobs complete.
+
+> **About This Document**
+>
+> This README serves two audiences:
+> - **[Connector Documentation](#connector-documentation)** – For Power Automate users who want to use the Apify connector in their flows
+> - **[Developer Guide](#developer-guide)** – For developers contributing to or customizing this connector
+
+---
+
+# Connector Documentation
+
+This section is for Power Automate users who want to use the Apify connector in their flows.
+
+## Quick Start
+
+1. **Sign up** for an Apify account at [console.apify.com](https://console.apify.com/)
+2. **Add the connector** to your Power Automate flow
+3. **Authenticate** by selecting *Sign in with Apify* and authorizing access
+4. **Use triggers and actions** to integrate Apify into your workflows
+
+For detailed instructions, visit the [Apify Microsoft Power Automate documentation](https://docs.apify.com/platform/integrations/microsoft-power-automate).
 
 ## Prerequisites
 
-Before using this connector, you need to set up the following:
+Before using this connector, you need:
 
 - An Apify account. Sign up at the [Apify Console](https://console.apify.com/).
 
-## Supported Operations
+## Authentication
 
-### Obtaining Credentials
+The connector supports **OAuth 2.0** authentication with the following scopes:
 
-The connector supports *OAuth 2.0* authentication with the following scopes only:
 - `profile`: Allows the connector to view your Apify account details and profile information.
 - `full_api_access`: Grants the connector complete access to all Apify API features, including running Actors, managing tasks, and accessing datasets.
 
 When creating a connection in Power Automate, select *Sign in with Apify*. You will be redirected to Apify to authorize access to your account.
 
-**Note**: All requests include the header `x-apify-integration-platform: microsoft-power-automate` to identify the integration platform.
+> **Note**: All requests include the header `x-apify-integration-platform: microsoft-power-automate` to identify the integration platform.
 
-### Triggers
+## Triggers
 
-> **Note:**  
-> Currently, when you set up these triggers, the Apify connector creates a webhook on your Apify account to notify Power Automate of completed runs. However, if you turn off or delete a workflow in Power Automate, the webhook on Apify is **not automatically removed**.  
-> To prevent unused webhooks from accumulating, please manually remove old webhooks from your [Apify Console](https://console.apify.com/) by navigating to the *Integration* tab of the Actor used in your trigger (*https://console.apify.com/actors/<actor_id>/integrations*).
-> This is especially important if you retire or disable flows. We are working to improve this behavior so that webhook cleanup will happen automatically in the future.
+> **Note:** Triggers create webhooks in your Apify account to notify Power Automate. When you delete or disable a flow, manually remove the associated webhooks in the [Apify Console](https://console.apify.com/) to keep your account organized. We are working on automating this cleanup in the future.
 
-#### Actor run finished Trigger
+### Actor Run Finished
 
 Use the *Actor run finished* trigger to automatically execute your Power Automate flow when a specific Apify Actor run completes with a selected status.
 
@@ -39,12 +56,12 @@ Use the *Actor run finished* trigger to automatically execute your Power Automat
   - `Trigger On`: Select which run statuses should trigger the flow (SUCCEEDED, FAILED, TIMED_OUT, ABORTED).
 - **Output**: Webhook payload containing detailed information about the completed Actor run.
 
-How it works:
+**How it works:**
 - Actor dropdown is populated via `GET /v2/acts` (for recent Actors) or via `GET /v2/store` store API (for store Actors).
 - The trigger creates a webhook via `POST /v2/webhooks` that subscribes to Actor run events.
 - When the selected Actor finishes with one of the specified statuses, Apify sends a webhook payload to Power Automate.
 
-#### Actor Task Finished Trigger
+### Actor Task Finished
 
 Use the *Actor task finished* trigger to automatically execute your Power Automate flow when a specific Apify Actor task run completes with a selected status.
 
@@ -55,33 +72,33 @@ Use the *Actor task finished* trigger to automatically execute your Power Automa
   - `Trigger On`: Select which run statuses should trigger the flow (SUCCEEDED, FAILED, TIMED_OUT, ABORTED).
 - **Output**: Webhook payload containing detailed information about the completed task run.
 
-How it works:
+**How it works:**
 - Creates a webhook via `POST /v2/webhooks` that subscribes to Actor task run events.
 - Task dropdown is populated via `GET /v2/actor-tasks` to list your available tasks.
 
-### Actions
+## Actions
 
-#### Get Dataset Items Action
+### Get Dataset Items
 
 Use the *Get dataset items* action to retrieve records from one of your Apify datasets.
 
-- Authentication: Use *Sign in with Apify* [OAuth 2.0] (scopes: `profile`, `full_api_access`).
-- Headers: All requests include `x-apify-integration-platform: microsoft-power-automate`.
-- Dataset (`datasetId`): Select a dataset from a dynamically populated dropdown of your datasets.
-- Optional query params:
-  - `limit`: number of items to return.
-  - `offset`: number of items to skip (for pagination).
-- Output: An array of dataset items. The item shape is dynamic and depends on the selected dataset.
+- **Authentication**: Use *Sign in with Apify* [OAuth 2.0] (scopes: `profile`, `full_api_access`).
+- **Headers**: All requests include `x-apify-integration-platform: microsoft-power-automate`.
+- **Inputs**:
+  - `Dataset` (`datasetId`): Select a dataset from a dynamically populated dropdown of your datasets.
+  - `Limit` (optional): Number of items to return.
+  - `Offset` (optional): Number of items to skip (for pagination).
+- **Output**: An array of dataset items. The item shape is dynamic and depends on the selected dataset.
 
-How it works:
+**How it works:**
 - The dataset dropdown is populated via `GET /v2/datasets` so you can pick by name.
 - The connector calls `GET /v2/datasets/{datasetId}/items` with the provided `limit` and `offset` to fetch the data.
 - To provide typed fields in Power Automate, it calls `GET /v2/datasets/{datasetId}/itemsSchemaHelper` to infer the item schema from a sample.
 
-Tips:
+**Tips:**
 - For large datasets, paginate using `limit` and `offset` to process items in batches.
 
-#### Get Key-Value Store Record Action
+### Get Key-Value Store Record
 
 Retrieve a record's content from a selected key-value store.
 
@@ -96,64 +113,83 @@ Retrieve a record's content from a selected key-value store.
 
 This action calls `GET /v2/key-value-stores/{storeId}/records/{recordKey}` via Apify API proxy.
 
-#### Scrape Single URL Action
+### Scrape Single URL
 
 Use the *Scrape single URL* action to scrape a single webpage using Apify's Web Scraper Actor.
 
-- Authentication: Use *Sign in with Apify* [OAuth 2.0] (scopes: `profile`, `full_api_access`).
-- Headers: All requests include `x-apify-integration-platform: microsoft-power-automate`.
-- URL (`url`): The full URL of the single page to be scraped. Must be a valid URL format.
-- Crawler Type (`crawler_type`): Select the crawling engine to use:
-  - `playwright:adaptive` (Adaptive - recommended)
-  - `playwright:firefox` (Firefox Headless Browser)
-  - `cheerio` (Cheerio - Raw HTTP, fastest)
+- **Authentication**: Use *Sign in with Apify* [OAuth 2.0] (scopes: `profile`, `full_api_access`).
+- **Headers**: All requests include `x-apify-integration-platform: microsoft-power-automate`.
+- **Inputs**:
+  - `URL` (`url`): The full URL of the single page to be scraped. Must be a valid URL format.
+  - `Crawler Type` (`crawler_type`): Select the crawling engine to use:
+    - `playwright:adaptive` (Adaptive - recommended)
+    - `playwright:firefox` (Firefox Headless Browser)
+    - `cheerio` (Cheerio - Raw HTTP, fastest)
 
-The connector invokes `POST /v2/acts/aYG0l9s7dbB7j3gbS/runs` (Web Scraper Actor). This action starts an asynchronous scrape and returns the run details immediately. Use the *Actor run finished* trigger to process results once the scrape is complete.
+The connector invokes `POST /v2/acts/aYG0l9s7dbB7j3gbS/runs` (Web Scraper Actor). This action returns the run details immediately. To process results, use the *Actor Run Finished* trigger.
 
-#### Run Actor Action
+### Run Actor
 
 Use the *Run Actor* action to start an Apify Actor run.
 
-- Authentication: Use *Sign in with Apify* [OAuth 2.0] (scopes: `profile`, `full_api_access`).
-- Headers: All requests include `x-apify-integration-platform: microsoft-power-automate`.
-- Actor Scope (`actorScope`): Choose *Recently used Actors* or *From store*.
-  - If *Recently used Actors*: pick from `Actor` populated by your account Actors.
-  - If *From store*: pick from `Actor` populated by Apify Store (limit 1000).
-- Input Body (`inputBody`): Provide JSON for the Actor input.
-- Optional query params:
-  - `build`: specific build tag or id
-  - `timeout` (seconds)
-  - `memory` (MB): 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768
-  - `waitForFinish` (seconds, max 60): set 0 to no limit
+- **Authentication**: Use *Sign in with Apify* [OAuth 2.0] (scopes: `profile`, `full_api_access`).
+- **Headers**: All requests include `x-apify-integration-platform: microsoft-power-automate`.
+- **Inputs**:
+  - `Actor Scope` (`actorScope`): Choose *Recently used Actors* or *From store*.
+    - If *Recently used Actors*: pick from `Actor` populated by your account Actors.
+    - If *From store*: pick from `Actor` populated by Apify Store (limit 1000).
+  - `Input Body` (`inputBody`): Provide JSON for the Actor input.
+  - `Build` (optional): Specific build tag or id.
+  - `Timeout` (optional): Timeout in seconds.
+  - `Memory` (optional): Memory in MB (128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768).
+  - `Wait for Finish` (optional): Wait time in seconds (max 60). Set 0 to return immediately.
 
-The connector invokes `POST /v2/acts/{actorId}/runs` per Apify docs (see: https://docs.apify.com/api/v2/act-runs-post). The `actorId` path segment is chosen automatically based on your `actorScope` selection.
+The connector invokes `POST /v2/acts/{actorId}/runs` per [Apify docs](https://docs.apify.com/api/v2/act-runs-post). The `actorId` path segment is chosen automatically based on your `actorScope` selection.
 
-#### Run Task Action
+> **Note:** Available memory options depend on your Apify subscription plan. For more information, see your [account limits](https://console.apify.com/billing/limits).
+
+### Run Task
 
 Use the *Run task* action to start an Apify task run.
 
-- Authentication: Use *Sign in with Apify* [OAuth 2.0] (scopes: `profile`, `full_api_access`).
-- Headers: All requests include `x-apify-integration-platform: microsoft-power-automate`.
-- Task (`taskId`): Select the task from a dynamic dropdown of your available tasks.
-- Input Body (`inputOverride`): (Optional) provide a raw JSON object to override the task's default input.
-- Optional query params:
-  - `timeout` (seconds)
-  - `build`: specific build tag or id
-  - `memory` (MB): 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768
-  - `waitForFinish` (seconds, max 60). If empty or 0, the call is asynchronous (does not wait).
+- **Authentication**: Use *Sign in with Apify* [OAuth 2.0] (scopes: `profile`, `full_api_access`).
+- **Headers**: All requests include `x-apify-integration-platform: microsoft-power-automate`.
+- **Inputs**:
+  - `Task` (`taskId`): Select the task from a dynamic dropdown of your available tasks.
+  - `Input Body` (`inputOverride`, optional): Provide a raw JSON object to override the task's default input.
+  - `Timeout` (optional): Timeout in seconds.
+  - `Build` (optional): Specific build tag or id.
+  - `Memory` (optional): Memory in MB (128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768).
+  - `Wait for Finish` (optional): Wait time in seconds (max 60). If empty or 0, the call is asynchronous.
 
-The connector invokes `POST /v2/actor-tasks/{taskId}/runs` per Apify docs (see: https://docs.apify.com/api/v2/actor-task-runs-post). The `taskId` path segment is selected directly from the dropdown.
+The connector invokes `POST /v2/actor-tasks/{taskId}/runs` per [Apify docs](https://docs.apify.com/api/v2/actor-task-runs-post). The `taskId` path segment is selected directly from the dropdown.
 
-## Getting Started
-
-For detailed instructions on how to get started with the Apify Power Automate connector, please visit the [Apify Power Automate documentation](https://docs.apify.com/platform/integrations/power-automate).
+> **Note:** Available memory options depend on your Apify subscription plan. For more information, see your [account limits](https://console.apify.com/billing/limits).
 
 ## Known Issues and Limitations
 
-- The *Wait for finish* parameter has a maximum of 60 seconds. For long-running Actors, use webhooks (triggers) instead of waiting
-- Dataset schemas are inferred from sample data and may not capture all possible fields
-- Dynamic schemas may not reflect all possible data structures in large or complex datasets
-- Start with default memory settings and only increase if needed to optimize costs
+- The *Wait for Finish* parameter has a maximum value of **60 seconds**. For long-running Actors, use webhooks (triggers) instead of waiting.
+- The connector infers dataset schemas from sample data. This may not capture all possible fields.
+- Dynamic schemas may not reflect all possible data structures in large or complex datasets.
+- Start with default memory settings and only increase if needed to optimize costs.
+
+## Troubleshooting
+
+**Trigger not firing?**
+- Verify the webhook was created in [Apify Console → Webhooks](https://console.apify.com/)
+- Check that the Actor/Task is running and completing with the selected status
+- Ensure your flow is enabled and saved
+
+**Authentication errors?**
+- Re-authenticate by creating a new connection in Power Automate
+- Verify your Apify account has the required permissions
+
+**Dataset items missing fields?**
+- The connector infers schema from sample data; some fields may not appear if they're absent in the sample
+- Use raw JSON output if you need all fields regardless of schema
+
+**Webhook cleanup?**
+- When you delete or disable a flow, manually remove associated webhooks from [Apify Console](https://console.apify.com/)
 
 ## Frequently Asked Questions
 
@@ -167,13 +203,19 @@ The connector itself is free to use, but Apify charges for compute resources bas
 - **Support**: [apify.com/contact](https://apify.com/contact)
 - **Community forum**: [community.apify.com](https://community.apify.com)
 
-## Development Setup
+---
 
-### Prerequisites
+# Developer Guide
+
+This section is for developers who want to contribute to, customize, or deploy this connector.
+
+## Prerequisites
 
 - [Apify account](https://apify.com)
 - [Power Automate environment](https://make.powerautomate.com/)
-- [Python](https://www.python.org/downloads) 3.5 or later installed
+- [Python](https://www.python.org/downloads) 3.5 or later
+
+## Getting Started
 
 ### Clone Repository
 
@@ -182,7 +224,7 @@ git clone https://github.com/apify/apify-microsoft-power-automate-integration.gi
 cd apify-microsoft-power-automate-integration
 ```
 
-### Install Python and Power Platform Connectors CLI
+### Install Power Platform Connectors CLI
 
 `paconn` requires Python and is installed via pip:
 
@@ -200,13 +242,13 @@ cd apify-microsoft-power-automate-integration
 
 > **Note:** Using a Python virtual environment is recommended to isolate dependencies.
 
-### Verify Installation
+3. Verify installation:
 
-```bash
-paconn
-```
+   ```bash
+   paconn
+   ```
 
-You should see usage help output, confirming the CLI is installed.
+   You should see usage help output, confirming the CLI is installed.
 
 ### Authentication
 
@@ -224,9 +266,9 @@ To logout:
 paconn logout
 ```
 
-### `settings.json` for paconn
+### Using `settings.json`
 
-You can use a settings.json file in this project root to store arguments for paconn commands. This simplifies repeated operations because the CLI reads environment, connector ID, file paths, and other parameters from this file when provided.
+You can use a `settings.json` file in this project root to store arguments for paconn commands. This simplifies repeated operations because the CLI reads environment, connector ID, file paths, and other parameters from this file when provided.
 
 This makes subsequent commands shorter:
 
@@ -235,24 +277,22 @@ paconn create --settings settings.json
 paconn update --settings settings.json
 ```
 
----
-
-## Connector Files Explained
+## Connector Files
 
 Apify's custom connector consists of the following core files:
 
-- **apiDefinition.swagger.json** – The API description in OpenAPI/Swagger format, listing endpoints, inputs, and outputs that determine what actions and triggers appear in Power Automate.
-- **apiProperties.json** – Connector metadata such as display name, authentication settings, host, and other configuration details.
-- **scripts.csx** – A C# script for custom request/response logic not covered by the API definition.
-- **icon.png** – The image shown as the connector’s icon in the Power Automate UI.
+| File | Description |
+|------|-------------|
+| `apiDefinition.swagger.json` | API description in OpenAPI/Swagger format, listing endpoints, inputs, and outputs that determine what actions and triggers appear in Power Automate |
+| `apiProperties.json` | Connector metadata such as display name, authentication settings, host, and other configuration details |
+| `scripts.csx` | C# script for custom request/response logic not covered by the API definition |
+| `icon.png` | The image shown as the connector's icon in the Power Automate UI |
 
 These definitions are stored locally and pushed to the Power Platform environment with paconn commands.
 
----
-
 ## Creating and Updating the Connector
 
-### When to Create
+### Create (First Time)
 
 If the connector does not yet exist in your Power Automate environment, create it once:
 
@@ -260,7 +300,7 @@ If the connector does not yet exist in your Power Automate environment, create i
 paconn create --settings settings.json --secret <oauth-client-secret>
 ```
 
-or explicitly without settings:
+Or explicitly without settings:
 
 ```bash
 paconn create -e <ENV_ID> --api-prop apiProperties.json --api-def apiDefinition.swagger.json --icon icon.png --script scripts.csx --secret <oauth-client-secret>
@@ -268,7 +308,7 @@ paconn create -e <ENV_ID> --api-prop apiProperties.json --api-def apiDefinition.
 
 After creation, paconn prints the `connector ID`. Save this value in your `settings.json` for future updates.
 
-### When to Update
+### Update (Subsequent Changes)
 
 Once the connector is created and you are modifying its definition locally, use the update command:
 
@@ -276,13 +316,11 @@ Once the connector is created and you are modifying its definition locally, use 
 paconn update --settings settings.json --secret <oauth-client-secret>
 ```
 
-or explicitly:
+Or explicitly:
 
 ```bash
 paconn update -e <ENV_ID> -c <CONNECTOR_ID> --api-prop apiProperties.json --api-def apiDefinition.swagger.json --icon icon.png --script scripts.csx --secret <oauth-client-secret>
 ```
-
----
 
 ## Development Cycle
 
@@ -295,14 +333,33 @@ paconn update -e <ENV_ID> -c <CONNECTOR_ID> --api-prop apiProperties.json --api-
    ```bash
    paconn update --settings settings.json --secret <oauth-client-secret>
    ```
+
 3. **Check for Errors**
-   Go to custom connector edit mode in Power Automate and try saving the connector. If there are errors, check the error message, fix them localy and repeat.
+   Go to custom connector edit mode in Power Automate and try saving the connector. If there are errors, check the error message, fix them locally and repeat.
+
 4. **Test Changes**
-   Run flows using your connector’s actions and triggers to verify behavior.
+   Run flows using your connector's actions and triggers to verify behavior.
+
 5. **Repeat**
    Fix issues locally, then update and test again.
 
----
+## Troubleshooting (Development)
+
+**paconn command not found?**
+- Ensure Python is installed and `pip install paconn` completed successfully
+- Check that your Python scripts directory is in your PATH
+
+**Authentication issues with paconn?**
+- Run `paconn logout` then `paconn login` to refresh credentials
+- Ensure you have the correct permissions in your Power Platform environment
+
+**Connector update fails?**
+- Verify the `connector ID` in `settings.json` matches your environment
+- Check that the OAuth client secret is correct and not expired
+
+**Changes not appearing in Power Automate?**
+- Clear your browser cache or use incognito mode
+- Try deleting and recreating the connection
 
 ## CI/CD Integration
 
@@ -310,8 +367,6 @@ The repository includes GitHub Actions workflows:
 
 - **Validation**: Validates connector files on pull requests
 - **Deployment**: There is no deployment workflow yet, due to limitations of the Power Platform Connectors CLI.
-
----
 
 ## Resources
 
@@ -322,5 +377,5 @@ The repository includes GitHub Actions workflows:
 
 ---
 
-Maintained by: Apify Team
-Support: [GitHub Issues](https://github.com/apify/apify-microsoft-power-automate-integration/issues)
+**Maintained by:** Apify Team
+**Support:** [GitHub Issues](https://github.com/apify/apify-microsoft-power-automate-integration/issues)
