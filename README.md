@@ -5,8 +5,8 @@ Apify is a web scraping platform. Use this connector to run scrapers (called Act
 > **About This Document**
 >
 > This README serves two audiences:
-> - **[Connector Documentation](#connector-documentation)** – For Power Automate users who want to use the Apify connector in their flows
-> - **[Developer Guide](#developer-guide)** – For developers contributing to or customizing this connector
+> - **[Connector Documentation](#connector-documentation):** For Power Automate users who want to use the Apify connector in their flows
+> - **[Developer Guide](#developer-guide):** For developers contributing to or customizing this connector
 
 ---
 
@@ -26,15 +26,15 @@ For detailed instructions, visit the [Apify Microsoft Power Automate documentati
 ## Key Capabilities
 
 **Triggers:**
-- **[Actor Run Finished](#actor-run-finished)** – Start a flow when an Actor completes
-- **[Actor Task Finished](#actor-task-finished)** – Start a flow when a Task completes
+- **[Actor Run Finished](#actor-run-finished):** Start a flow when an Actor completes
+- **[Actor Task Finished](#actor-task-finished):** Start a flow when a Task completes
 
 **Actions:**
-- **[Run Actor](#run-actor)** – Execute any Apify Actor
-- **[Run Task](#run-task)** – Execute a saved Actor Task
-- **[Get Dataset Items](#get-dataset-items)** – Retrieve scraped data from datasets
-- **[Get Key-Value Store Record](#get-key-value-store-record)** – Fetch stored data
-- **[Scrape Single URL](#scrape-single-url)** – Quick single-page scraping
+- **[Run Actor](#run-actor):** Execute any Apify Actor
+- **[Run Task](#run-task):** Execute a saved Actor Task
+- **[Get Dataset Items](#get-dataset-items):** Retrieve scraped data from datasets
+- **[Get Key-Value Store Record](#get-key-value-store-record):** Fetch stored data
+- **[Scrape Single URL](#scrape-single-url):** Quick single-page scraping
 
 ## Prerequisites
 
@@ -51,7 +51,7 @@ The connector supports **OAuth 2.0** authentication with the following scopes:
 
 When creating a connection in Power Automate, select *Sign in with Apify*. You will be redirected to Apify to authorize access to your account.
 
-> **Note**: All requests include the header `x-apify-integration-platform: microsoft-power-automate` to identify the integration platform.
+> **Note:** All requests include the header `x-apify-integration-platform: microsoft-power-automate` to identify the integration platform.
 
 ## Triggers
 
@@ -61,13 +61,13 @@ When creating a connection in Power Automate, select *Sign in with Apify*. You w
 
 Use the *Actor run finished* trigger to automatically execute your Power Automate flow when a specific Apify Actor run completes with a selected status.
 
-- **Authentication**: Use *Sign in with Apify* [OAuth 2.0] (scopes: `profile`, `full_api_access`).
-- **Headers**: `x-apify-integration-platform: microsoft-power-automate`.
-- **Inputs**:
+- **Authentication:** Use *Sign in with Apify* [OAuth 2.0] (scopes: `profile`, `full_api_access`).
+- **Headers:** `x-apify-integration-platform: microsoft-power-automate`.
+- **Inputs:**
   - `Actor Scope`: Choose between *Recently used Actors* or *From store* (Apify store Actors).
   - `Actor`: Dynamic dropdown populated with Actors based on the selected scope.
   - `Trigger On`: Select which run statuses should trigger the flow (SUCCEEDED, FAILED, TIMED_OUT, ABORTED).
-- **Output**: Webhook payload containing detailed information about the completed Actor run.
+- **Output:** Webhook payload containing detailed information about the completed Actor run.
 
 **How it works:**
 - Actor dropdown is populated via `GET /v2/acts` (for recent Actors) or via `GET /v2/store` store API (for store Actors).
@@ -78,12 +78,12 @@ Use the *Actor run finished* trigger to automatically execute your Power Automat
 
 Use the *Actor task finished* trigger to automatically execute your Power Automate flow when a specific Apify Actor task run completes with a selected status.
 
-- **Authentication**: Use *Sign in with Apify* [OAuth 2.0] (scopes: `profile`, `full_api_access`).
-- **Headers**: `x-apify-integration-platform: microsoft-power-automate`.
-- **Inputs**:
+- **Authentication:** Use *Sign in with Apify* [OAuth 2.0] (scopes: `profile`, `full_api_access`).
+- **Headers:** `x-apify-integration-platform: microsoft-power-automate`.
+- **Inputs:**
   - `Task`: Dynamic dropdown populated with your Actor tasks.
   - `Trigger On`: Select which run statuses should trigger the flow (SUCCEEDED, FAILED, TIMED_OUT, ABORTED).
-- **Output**: Webhook payload containing detailed information about the completed task run.
+- **Output:** Webhook payload containing detailed information about the completed task run.
 
 **How it works:**
 - Creates a webhook via `POST /v2/webhooks` that subscribes to Actor task run events.
@@ -95,13 +95,13 @@ Use the *Actor task finished* trigger to automatically execute your Power Automa
 
 Use the *Get dataset items* action to retrieve records from one of your Apify datasets.
 
-- **Authentication**: Use *Sign in with Apify* [OAuth 2.0] (scopes: `profile`, `full_api_access`).
-- **Headers**: `x-apify-integration-platform: microsoft-power-automate`.
-- **Inputs**:
+- **Authentication:** Use *Sign in with Apify* [OAuth 2.0] (scopes: `profile`, `full_api_access`).
+- **Headers:** `x-apify-integration-platform: microsoft-power-automate`.
+- **Inputs:**
   - `Dataset`: Select a dataset from a dynamically populated dropdown of your datasets.
   - `Limit` (optional): Number of items to return.
   - `Offset` (optional): Number of items to skip (for pagination).
-- **Output**: An array of dataset items. The item shape is dynamic and depends on the selected dataset.
+- **Output:** An array of dataset items. The item shape is dynamic and depends on the selected dataset.
 
 **How it works:**
 - The dataset dropdown is populated via `GET /v2/datasets` so you can pick by name.
@@ -115,12 +115,12 @@ Use the *Get dataset items* action to retrieve records from one of your Apify da
 
 Retrieve a record's content from a selected key-value store.
 
-- **Authentication**: Use *Sign in with Apify* [OAuth 2.0] (scopes: `profile`, `full_api_access`).
-- **Headers**: `x-apify-integration-platform: microsoft-power-automate`.
-- **Inputs**:
+- **Authentication:** Use *Sign in with Apify* [OAuth 2.0] (scopes: `profile`, `full_api_access`).
+- **Headers:** `x-apify-integration-platform: microsoft-power-automate`.
+- **Inputs:**
   - `Store` (`storeId`, required): Dynamic dropdown listing your stores.
   - `Record Key` (`recordKey`, required): Dependent dropdown listing keys for the selected store.
-- **Output**:
+- **Output:**
   - Body: Raw record content (handled as binary; text and JSON are shown accordingly by Power Automate).
   - Header: `Content-Type` is exposed as an output value.
 
@@ -130,9 +130,9 @@ This action calls `GET /v2/key-value-stores/{storeId}/records/{recordKey}` via A
 
 Use the *Scrape single URL* action to scrape a single webpage using Apify's Web Scraper Actor.
 
-- **Authentication**: Use *Sign in with Apify* [OAuth 2.0] (scopes: `profile`, `full_api_access`).
-- **Headers**: `x-apify-integration-platform: microsoft-power-automate`.
-- **Inputs**:
+- **Authentication:** Use *Sign in with Apify* [OAuth 2.0] (scopes: `profile`, `full_api_access`).
+- **Headers:** `x-apify-integration-platform: microsoft-power-automate`.
+- **Inputs:**
   - `URL`: The full URL of the single page to be scraped. Must be a valid URL format.
   - `Crawler Type`: Select the crawling engine to use:
     - `playwright:adaptive` (Adaptive - recommended)
@@ -145,9 +145,9 @@ The connector invokes `POST /v2/acts/aYG0l9s7dbB7j3gbS/runs` (Web Scraper Actor)
 
 Use the *Run Actor* action to start an Apify Actor run.
 
-- **Authentication**: Use *Sign in with Apify* [OAuth 2.0] (scopes: `profile`, `full_api_access`).
-- **Headers**: `x-apify-integration-platform: microsoft-power-automate`.
-- **Inputs**:
+- **Authentication:** Use *Sign in with Apify* [OAuth 2.0] (scopes: `profile`, `full_api_access`).
+- **Headers:** `x-apify-integration-platform: microsoft-power-automate`.
+- **Inputs:**
   - `Actor Scope`: Choose *Recently used Actors* or *From store*.
     - If *Recently used Actors*: pick from `Actor` populated by your account Actors.
     - If *From store*: pick from `Actor` populated by Apify Store (limit 1000).
@@ -165,9 +165,9 @@ The connector invokes `POST /v2/acts/{actorId}/runs` per [Apify docs](https://do
 
 Use the *Run task* action to start an Apify task run.
 
-- **Authentication**: Use *Sign in with Apify* [OAuth 2.0] (scopes: `profile`, `full_api_access`).
-- **Headers**: `x-apify-integration-platform: microsoft-power-automate`.
-- **Inputs**:
+- **Authentication:** Use *Sign in with Apify* [OAuth 2.0] (scopes: `profile`, `full_api_access`).
+- **Headers:** `x-apify-integration-platform: microsoft-power-automate`.
+- **Inputs:**
   - `Task`: Select the task from a dynamic dropdown of your available tasks.
   - `Input Body` (optional): Provide a raw JSON object to override the task's default input.
   - `Timeout` (optional): Timeout in seconds.
@@ -181,10 +181,10 @@ The connector invokes `POST /v2/actor-tasks/{taskId}/runs` per [Apify docs](http
 
 ## Common Use Cases
 
-- **Price drop alerts**: Run a price scraper on a schedule, then notify via Teams when prices drop
-- **CRM enrichment**: Scrape company websites and push the data to Dynamics 365 or SharePoint
-- **Competitor tracking**: Detect changes on competitor pages and log them to Excel
-- **Lead generation**: Scrape directories, filter results, and add leads to your CRM
+- **Price drop alerts:** Run a price scraper on a schedule, then notify via Teams when prices drop
+- **CRM enrichment:** Scrape company websites and push the data to Dynamics 365 or SharePoint
+- **Competitor tracking:** Detect changes on competitor pages and log them to Excel
+- **Lead generation:** Scrape directories, filter results, and add leads to your CRM
 
 ## Known Issues and Limitations
 
@@ -217,11 +217,11 @@ The connector invokes `POST /v2/actor-tasks/{taskId}/runs` per [Apify docs](http
 The connector is free. Apify charges for compute (runtime, memory, proxies). There's a free tier with monthly credits. For pricing details, visit [apify.com/pricing](https://apify.com/pricing).
 
 **Where can I get help?**
-- **Apify documentation**: [docs.apify.com](https://docs.apify.com)
-- **API reference**: [docs.apify.com/api/v2](https://docs.apify.com/api/v2)
-- **Apify store**: [apify.com/store](https://apify.com/store)
-- **Support**: [apify.com/contact](https://apify.com/contact)
-- **Community forum**: [community.apify.com](https://community.apify.com)
+- **Apify documentation:** [docs.apify.com](https://docs.apify.com)
+- **API reference:** [docs.apify.com/api/v2](https://docs.apify.com/api/v2)
+- **Apify store:** [apify.com/store](https://apify.com/store)
+- **Support:** [apify.com/contact](https://apify.com/contact)
+- **Community forum:** [community.apify.com](https://community.apify.com)
 
 ---
 
@@ -388,7 +388,7 @@ paconn update -e <ENV_ID> -c <CONNECTOR_ID> --api-prop apiProperties.json --api-
 
 The repository includes GitHub Actions workflows:
 
-- **Validation**: Validates connector files on pull requests
+- **Validation:** Validates connector files on pull requests
 
 ## Resources
 
