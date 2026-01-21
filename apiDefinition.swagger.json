@@ -1595,7 +1595,7 @@
       "required": false,
       "type": "string",
       "x-ms-summary": "Build",
-      "description": "Actor build to run (tag or build number). Default is latest."
+      "description": "Actor build to run (tag or build number). Typically it's the 'latest'."
     },
     "ActorScopeParameter": {
       "name": "actorScope",
