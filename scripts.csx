@@ -15,6 +15,33 @@ public class Script : ScriptBase {
   private const string OP_GET_DATASET_ITEMS_ID = "GetDatasetItems";
 
   /// <summary>
+  /// Compiled regex pattern for validating HTTP/HTTPS URLs.
+  /// 
+  /// Pattern breakdown:
+  /// - ^(https|http)://                    - Must start with http:// or https://
+  /// - [a-zA-Z0-9]                         - Host must start with alphanumeric
+  /// - ([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?    - Optional: up to 61 chars, ending with alphanumeric (DNS label rules)
+  /// - (\.[a-zA-Z0-9](...)?)*              - Zero or more additional domain segments (e.g., .example.com)
+  /// - (:(0|[1-9][0-9]{0,3}|...)+)?        - Optional port number (0-65535)
+  /// - ((/[^...])?(\\?[^...])?(#[^...])?)?$ - Optional path, query string (?key=value&other=val), and fragment (#section)
+  ///                                         Blocks dangerous chars: &lt; &gt; { } | \ and whitespace
+  ///                                         Allows & for query string parameters
+  /// 
+  /// Port validation breakdown (0-65535):
+  /// - 0                                   - Zero
+  /// - [1-9][0-9]{0,3}                     - 1-9999
+  /// - [1-5][0-9]{4}                       - 10000-59999
+  /// - 6[0-4][0-9]{3}                      - 60000-64999
+  /// - 65[0-4][0-9]{2}                     - 65000-65499
+  /// - 655[0-2][0-9]                       - 65500-65529
+  /// - 6553[0-5]                           - 65530-65535
+  /// </summary>
+  private static readonly System.Text.RegularExpressions.Regex UrlValidationPattern = 
+    new System.Text.RegularExpressions.Regex(
+      @"^(https|http)://[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*(:(0|[1-9][0-9]{0,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5]))?((/[^<>{}|\\\s]*)?(\?[^<>{}|\\\s]*)?(#[^<>{}|\\\s]*)?)?$",
+      System.Text.RegularExpressions.RegexOptions.Compiled);
+
+  /// <summary>
   /// Main entry point for the Power Automate custom connector script.
   /// Routes incoming requests to appropriate handlers based on the operation ID.
   /// </summary>
@@ -572,15 +599,32 @@ public class Script : ScriptBase {
   /// <param name="paramValue">The value to validate.</param>
   /// <returns>ValidationResult indicating success or failure with error message.</returns>
   private ValidationResult ValidateUrl(string paramName, string paramValue) {
-    var result = new ValidationResult();
-    
-    if (Uri.TryCreate(paramValue, UriKind.Absolute, out var uri) && 
-        (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps)) {
-      return result;
+    if (!IsValidUrlFormat(paramValue)) {
+      return CreateInvalidUrlError(paramName);
     }
     
+    return new ValidationResult();
+  }
+
+  /// <summary>
+  /// Creates a validation result with an invalid URL error.
+  /// </summary>
+  /// <param name="paramName">The name of the parameter that failed validation.</param>
+  /// <returns>A new ValidationResult containing the error message.</returns>
+  private ValidationResult CreateInvalidUrlError(string paramName) {
+    var result = new ValidationResult();
     result.AddError($"Parameter '{paramName}' must be a valid URL.");
     return result;
+  }
+
+  /// <summary>
+  /// Checks if URL has valid format using the compiled regex pattern.
+  /// Validates scheme (http/https), host format, port range, and path characters.
+  /// </summary>
+  /// <param name="url">The URL string to validate.</param>
+  /// <returns>True if the URL format is valid, false otherwise.</returns>
+  private bool IsValidUrlFormat(string url) {
+    return UrlValidationPattern.IsMatch(url);
   }
 
   /// <summary>
