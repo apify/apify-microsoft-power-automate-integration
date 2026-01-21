@@ -1616,7 +1616,6 @@
       "type": "integer",
       "x-ms-summary": "Wait for finish",
       "description": "Wait for the run to finish in seconds (0\u201360).",
-      "maximum": 60,
       "default": 0
     },
     "MemoryParameter": {
