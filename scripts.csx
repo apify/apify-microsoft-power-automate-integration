@@ -15,13 +15,6 @@ public class Script : ScriptBase {
   private const string OP_GET_DATASET_ITEMS_ID = "GetDatasetItems";
 
   /// <summary>
-  /// Regex pattern for additional URL security validation.
-  private static readonly System.Text.RegularExpressions.Regex UrlValidationPattern = 
-    new System.Text.RegularExpressions.Regex(
-      @"^(https|http)://[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*(:(0|[1-9][0-9]{0,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5]))?((/[^<>{}|\\\s]*)?(\?[^<>{}|\\\s]*)?(#[^<>{}|\\\s]*)?)?$",
-      System.Text.RegularExpressions.RegexOptions.Compiled);
-
-  /// <summary>
   /// Main entry point for the Power Automate custom connector script.
   /// Routes incoming requests to appropriate handlers based on the operation ID.
   /// </summary>
@@ -579,20 +572,20 @@ public class Script : ScriptBase {
   /// <param name="paramValue">The value to validate.</param>
   /// <returns>ValidationResult indicating success or failure with error message.</returns>
   private ValidationResult ValidateUrl(string paramName, string paramValue) {
-    // First check basic URI format and scheme
-    if (!Uri.TryCreate(paramValue, UriKind.Absolute, out var uri) ||
-        (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps)) {
+    if (!Uri.IsWellFormedUriString(paramValue, UriKind.Absolute)) {
       return CreateInvalidUrlError(paramName);
     }
     
-    // Check for valid host: must be IP, localhost, or have at least one dot (domain with TLD)
+    if (!Uri.TryCreate(paramValue, UriKind.Absolute, out var uri)) {
+      return CreateInvalidUrlError(paramName);
+    }
+    
+    if (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps) {
+      return CreateInvalidUrlError(paramName);
+    }
+    
     var host = uri.Host;
     if (!IsValidHost(host)) {
-      return CreateInvalidUrlError(paramName);
-    }
-    
-    // Then check for dangerous characters using regex
-    if (!IsValidUrlFormat(paramValue)) {
       return CreateInvalidUrlError(paramName);
     }
     
@@ -625,14 +618,6 @@ public class Script : ScriptBase {
     return host.Contains(".");
   }
 
-  /// <summary>
-  /// Checks if URL contains only safe characters using the compiled regex pattern.
-  /// </summary>
-  /// <param name="url">The URL string to validate.</param>
-  /// <returns>True if the URL contains only safe characters, false otherwise.</returns>
-  private bool IsValidUrlFormat(string url) {
-    return UrlValidationPattern.IsMatch(url);
-  }
 
   /// <summary>
   /// Validates that a parameter value is a non-negative integer (greater than or equal to 0).
