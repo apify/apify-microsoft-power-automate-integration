@@ -606,10 +606,10 @@ public class Script : ScriptBase {
 
   /// <summary>
   /// Validates that the host is either a valid IP address or a domain name with a TLD.
-  /// Rejects single-word hostnames like "localhost" or "intranet".
+  /// Rejects single-word hostnames like "localhost".
   /// </summary>
   /// <param name="host">The host part of the URL to validate.</param>
-  /// <returns>True if the host is a valid IP address or contains a dot (domain with TLD), false otherwise.</returns>
+  /// <returns>True if the host is valid, false otherwise.</returns>
   private bool IsValidHost(string host) {
     // Accept valid IP addresses (e.g., 192.168.1.1)
     if (System.Net.IPAddress.TryParse(host, out _)) {
