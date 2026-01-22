@@ -633,7 +633,7 @@ public class Script : ScriptBase {
       return result;
     }
     
-    result.AddError($"Parameter '{paramName}' must be a non-negative integer");
+    result.AddError($"Parameter '{paramName}' must be a non-negative integer.");
     return result;
   }
 
@@ -652,7 +652,7 @@ public class Script : ScriptBase {
       return result;
     }
     
-    result.AddError($"Parameter '{paramName}' must be an integer between {min} and {max}");
+    result.AddError($"Parameter '{paramName}' must be an integer between {min} and {max}.");
     return result;
   }
 
