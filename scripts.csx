@@ -13,6 +13,7 @@ public class Script : ScriptBase {
   private const string OP_RUN_TASK_ID = "RunTask";
   private const string OP_SCRAPE_SINGLE_URL_ID = "ScrapeSingleUrl";
   private const string OP_GET_DATASET_ITEMS_ID = "GetDatasetItems";
+  private const int MAX_WAIT_FOR_FINISH = 60;
 
   /// <summary>
   /// Main entry point for the Power Automate custom connector script.
@@ -604,20 +605,20 @@ public class Script : ScriptBase {
   }
 
   /// <summary>
-  /// Validates that the host is a correct IP address.
+  /// Validates that the host is either a valid IP address or a domain name with a TLD.
+  /// Rejects single-word hostnames like "localhost" or "intranet".
   /// </summary>
-  /// <param name="host">The host part of the URL.</param>
-  /// <returns>True if the host is valid, false otherwise.</returns>
+  /// <param name="host">The host part of the URL to validate.</param>
+  /// <returns>True if the host is a valid IP address or contains a dot (domain with TLD), false otherwise.</returns>
   private bool IsValidHost(string host) {
-    // host is an IP address
+    // Accept valid IP addresses (e.g., 192.168.1.1)
     if (System.Net.IPAddress.TryParse(host, out _)) {
       return true;
     }
     
-    // host contains a dot
+    // Accept domain names with at least one dot (e.g., example.com)
     return host.Contains(".");
   }
-
 
   /// <summary>
   /// Validates that a parameter value is a non-negative integer (greater than or equal to 0).
@@ -662,7 +663,7 @@ public class Script : ScriptBase {
   /// <param name="paramValue">The value to validate.</param>
   /// <returns>ValidationResult indicating success or failure with error message.</returns>
   private ValidationResult ValidateWaitForFinish(string paramName, string paramValue) {
-    return ValidateIntegerRange(paramName, paramValue, 0, 60);
+    return ValidateIntegerRange(paramName, paramValue, 0, MAX_WAIT_FOR_FINISH);
   }
 
   /// <summary>
