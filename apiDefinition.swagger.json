@@ -322,6 +322,9 @@
             "x-ms-visibility": "important"
           },
           {
+            "$ref": "#/parameters/WaitForFinishParameter"
+          },
+          {
             "$ref": "#/parameters/TimeoutParameter"
           },
           {
@@ -331,13 +334,10 @@
             "$ref": "#/parameters/MemoryParameter"
           },
           {
-            "$ref": "#/parameters/WaitForFinishParameter"
-          },
-          {
             "name": "inputBody",
             "in": "body",
             "required": true,
-            "x-ms-summary": "Input body",
+            "x-ms-summary": "Input body (JSON)",
             "description": "Raw JSON object passed as INPUT to the Actor.",
             "x-ms-textarea": true,
             "schema": {
@@ -374,7 +374,7 @@
     "/actor-tasks": {
       "get": {
         "summary": "List tasks (for dropdown)",
-        "description": "Fetches a list of the user's actor tasks.",
+        "description": "Fetches a list of the user's Actor tasks.",
         "operationId": "ListTasks",
         "x-ms-summary": "List tasks (for dropdown)",
         "x-ms-visibility": "internal",
@@ -444,10 +444,10 @@
             "$ref": "#/parameters/WaitForFinishParameter"
           },
           {
-            "$ref": "#/parameters/BuildOrTagParameter"
+            "$ref": "#/parameters/TimeoutParameter"
           },
           {
-            "$ref": "#/parameters/TimeoutParameter"
+            "$ref": "#/parameters/BuildOrTagParameter"
           },
           {
             "$ref": "#/parameters/MemoryParameter"
@@ -456,7 +456,7 @@
             "name": "inputOverride",
             "in": "body",
             "required": false,
-            "x-ms-summary": "Input override",
+            "x-ms-summary": "Input override (JSON)",
             "description": "A raw JSON object to override the task's default input.",
             "x-ms-textarea": true,
             "schema": {
@@ -693,7 +693,7 @@
             "type": "string",
             "pattern": "^https?://[^\\s]+$",
             "x-ms-summary": "URL to scrape",
-            "description": "The full URL of the single page to be scraped. Must be a valid URL format."
+            "description": "The full URL of the single page to be scraped. Must be a valid URL format (e.g., https://example.com)."
           },
           {
             "name": "crawler_type",
@@ -711,7 +711,7 @@
             "x-ms-enum-values": [
               {
                 "value": "playwright:adaptive",
-                "displayName": "Adaptive"
+                "displayName": "Adaptive (Recommended)"
               },
               {
                 "value": "playwright:firefox",
@@ -1082,7 +1082,7 @@
                       "type": "string",
                       "x-ms-visibility": "important",
                       "x-ms-summary": "Actor",
-                      "description": "Actor identifier to run. Supply Actor ID or Actor name.",
+                      "description": "Actor identifier to monitor. Supply Actor ID or Actor name.",
                       "x-ms-dynamic-values": {
                         "operationId": "ListActorsDropdown",
                         "value-collection": "data/items",
@@ -1586,7 +1586,7 @@
       "in": "query",
       "required": false,
       "type": "integer",
-      "x-ms-summary": "Timeout",
+      "x-ms-summary": "Timeout (seconds)",
       "description": "Timeout for the run in seconds."
     },
     "BuildOrTagParameter": {
@@ -1595,7 +1595,7 @@
       "required": false,
       "type": "string",
       "x-ms-summary": "Build",
-      "description": "Actor build to run (tag or build number). Default is latest."
+      "description": "Actor build to run (tag or build number). Typically it's the 'latest'."
     },
     "ActorScopeParameter": {
       "name": "actorScope",
@@ -1614,9 +1614,8 @@
       "in": "query",
       "required": false,
       "type": "integer",
-      "x-ms-summary": "Wait for finish",
+      "x-ms-summary": "Wait for finish (0\u201360 seconds)",
       "description": "Wait for the run to finish in seconds (0\u201360).",
-      "maximum": 60,
       "default": 0
     },
     "MemoryParameter": {
@@ -1624,7 +1623,7 @@
       "in": "query",
       "required": false,
       "type": "integer",
-      "x-ms-summary": "Memory",
+      "x-ms-summary": "Memory (MB)",
       "description": "Memory limit in MB (power of 2, min 128).",
       "enum": [
         128,
