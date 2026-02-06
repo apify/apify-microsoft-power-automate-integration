@@ -583,7 +583,7 @@ public class Script : ScriptBase {
     }
     catch (Exception ex) {
       // Re-throw with context for debugging
-      throw new Exception($"Failed to process webhook body. Error: {ex.Message}. Body: {bodyString}");
+      throw new Exception($"Failed to process webhook body for field '{conditionField}'. Error: {ex.Message}");
     }
   }
 
