@@ -503,6 +503,9 @@ public class Script : ScriptBase {
     queryParams.Remove("actorScope");
     Context.Request.RequestUri = new UriBuilder(originalUri) { Query = queryParams.ToString() }.Uri;
 
+    // Add idempotency key based on requestUrl and actorId
+    await SetWebhookIdempotencyKey("actorId").ConfigureAwait(false);
+
     // Forward request to Apify API
     return await Context.SendAsync(Context.Request, CancellationToken).ConfigureAwait(false);
   }
@@ -530,7 +533,58 @@ public class Script : ScriptBase {
     // Update path from /webhooks/task to /webhooks
     ModifyRequestPath("/webhooks/task", "/webhooks");
 
+    // Add idempotency key based on requestUrl and actorTaskId
+    await SetWebhookIdempotencyKey("actorTaskId").ConfigureAwait(false);
+
     return await HandlePassthrough().ConfigureAwait(false);
+  }
+
+  /// <summary>
+  /// Computes a SHA256 hash of the input string and returns it as a lowercase hex string.
+  /// </summary>
+  /// <param name="input">The string to hash.</param>
+  /// <returns>A 64-character lowercase hex string.</returns>
+  private static string ComputeSha256Hash(string input) {
+    using (var sha256 = System.Security.Cryptography.SHA256.Create()) {
+      var hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(input));
+      return BitConverter.ToString(hashBytes).Replace("-", "").ToLowerInvariant();
+    }
+  }
+
+  /// <summary>
+  /// Sets an idempotency key on the webhook request body as a SHA256 hash of requestUrl and the specified condition field.
+  /// Reads the body, extracts requestUrl and the condition identifier, and injects the hash as idempotencyKey.
+  /// Always restores the request content since ReadAsStringAsync consumes the stream.
+  /// </summary>
+  /// <param name="conditionField">The field name inside "condition" to use (e.g. "actorId" or "actorTaskId").</param>
+  private async Task SetWebhookIdempotencyKey(string conditionField) {
+    if (Context.Request.Content == null) return;
+
+    var bodyString = await Context.Request.Content.ReadAsStringAsync().ConfigureAwait(false);
+    if (string.IsNullOrEmpty(bodyString)) return;
+
+    try {
+      var bodyJson = JObject.Parse(bodyString);
+
+      var requestUrl = bodyJson["requestUrl"]?.Value<string>();
+      var conditionId = bodyJson["condition"]?[conditionField]?.Value<string>();
+
+      // Generate idempotency key as SHA256 hash of "requestUrl:conditionId"
+      if (!string.IsNullOrEmpty(conditionId) && !string.IsNullOrEmpty(requestUrl)) {
+        bodyJson["idempotencyKey"] = ComputeSha256Hash($"{requestUrl}:{conditionId}");
+      }
+
+      // Restore the request content (reading consumes the stream)
+      Context.Request.Content = new StringContent(
+        bodyJson.ToString(Newtonsoft.Json.Formatting.None),
+        Encoding.UTF8,
+        "application/json"
+      );
+    }
+    catch (Exception ex) {
+      // Re-throw with context for debugging
+      throw new Exception($"Failed to process webhook body. Error: {ex.Message}. Body: {bodyString}");
+    }
   }
 
   /// <summary>
