@@ -2,10 +2,10 @@
   "swagger": "2.0",
   "info": {
     "title": "Apify",
-    "description": "Use Apify in Power Automate to run web scrapers and AI agents, manage Actors and tasks, schedule and monitor runs, retrieve datasets and results, and trigger flows from webhooks. Enable end-to-end data collection, enrichment, and automation in your flows.",
+    "description": "Use Apify to run web scrapers and AI agents, manage Actors and tasks, schedule and monitor runs, retrieve datasets and results, and trigger flows from webhooks. Enable end-to-end data collection, enrichment, and automation in your workflows.",
     "version": "1.0.0",
     "contact": {
-      "name": "Apify Support",
+      "name": "Apify support",
       "url": "https://apify.com/contact",
       "email": "support@apify.com"
     },
@@ -13,6 +13,10 @@
       "name": "Apache 2.0",
       "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
     }
+  },
+  "externalDocs": {
+    "description": "Find more information about Apify.",
+    "url": "https://docs.apify.com"
   },
   "host": "api.apify.com",
   "basePath": "/v2",
@@ -38,7 +42,12 @@
     }
   },
   "security": [
-    { "apify_oauth2_auth": [ "profile", "full_api_access" ] }
+    {
+      "apify_oauth2_auth": [
+        "profile",
+        "full_api_access"
+      ]
+    }
   ],
   "x-ms-connector-metadata": [
     {
@@ -69,20 +78,32 @@
         ],
         "responses": {
           "200": {
-            "description": "User information retrieved successfully",
-            "schema": {
-              "$ref": "#/definitions/UserResponse"
-            }
+            "$ref": "#/responses/UserResponse"
           },
-          "default": {
-            "$ref": "#/responses/ErrorResponse"
+          "400": {
+            "$ref": "#/responses/ErrorResponse400"
+          },
+          "404": {
+            "$ref": "#/responses/ErrorResponse404"
+          },
+          "401": {
+            "$ref": "#/responses/ErrorResponse401"
+          },
+          "429": {
+            "$ref": "#/responses/ErrorResponse429"
+          },
+          "405": {
+            "$ref": "#/responses/ErrorResponse405"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse500"
           }
         },
-        "summary": "Get User Information",
+        "summary": "Get user information",
+        "x-ms-summary": "Get user information",
         "description": "Returns information about the current user account, including both public and private information.",
         "operationId": "GetUserInfo",
         "x-ms-visibility": "internal",
-        "x-ms-summary": "Get User Information",
         "tags": [
           "Users"
         ]
@@ -93,22 +114,14 @@
         "summary": "List recently used Actors (for dropdown)",
         "description": "Fetches a list of recently used Actors.",
         "operationId": "ListRecentActors",
+        "x-ms-summary": "List recently used Actors (for dropdown)",
         "x-ms-visibility": "internal",
         "tags": [
           "Actors"
         ],
         "parameters": [
           {
-            "name": "actorScope",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "enum": [
-              "RecentActors",
-              "StoreActors"
-            ],
-            "description": "Only used by the connector UI to trigger list refresh when scope changes.",
-            "x-ms-visibility": "internal"
+            "$ref": "#/parameters/ActorScopeParameter"
           },
           {
             "$ref": "#/parameters/IntegrationPlatformHeader"
@@ -116,113 +129,71 @@
         ],
         "responses": {
           "200": {
-            "description": "OK",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "data": {
-                  "type": "object",
-                  "properties": {
-                    "total": { "type": "integer", "format": "int32" },
-                    "count": { "type": "integer", "format": "int32" },
-                    "offset": { "type": "integer", "format": "int32" },
-                    "limit": { "type": "integer", "format": "int32" },
-                    "desc": { "type": "boolean" },
-                    "items": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": { "type": "string" },
-                          "createdAt": { "type": "string" },
-                          "modifiedAt": { "type": "string" },
-                          "name": { "type": "string" },
-                          "username": { "type": "string" },
-                          "title": { "type": "string" },
-                          "stats": {
-                            "type": "object",
-                            "properties": {
-                              "totalRuns": { "type": "integer", "format": "int32" },
-                              "lastRunStartedAt": { "type": "string" }
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              },
-              "additionalProperties": true
-            }
+            "$ref": "#/responses/RecentlyUsedActorsListResponse"
           },
-          "default": {
-            "$ref": "#/responses/ErrorResponse"
+          "400": {
+            "$ref": "#/responses/ErrorResponse400"
+          },
+          "404": {
+            "$ref": "#/responses/ErrorResponse404"
+          },
+          "401": {
+            "$ref": "#/responses/ErrorResponse401"
+          },
+          "429": {
+            "$ref": "#/responses/ErrorResponse429"
+          },
+          "405": {
+            "$ref": "#/responses/ErrorResponse405"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse500"
           }
         }
       }
     },
     "/store": {
       "get": {
-        "summary": "List Store Actors (for dropdown)",
-        "description": "Fetches a list of Actors from the Apify Store.",
+        "summary": "List store Actors (for dropdown)",
+        "description": "Fetches a list of Actors from the Apify store.",
         "operationId": "ListStoreActors",
+        "x-ms-summary": "List store Actors (for dropdown)",
         "x-ms-visibility": "internal",
         "tags": [
           "Actors"
         ],
         "parameters": [
           {
-            "name": "actorScope",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "enum": [
-              "RecentActors",
-              "StoreActors"
-            ],
-            "description": "Only used by the connector UI to trigger list refresh when scope changes.",
-            "x-ms-visibility": "internal"
+            "$ref": "#/parameters/ActorScopeParameter"
           },
           {
             "$ref": "#/parameters/IntegrationPlatformHeader"
           },
           {
-            "name": "limit",
-            "in": "query",
-            "type": "integer",
-            "required": false,
-            "default": 1000,
-            "x-ms-summary": "Maximum number of Actors to return"
+            "$ref": "#/parameters/LimitDropdownParameter"
           }
         ],
         "responses": {
           "200": {
-            "description": "OK",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "data": {
-                  "type": "object",
-                  "properties": {
-                    "items": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": { "type": "string" },
-                          "name": { "type": "string" },
-                          "title": { "type": "string" },
-                          "username": { "type": "string" }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
+            "$ref": "#/responses/StoreActorsListResponse"
           },
-          "default": {
-            "$ref": "#/responses/ErrorResponse"
+          "400": {
+            "$ref": "#/responses/ErrorResponse400"
+          },
+          "404": {
+            "$ref": "#/responses/ErrorResponse404"
+          },
+          "401": {
+            "$ref": "#/responses/ErrorResponse401"
+          },
+          "429": {
+            "$ref": "#/responses/ErrorResponse429"
+          },
+          "405": {
+            "$ref": "#/responses/ErrorResponse405"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse500"
           }
         }
       }
@@ -230,8 +201,9 @@
     "/actors/dropdown": {
       "get": {
         "summary": "List Actors (dropdown)",
-        "description": "Fetches a list of Actors from recently used Actors or from Apify Store based on scope for dropdown selection.",
+        "description": "Fetches a list of Actors from recently used Actors or from Apify store based on scope for dropdown selection.",
         "operationId": "ListActorsDropdown",
+        "x-ms-summary": "List Actors (dropdown)",
         "x-ms-visibility": "internal",
         "tags": [
           "Actors"
@@ -253,50 +225,40 @@
               },
               {
                 "value": "StoreActors",
-                "displayName": "From Store"
+                "displayName": "Apify store Actors"
               }
             ],
-            "description": "Select scope of Actors: recently used or from the Apify Store.",
+            "description": "Please select the source to search Actors from.",
             "x-ms-visibility": "internal"
           },
           {
             "$ref": "#/parameters/IntegrationPlatformHeader"
           },
           {
-            "name": "limit",
-            "in": "query",
-            "type": "integer",
-            "required": false,
-            "default": 1000,
-            "x-ms-summary": "Maximum number of Actors to return"
+            "$ref": "#/parameters/LimitDropdownParameter"
           }
         ],
         "responses": {
           "200": {
-            "description": "OK",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "data": {
-                  "type": "object",
-                  "properties": {
-                    "items": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": { "type": "string" },
-                          "title": { "type": "string" }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
+            "$ref": "#/responses/ActorsDropdownResponse"
           },
-          "default": {
-            "$ref": "#/responses/ErrorResponse"
+          "400": {
+            "$ref": "#/responses/ErrorResponse400"
+          },
+          "404": {
+            "$ref": "#/responses/ErrorResponse404"
+          },
+          "401": {
+            "$ref": "#/responses/ErrorResponse401"
+          },
+          "429": {
+            "$ref": "#/responses/ErrorResponse429"
+          },
+          "405": {
+            "$ref": "#/responses/ErrorResponse405"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse500"
           }
         }
       }
@@ -304,9 +266,9 @@
     "/acts/{actorId}/runs": {
       "post": {
         "summary": "Run Actor",
-        "description": "Runs an Actor and immediately returns without waiting for the run to finish. To wait for the run to finish, use the waitForFinish query parameter. See docs: https://docs.apify.com/api/v2/act-runs-post",
-        "operationId": "RunActor",
         "x-ms-summary": "Run Actor",
+        "description": "Runs an Actor and immediately returns without waiting for the run to finish. To wait for the run to finish, use the waitForFinish query parameter. See docs: https://docs.apify.com/api/v2/act-runs-post.",
+        "operationId": "RunActor",
         "x-ms-visibility": "important",
         "tags": [
           "Actors"
@@ -317,12 +279,12 @@
           },
           {
             "name": "actorScope",
-            "description": "Actor can be either yours or from the Apify Store.",
+            "x-ms-summary": "Select Actor from",
+            "description": "Please select the source to search Actors from.",
             "default": "RecentActors",
             "in": "query",
             "required": true,
             "type": "string",
-            "x-ms-summary": "Select Actor from",
             "enum": [
               "RecentActors",
               "StoreActors"
@@ -334,7 +296,7 @@
               },
               {
                 "value": "StoreActors",
-                "displayName": "From Store"
+                "displayName": "Apify store Actors"
               }
             ]
           },
@@ -343,100 +305,78 @@
             "in": "path",
             "required": true,
             "type": "string",
-            "description": "Actor identifier to run. Supply Actor ID or Actor name.",
             "x-ms-summary": "Actor",
+            "description": "Actor identifier to run. Supply Actor ID or Actor name.",
             "x-ms-dynamic-values": {
               "operationId": "ListActorsDropdown",
               "value-collection": "data/items",
               "value-path": "id",
               "value-title": "title",
               "parameters": {
-                "actorScope": { "parameter": "actorScope" },
+                "actorScope": {
+                  "parameter": "actorScope"
+                },
                 "limit": 1000
               }
             },
             "x-ms-visibility": "important"
           },
           {
-            "name": "build",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "description": "Actor build to run (tag or build number). Default is latest.",
-            "x-ms-summary": "Build"
+            "$ref": "#/parameters/TimeoutParameter"
           },
           {
-            "name": "timeout",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "description": "Timeout for the run in seconds.",
-            "x-ms-summary": "Timeout"
+            "$ref": "#/parameters/BuildOrTagParameter"
           },
           {
-            "name": "memory",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "description": "Memory limit in MB (power of 2, min 128).",
-            "x-ms-summary": "Memory",
-            "enum": [
-              128,
-              256,
-              512,
-              1024,
-              2048,
-              4096,
-              8192,
-              16384
-            ]
+            "$ref": "#/parameters/MemoryParameter"
           },
           {
-            "name": "waitForFinish",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "x-ms-summary": "Wait for Finish",
-            "description": "Wait for the run to finish in seconds (0–60).",
-            "maximum": 60,
-            "default": 0
+            "$ref": "#/parameters/WaitForFinishParameter"
           },
           {
             "name": "inputBody",
             "in": "body",
             "required": true,
+            "x-ms-summary": "Input body",
             "description": "Raw JSON object passed as INPUT to the Actor.",
             "x-ms-textarea": true,
-            "x-ms-summary": "Input Body",
             "schema": {
               "type": "object",
-              "description": "Raw JSON object passed as INPUT to the Actor"
+              "description": "Raw JSON object passed as INPUT to the Actor."
             }
           }
         ],
         "responses": {
           "201": {
-            "description": "Actor run created",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "data": {
-                  "$ref": "#/definitions/ActorRunResponse"
-                }
-              }
-            }
+            "$ref": "#/responses/ActorRunCreatedResponse"
           },
-          "default": {
-            "$ref": "#/responses/ErrorResponse"
+          "400": {
+            "$ref": "#/responses/ErrorResponse400"
+          },
+          "404": {
+            "$ref": "#/responses/ErrorResponse404"
+          },
+          "401": {
+            "$ref": "#/responses/ErrorResponse401"
+          },
+          "429": {
+            "$ref": "#/responses/ErrorResponse429"
+          },
+          "405": {
+            "$ref": "#/responses/ErrorResponse405"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse500"
           }
         }
       }
     },
     "/actor-tasks": {
       "get": {
-        "summary": "List Tasks (for dropdown)",
+        "summary": "List tasks (for dropdown)",
         "description": "Fetches a list of the user's actor tasks.",
         "operationId": "ListTasks",
+        "x-ms-summary": "List tasks (for dropdown)",
         "x-ms-visibility": "internal",
         "tags": [
           "Tasks"
@@ -448,42 +388,35 @@
         ],
         "responses": {
           "200": {
-            "description": "OK",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "data": {
-                  "type": "object",
-                  "properties": {
-                    "items": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": { "type": "string" },
-                          "name": { "type": "string" },
-                          "actName": { "type": "string" }
-                        }
-                      }
-                    }
-                  }
-                }
-              },
-              "additionalProperties": true
-            }
+            "$ref": "#/responses/TasksListResponse"
           },
-          "default": {
-            "$ref": "#/responses/ErrorResponse"
+          "400": {
+            "$ref": "#/responses/ErrorResponse400"
+          },
+          "404": {
+            "$ref": "#/responses/ErrorResponse404"
+          },
+          "401": {
+            "$ref": "#/responses/ErrorResponse401"
+          },
+          "429": {
+            "$ref": "#/responses/ErrorResponse429"
+          },
+          "405": {
+            "$ref": "#/responses/ErrorResponse405"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse500"
           }
         }
       }
     },
     "/actor-tasks/{taskId}/runs": {
       "post": {
-        "summary": "Run Task",
-        "description": "Runs an Actor task and immediately returns without waiting for the run to finish. To wait for the run to finish, use the waitForFinish query parameter. See docs: https://docs.apify.com/api/v2/actor-task-runs-post",
+        "summary": "Run task",
+        "x-ms-summary": "Run task",
+        "description": "Runs an Actor task and immediately returns without waiting for the run to finish. To wait for the run to finish, use the waitForFinish query parameter. See docs: https://docs.apify.com/api/v2/actor-task-runs-post.",
         "operationId": "RunTask",
-        "x-ms-summary": "Run Task",
         "x-ms-visibility": "important",
         "tags": [
           "Tasks"
@@ -497,8 +430,8 @@
             "in": "path",
             "required": true,
             "type": "string",
-            "description": "Task identifier to run.",
             "x-ms-summary": "Task",
+            "description": "Task identifier to run.",
             "x-ms-dynamic-values": {
               "operationId": "ListTasks",
               "value-collection": "data/items",
@@ -508,48 +441,24 @@
             "x-ms-visibility": "important"
           },
           {
-            "name": "waitForFinish",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "x-ms-summary": "Wait for Finish",
-            "description": "Wait for the run to finish in seconds (0–60).",
-            "maximum": 60,
-            "default": 0
+            "$ref": "#/parameters/WaitForFinishParameter"
           },
           {
-            "name": "timeout",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "description": "Timeout for the run in seconds.",
-            "x-ms-summary": "Timeout"
+            "$ref": "#/parameters/BuildOrTagParameter"
           },
           {
-            "name": "memory",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "description": "Memory limit in MB (power of 2, min 128).",
-            "x-ms-summary": "Memory",
-            "enum": [
-              128,
-              256,
-              512,
-              1024,
-              2048,
-              4096,
-              8192,
-              16384
-            ]
+            "$ref": "#/parameters/TimeoutParameter"
+          },
+          {
+            "$ref": "#/parameters/MemoryParameter"
           },
           {
             "name": "inputOverride",
             "in": "body",
             "required": false,
+            "x-ms-summary": "Input override",
             "description": "A raw JSON object to override the task's default input.",
             "x-ms-textarea": true,
-            "x-ms-summary": "Input Override",
             "schema": {
               "type": "object",
               "description": "A raw JSON object to override the task's default input."
@@ -558,27 +467,35 @@
         ],
         "responses": {
           "201": {
-            "description": "Actor run created",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "data": {
-                  "$ref": "#/definitions/ActorRunResponse"
-                }
-              }
-            }
+            "$ref": "#/responses/ActorRunCreatedResponse"
           },
-          "default": {
-            "$ref": "#/responses/ErrorResponse"
+          "400": {
+            "$ref": "#/responses/ErrorResponse400"
+          },
+          "404": {
+            "$ref": "#/responses/ErrorResponse404"
+          },
+          "401": {
+            "$ref": "#/responses/ErrorResponse401"
+          },
+          "429": {
+            "$ref": "#/responses/ErrorResponse429"
+          },
+          "405": {
+            "$ref": "#/responses/ErrorResponse405"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse500"
           }
         }
       }
     },
     "/datasets": {
       "get": {
-        "summary": "List Datasets (for dropdown)",
+        "summary": "List datasets (for dropdown)",
         "description": "Fetches a list of the user's datasets.",
         "operationId": "ListDatasets",
+        "x-ms-summary": "List datasets (for dropdown)",
         "x-ms-visibility": "internal",
         "tags": [
           "Datasets"
@@ -590,49 +507,35 @@
         ],
         "responses": {
           "200": {
-            "description": "OK",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "data": {
-                  "type": "object",
-                  "properties": {
-                    "total": { "type": "integer", "format": "int32" },
-                    "count": { "type": "integer", "format": "int32" },
-                    "offset": { "type": "integer", "format": "int32" },
-                    "limit": { "type": "integer", "format": "int32" },
-                    "desc": { "type": "boolean" },
-                    "items": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": { "type": "string" },
-                          "createdAt": { "type": "string" },
-                          "modifiedAt": { "type": "string" },
-                          "name": { "type": "string" },
-                          "itemCount": { "type": "integer", "format": "int32" },
-                          "cleanItemCount": { "type": "integer", "format": "int32" }
-                        }
-                      }
-                    }
-                  }
-                }
-              },
-              "additionalProperties": true
-            }
+            "$ref": "#/responses/DatasetListResponse"
           },
-          "default": {
-            "$ref": "#/responses/ErrorResponse"
+          "400": {
+            "$ref": "#/responses/ErrorResponse400"
+          },
+          "404": {
+            "$ref": "#/responses/ErrorResponse404"
+          },
+          "401": {
+            "$ref": "#/responses/ErrorResponse401"
+          },
+          "429": {
+            "$ref": "#/responses/ErrorResponse429"
+          },
+          "405": {
+            "$ref": "#/responses/ErrorResponse405"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse500"
           }
         }
       }
     },
     "/datasets/{datasetId}/itemsSchemaHelper": {
       "get": {
-        "summary": "Get Dataset Schema (for dynamic schema)",
+        "summary": "Get dataset schema (for dynamic schema)",
         "description": "Fetches one item from a dataset to infer the schema.",
         "operationId": "GetDatasetSchema",
+        "x-ms-summary": "Get dataset schema (for dynamic schema)",
         "x-ms-visibility": "internal",
         "tags": [
           "Datasets"
@@ -646,7 +549,8 @@
             "in": "path",
             "required": true,
             "type": "string",
-            "description": "Dataset ID"
+            "x-ms-summary": "Dataset ID",
+            "description": "Dataset ID."
           },
           {
             "name": "limit",
@@ -660,25 +564,39 @@
         ],
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "Dataset schema inferred successfully.",
             "schema": {
-              "type": "object",
               "description": "An OpenAPI schema object representing a single dataset item. The schema may include a wrapper if the sample isn't an object.",
               "additionalProperties": true
             }
           },
-          "default": {
-            "$ref": "#/responses/ErrorResponse"
+          "400": {
+            "$ref": "#/responses/ErrorResponse400"
+          },
+          "404": {
+            "$ref": "#/responses/ErrorResponse404"
+          },
+          "401": {
+            "$ref": "#/responses/ErrorResponse401"
+          },
+          "429": {
+            "$ref": "#/responses/ErrorResponse429"
+          },
+          "405": {
+            "$ref": "#/responses/ErrorResponse405"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse500"
           }
         }
       }
     },
     "/datasets/{datasetId}/items": {
       "get": {
-        "summary": "Get Dataset Items",
+        "summary": "Get dataset items",
+        "x-ms-summary": "Get dataset items",
         "description": "Retrieves items from one of your Apify datasets with optional pagination parameters.",
         "operationId": "GetDatasetItems",
-        "x-ms-summary": "Get Dataset Items",
         "x-ms-visibility": "important",
         "tags": [
           "Datasets"
@@ -693,7 +611,7 @@
             "required": true,
             "type": "string",
             "x-ms-summary": "Dataset",
-            "description": "Select the dataset from which to retrieve items",
+            "description": "Select the dataset from which to retrieve items.",
             "x-ms-dynamic-values": {
               "operationId": "ListDatasets",
               "value-collection": "data/items",
@@ -720,34 +638,46 @@
         ],
         "responses": {
           "200": {
-            "description": "Dataset items retrieved successfully",
+            "description": "Dataset items retrieved successfully.",
             "schema": {
-              "type": "array",
-              "items": {
-                "title": "Dataset Item",
-                "x-ms-dynamic-schema": {
-                  "operationId": "GetDatasetSchema",
-                  "parameters": {
-                    "datasetId": {
-                      "parameter": "datasetId"
-                    }
+              "title": "Dataset items",
+              "x-ms-dynamic-schema": {
+                "operationId": "GetDatasetSchema",
+                "parameters": {
+                  "datasetId": {
+                    "parameter": "datasetId"
                   }
                 }
               }
             }
           },
-          "default": {
-            "$ref": "#/responses/ErrorResponse"
+          "400": {
+            "$ref": "#/responses/ErrorResponse400"
+          },
+          "404": {
+            "$ref": "#/responses/ErrorResponse404"
+          },
+          "401": {
+            "$ref": "#/responses/ErrorResponse401"
+          },
+          "429": {
+            "$ref": "#/responses/ErrorResponse429"
+          },
+          "405": {
+            "$ref": "#/responses/ErrorResponse405"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse500"
           }
         }
       }
     },
     "/acts/aYG0l9s7dbB7j3gbS/runs": {
       "post": {
-        "summary": "Scrape Single URL",
-        "description": "Scrapes a single URL using the Web Scraper actor. This action starts an asynchronous scrape and returns the run details immediately. Use the Actor Run Finished trigger to process results once the scrape is complete.",
+        "summary": "Scrape single URL",
+        "x-ms-summary": "Scrape single URL",
+        "description": "Scrapes a single URL using the Web Scraper Actor. This action starts an asynchronous scrape and returns the run details immediately. Use the Actor run finished trigger to process results once the scrape is complete.",
         "operationId": "ScrapeSingleUrl",
-        "x-ms-summary": "Scrape Single URL",
         "x-ms-visibility": "important",
         "tags": [
           "Scraping"
@@ -762,23 +692,21 @@
             "required": true,
             "type": "string",
             "pattern": "^https?://[^\\s]+$",
-            "description": "The full URL of the single page to be scraped. Must be a valid URL format.",
-            "x-ms-summary": "URL to scrape"
+            "x-ms-summary": "URL to scrape",
+            "description": "The full URL of the single page to be scraped. Must be a valid URL format."
           },
           {
             "name": "crawler_type",
             "in": "query",
             "required": true,
             "type": "string",
-            "description": "Select the crawling engine to use for scraping the page.",
             "x-ms-summary": "Crawler type",
+            "description": "Select the crawling engine to use for scraping the page.",
             "default": "playwright:adaptive",
             "enum": [
               "playwright:adaptive",
               "playwright:firefox",
-              "cheerio",
-              "jsdom",
-              "playwright:chrome"
+              "cheerio"
             ],
             "x-ms-enum-values": [
               {
@@ -792,14 +720,6 @@
               {
                 "value": "cheerio",
                 "displayName": "Cheerio (Raw HTTP)"
-              },
-              {
-                "value": "jsdom",
-                "displayName": "JSDOM (Raw HTTP with JS)"
-              },
-              {
-                "value": "playwright:chrome",
-                "displayName": "Chrome (Headless Browser) [DEPRECATED]"
               }
             ]
           },
@@ -810,33 +730,41 @@
             "x-ms-visibility": "internal",
             "default": 0,
             "type": "integer",
-            "description": "Timeout for the run in seconds.",
-            "x-ms-summary": "Timeout"
+            "x-ms-summary": "Timeout",
+            "description": "Timeout for the run in seconds."
           }
         ],
         "responses": {
           "201": {
-            "description": "Scrape started successfully",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "data": {
-                  "$ref": "#/definitions/ActorRunResponse"
-                }
-              }
-            }
+            "$ref": "#/responses/ScrapeStartedResponse"
           },
-          "default": {
-            "$ref": "#/responses/ErrorResponse"
+          "400": {
+            "$ref": "#/responses/ErrorResponse400"
+          },
+          "404": {
+            "$ref": "#/responses/ErrorResponse404"
+          },
+          "401": {
+            "$ref": "#/responses/ErrorResponse401"
+          },
+          "429": {
+            "$ref": "#/responses/ErrorResponse429"
+          },
+          "405": {
+            "$ref": "#/responses/ErrorResponse405"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse500"
           }
         }
       }
     },
     "/key-value-stores": {
       "get": {
-        "summary": "List Key-Value Stores (for dropdown)",
+        "summary": "List key-value stores",
         "description": "Fetches a list of the user's key-value stores.",
         "operationId": "ListKeyValueStores",
+        "x-ms-summary": "List key-value stores",
         "x-ms-visibility": "internal",
         "tags": [
           "KeyValueStores"
@@ -848,41 +776,35 @@
         ],
         "responses": {
           "200": {
-            "description": "OK",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "data": {
-                  "type": "object",
-                  "properties": {
-                    "items": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": { "type": "string" },
-                          "name": { "type": "string" }
-                        }
-                      }
-                    }
-                  },
-                  "required": ["items"]
-                }
-              },
-              "additionalProperties": true
-            }
+            "$ref": "#/responses/KeyValueStoresListResponse"
           },
-          "default": {
-            "$ref": "#/responses/ErrorResponse"
+          "400": {
+            "$ref": "#/responses/ErrorResponse400"
+          },
+          "404": {
+            "$ref": "#/responses/ErrorResponse404"
+          },
+          "401": {
+            "$ref": "#/responses/ErrorResponse401"
+          },
+          "429": {
+            "$ref": "#/responses/ErrorResponse429"
+          },
+          "405": {
+            "$ref": "#/responses/ErrorResponse405"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse500"
           }
         }
       }
     },
     "/key-value-stores/{storeId}/keys": {
       "get": {
-        "summary": "List Record Keys (for dropdown)",
+        "summary": "List record keys",
         "description": "Fetches a list of keys for a specific key-value store.",
         "operationId": "ListRecordKeys",
+        "x-ms-summary": "List record keys",
         "x-ms-visibility": "internal",
         "tags": [
           "KeyValueStores"
@@ -892,49 +814,40 @@
             "$ref": "#/parameters/IntegrationPlatformHeader"
           },
           {
-            "name": "storeId",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "description": "The ID of the key-value store."
+            "$ref": "#/parameters/StoreIdParameter"
           }
         ],
         "responses": {
           "200": {
-            "description": "OK",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "data": {
-                  "type": "object",
-                  "properties": {
-                    "items": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "key": { "type": "string" }
-                        }
-                      }
-                    }
-                  },
-                  "required": ["items"]
-                }
-              },
-              "additionalProperties": true
-            }
+            "$ref": "#/responses/RecordKeysListResponse"
           },
-          "default": {
-            "$ref": "#/responses/ErrorResponse"
+          "400": {
+            "$ref": "#/responses/ErrorResponse400"
+          },
+          "404": {
+            "$ref": "#/responses/ErrorResponse404"
+          },
+          "401": {
+            "$ref": "#/responses/ErrorResponse401"
+          },
+          "429": {
+            "$ref": "#/responses/ErrorResponse429"
+          },
+          "405": {
+            "$ref": "#/responses/ErrorResponse405"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse500"
           }
         }
       }
     },
     "/key-value-stores/{storeId}/records/{recordKey}/schemaHelper": {
       "get": {
-        "summary": "Get Key-Value Store Record Schema (for dynamic schema)",
+        "summary": "Get key-value store record schema",
         "description": "Fetches a record from a key-value store to infer the schema.",
         "operationId": "GetKeyValueStoreRecordSchema",
+        "x-ms-summary": "Get key-value store record schema",
         "x-ms-visibility": "internal",
         "tags": [
           "KeyValueStores"
@@ -944,42 +857,52 @@
             "$ref": "#/parameters/IntegrationPlatformHeader"
           },
           {
-            "name": "storeId",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "x-ms-summary": "Select a value",
-            "description": "Store"
+            "$ref": "#/parameters/StoreIdParameter"
           },
           {
             "name": "recordKey",
             "in": "path",
             "required": true,
             "type": "string",
-            "x-ms-summary": "Select a value",
-            "description": "Key"
+            "x-ms-summary": "Key",
+            "description": "Select the key from which to retrieve the record."
           }
         ],
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "Key-value store record schema inferred successfully.",
             "schema": {
               "description": "An OpenAPI schema object representing a key-value store record. The schema may include a wrapper if the sample isn't an object.",
               "additionalProperties": true
             }
           },
-          "default": {
-            "$ref": "#/responses/ErrorResponse"
+          "400": {
+            "$ref": "#/responses/ErrorResponse400"
+          },
+          "404": {
+            "$ref": "#/responses/ErrorResponse404"
+          },
+          "401": {
+            "$ref": "#/responses/ErrorResponse401"
+          },
+          "429": {
+            "$ref": "#/responses/ErrorResponse429"
+          },
+          "405": {
+            "$ref": "#/responses/ErrorResponse405"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse500"
           }
         }
       }
     },
     "/key-value-stores/{storeId}/records/{recordKey}": {
       "get": {
-        "summary": "Get Key-Value Store Record",
+        "summary": "Get key-value store record",
+        "x-ms-summary": "Get key-value store record",
         "description": "Gets a value stored in the key-value store under a specific key.",
         "operationId": "GetKeyValueStoreRecord",
-        "x-ms-summary": "Get Key-Value Store Record",
         "x-ms-visibility": "important",
         "tags": [
           "KeyValueStores"
@@ -1018,16 +941,18 @@
               "value-path": "key",
               "value-title": "key",
               "parameters": {
-                "storeId": { "parameter": "storeId" }
+                "storeId": {
+                  "parameter": "storeId"
+                }
               }
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "OK - The record content.",
+            "description": "Key-value store record retrieved successfully.",
             "schema": {
-              "title": "Key-Value Store Record",
+              "title": "Key-value store record",
               "x-ms-dynamic-schema": {
                 "operationId": "GetKeyValueStoreRecordSchema",
                 "parameters": {
@@ -1047,21 +972,48 @@
               }
             }
           },
-          "default": {
-            "$ref": "#/responses/ErrorResponse"
+          "302": {
+            "description": "Found.",
+            "headers": {
+              "Location": {
+                "type": "string",
+                "description": "The URL to redirect to."
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/responses/ErrorResponse400"
+          },
+          "404": {
+            "$ref": "#/responses/ErrorResponse404"
+          },
+          "401": {
+            "$ref": "#/responses/ErrorResponse401"
+          },
+          "429": {
+            "$ref": "#/responses/ErrorResponse429"
+          },
+          "405": {
+            "$ref": "#/responses/ErrorResponse405"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse500"
           }
         }
       }
     },
     "/webhooks": {
       "x-ms-notification-content": {
-        "description": "Payload received from Apify when the webhook fires",
-        "schema": { "$ref": "#/definitions/WebhookPayload" }
+        "description": "Payload received from Apify when the webhook fires.",
+        "schema": {
+          "$ref": "#/definitions/WebhookPayloadSchema"
+        }
       },
       "post": {
-        "summary": "Actor Run Finished",
-        "description": "Creates a webhook to subscribe to Actor run events. Triggers when the selected Actor run finishes with a specific status. See docs: https://docs.apify.com/api/v2/webhooks-post",
+        "summary": "Actor run finished",
+        "description": "Creates a webhook to subscribe to Actor run events. Triggers when the selected Actor run finishes with a specific status. See docs: https://docs.apify.com/api/v2/webhooks-post.",
         "operationId": "ActorRunFinishedTrigger",
+        "x-ms-summary": "Actor run finished",
         "x-ms-visibility": "important",
         "x-ms-trigger": "single",
         "tags": [
@@ -1073,24 +1025,24 @@
           },
           {
             "name": "actorScope",
-            "description": "Actor can be either yours or from the Apify Store.",
+            "x-ms-summary": "Select Actor from",
+            "description": "Please select the source to search Actors from.",
             "default": "RecentActors",
             "in": "query",
             "required": true,
             "type": "string",
-            "x-ms-summary": "Select Actor from",
             "enum": [
               "RecentActors",
               "StoreActors"
             ],
             "x-ms-enum-values": [
-              { 
-                "value": "RecentActors", 
+              {
+                "value": "RecentActors",
                 "displayName": "Recently used Actors"
               },
-              { 
-                "value": "StoreActors", 
-                "displayName": "From Store"
+              {
+                "value": "StoreActors",
+                "displayName": "Apify store Actors"
               }
             ]
           },
@@ -1098,11 +1050,12 @@
             "name": "body",
             "in": "body",
             "required": true,
+            "description": "Webhook subscription configuration including the callback URL and statuses.",
             "x-ms-visibility": "important",
             "schema": {
               "type": "object",
               "properties": {
-                "requestUrl": { 
+                "requestUrl": {
                   "type": "string",
                   "x-ms-notification-url": true,
                   "x-ms-visibility": "internal"
@@ -1110,8 +1063,8 @@
                 "eventTypes": {
                   "type": "array",
                   "x-ms-visibility": "important",
-                  "description": "Actor run statuses to trigger on",
                   "x-ms-summary": "Statuses",
+                  "description": "Actor run statuses to trigger on.",
                   "items": {
                     "type": "string",
                     "enum": [
@@ -1119,66 +1072,84 @@
                       "ACTOR.RUN.FAILED",
                       "ACTOR.RUN.TIMED_OUT",
                       "ACTOR.RUN.ABORTED"
-                    ],
-                    "x-ms-enum-values": [
-                      { "value": "ACTOR.RUN.SUCCEEDED", "displayName": "SUCCEEDED" },
-                      { "value": "ACTOR.RUN.FAILED", "displayName": "FAILED" },
-                      { "value": "ACTOR.RUN.TIMED_OUT", "displayName": "TIMED_OUT" },
-                      { "value": "ACTOR.RUN.ABORTED", "displayName": "ABORTED" }
                     ]
                   }
                 },
                 "condition": {
                   "type": "object",
                   "properties": {
-                    "actorId": { 
+                    "actorId": {
                       "type": "string",
                       "x-ms-visibility": "important",
-                      "description": "Actor identifier to run. Supply Actor ID or Actor name.",
                       "x-ms-summary": "Actor",
+                      "description": "Actor identifier to run. Supply Actor ID or Actor name.",
                       "x-ms-dynamic-values": {
                         "operationId": "ListActorsDropdown",
                         "value-collection": "data/items",
                         "value-path": "id",
                         "value-title": "title",
                         "parameters": {
-                          "actorScope": { "parameter": "actorScope" },
+                          "actorScope": {
+                            "parameter": "actorScope"
+                          },
                           "limit": 1000
                         }
                       }
                     }
                   }
                 },
-                "idempotencyKey": { 
+                "idempotencyKey": {
                   "type": "string",
                   "x-ms-visibility": "internal"
                 },
-                "payloadTemplate": { 
+                "payloadTemplate": {
                   "type": "string",
                   "x-ms-visibility": "internal"
                 },
-                "shouldInterpolateStrings": { 
+                "shouldInterpolateStrings": {
                   "type": "boolean",
                   "x-ms-visibility": "internal"
                 }
               },
-              "required": ["requestUrl", "eventTypes", "condition"]
+              "required": [
+                "requestUrl",
+                "eventTypes",
+                "condition"
+              ]
             }
           }
         ],
         "responses": {
           "201": {
-            "$ref": "#/responses/WebhookCreated"
+            "$ref": "#/responses/WebhookCreatedResponse"
           },
-          "default": { "$ref": "#/responses/ErrorResponse" }
+          "400": {
+            "$ref": "#/responses/ErrorResponse400"
+          },
+          "404": {
+            "$ref": "#/responses/ErrorResponse404"
+          },
+          "401": {
+            "$ref": "#/responses/ErrorResponse401"
+          },
+          "429": {
+            "$ref": "#/responses/ErrorResponse429"
+          },
+          "405": {
+            "$ref": "#/responses/ErrorResponse405"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse500"
+          }
         }
       }
     },
     "/webhooks/{webhookId}": {
       "delete": {
-        "summary": "Delete Webhook",
+        "summary": "Delete Actor webhook (for trigger)",
         "description": "Deletes an existing webhook subscription.",
-        "operationId": "DeleteWebhook",
+        "operationId": "DeleteActorWebhook",
+        "x-ms-summary": "Delete Actor webhook (for trigger)",
         "x-ms-visibility": "internal",
         "tags": [
           "Webhooks"
@@ -1192,25 +1163,50 @@
             "in": "path",
             "required": true,
             "type": "string",
+            "description": "The ID of the webhook to delete.",
             "x-ms-url-encoding": "single"
           }
         ],
         "responses": {
-          "200": { "description": "OK" },
-          "204": { "description": "No Content" },
-          "default": { "$ref": "#/responses/ErrorResponse" }
+          "200": {
+            "description": "Webhook deleted successfully."
+          },
+          "204": {
+            "description": "Webhook deleted successfully."
+          },
+          "400": {
+            "$ref": "#/responses/ErrorResponse400"
+          },
+          "404": {
+            "$ref": "#/responses/ErrorResponse404"
+          },
+          "401": {
+            "$ref": "#/responses/ErrorResponse401"
+          },
+          "429": {
+            "$ref": "#/responses/ErrorResponse429"
+          },
+          "405": {
+            "$ref": "#/responses/ErrorResponse405"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse500"
+          }
         }
       }
     },
     "/webhooks/task": {
       "x-ms-notification-content": {
-        "description": "Payload received from Apify when the task webhook fires",
-        "schema": { "$ref": "#/definitions/WebhookPayload" }
+        "description": "Payload received from Apify when the task webhook fires.",
+        "schema": {
+          "$ref": "#/definitions/WebhookPayloadSchema"
+        }
       },
       "post": {
-        "summary": "Actor Task Finished",
-        "description": "Creates a webhook to subscribe to Actor task run events. Triggers when the selected Actor task run finishes with a specific status. See docs: https://docs.apify.com/api/v2/webhooks-post",
+        "summary": "Actor task finished",
+        "description": "Creates a webhook to subscribe to Actor task run events. Triggers when the selected Actor task run finishes with a specific status. See docs: https://docs.apify.com/api/v2/webhooks-post.",
         "operationId": "ActorTaskFinishedTrigger",
+        "x-ms-summary": "Actor task finished",
         "x-ms-visibility": "important",
         "x-ms-trigger": "single",
         "tags": [
@@ -1224,11 +1220,12 @@
             "name": "body",
             "in": "body",
             "required": true,
+            "description": "Webhook subscription configuration for task run events including the callback URL and statuses.",
             "x-ms-visibility": "important",
             "schema": {
               "type": "object",
               "properties": {
-                "requestUrl": { 
+                "requestUrl": {
                   "type": "string",
                   "x-ms-notification-url": true,
                   "x-ms-visibility": "internal"
@@ -1236,8 +1233,8 @@
                 "eventTypes": {
                   "type": "array",
                   "x-ms-visibility": "important",
-                  "description": "Actor run statuses to trigger on",
                   "x-ms-summary": "Statuses",
+                  "description": "Actor run statuses to trigger on.",
                   "items": {
                     "type": "string",
                     "enum": [
@@ -1245,22 +1242,16 @@
                       "ACTOR.RUN.FAILED",
                       "ACTOR.RUN.TIMED_OUT",
                       "ACTOR.RUN.ABORTED"
-                    ],
-                    "x-ms-enum-values": [
-                      { "value": "ACTOR.RUN.SUCCEEDED", "displayName": "SUCCEEDED" },
-                      { "value": "ACTOR.RUN.FAILED", "displayName": "FAILED" },
-                      { "value": "ACTOR.RUN.TIMED_OUT", "displayName": "TIMED_OUT" },
-                      { "value": "ACTOR.RUN.ABORTED", "displayName": "ABORTED" }
                     ]
                   }
                 },
                 "condition": {
                   "type": "object",
                   "properties": {
-                    "actorTaskId": { 
+                    "actorTaskId": {
                       "type": "string",
-                      "description": "Actor task identifier to monitor for run events.",
                       "x-ms-summary": "Task",
+                      "description": "Please select the Actor task to monitor for events.",
                       "x-ms-visibility": "important",
                       "x-ms-dynamic-values": {
                         "operationId": "ListTasks",
@@ -1271,127 +1262,135 @@
                     }
                   }
                 },
-                "idempotencyKey": { 
+                "idempotencyKey": {
                   "type": "string",
                   "x-ms-visibility": "internal"
                 },
-                "payloadTemplate": { 
+                "payloadTemplate": {
                   "type": "string",
                   "x-ms-visibility": "internal"
                 },
-                "shouldInterpolateStrings": { 
+                "shouldInterpolateStrings": {
                   "type": "boolean",
                   "x-ms-visibility": "internal"
                 }
               },
-              "required": ["requestUrl", "eventTypes", "condition"]
+              "required": [
+                "requestUrl",
+                "eventTypes",
+                "condition"
+              ]
             }
           }
         ],
         "responses": {
           "201": {
-            "$ref": "#/responses/WebhookCreated"
+            "$ref": "#/responses/WebhookCreatedResponse"
           },
-          "default": { "$ref": "#/responses/ErrorResponse" }
+          "400": {
+            "$ref": "#/responses/ErrorResponse400"
+          },
+          "404": {
+            "$ref": "#/responses/ErrorResponse404"
+          },
+          "401": {
+            "$ref": "#/responses/ErrorResponse401"
+          },
+          "429": {
+            "$ref": "#/responses/ErrorResponse429"
+          },
+          "405": {
+            "$ref": "#/responses/ErrorResponse405"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse500"
+          }
+        }
+      }
+    },
+    "/webhooks/task/{webhookId}": {
+      "delete": {
+        "summary": "Delete task webhook (for trigger)",
+        "description": "Deletes an existing task webhook subscription.",
+        "operationId": "DeleteTaskWebhook",
+        "x-ms-summary": "Delete task webhook (for trigger)",
+        "x-ms-visibility": "internal",
+        "tags": [
+          "Webhooks"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/IntegrationPlatformHeader"
+          },
+          {
+            "name": "webhookId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The ID of the task webhook to delete.",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Task webhook deleted successfully."
+          },
+          "204": {
+            "description": "Task webhook deleted successfully."
+          },
+          "400": {
+            "$ref": "#/responses/ErrorResponse400"
+          },
+          "404": {
+            "$ref": "#/responses/ErrorResponse404"
+          },
+          "401": {
+            "$ref": "#/responses/ErrorResponse401"
+          },
+          "429": {
+            "$ref": "#/responses/ErrorResponse429"
+          },
+          "405": {
+            "$ref": "#/responses/ErrorResponse405"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse500"
+          }
         }
       }
     }
   },
   "definitions": {
-    "UserResponse": {
-      "type": "object",
-      "x-ms-summary": "Represents information about the authenticated Apify user.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "x-ms-summary": "User ID"
-        },
-        "username": {
-          "type": "string",
-          "x-ms-summary": "Username"
-        },
-        "email": {
-          "type": "string",
-          "x-ms-summary": "Email"
-        },
-        "name": {
-          "type": "string",
-          "x-ms-summary": "Full Name"
-        },
-        "createdAt": {
-          "type": "string",
-          "format": "date-time",
-          "x-ms-summary": "Created At"
-        },
-        "subscription": {
-          "type": "object",
-          "x-ms-summary": "Subscription",
-          "properties": {
-            "plan": {
-              "type": "string",
-              "x-ms-summary": "Plan"
-            },
-            "planId": {
-              "type": "string",
-              "x-ms-summary": "Plan ID"
-            },
-            "isActive": {
-              "type": "boolean",
-              "x-ms-summary": "Is Active"
-            }
-          }
-        },
-        "profile": {
-          "type": "object",
-          "properties": {
-            "pictureUrl": {
-              "type": "string",
-              "x-ms-summary": "Profile Picture URL"
-            },
-            "githubUsername": {
-              "type": "string",
-              "x-ms-summary": "GitHub Username"
-            },
-            "websiteUrl": {
-              "type": "string",
-              "x-ms-summary": "Website URL"
-            },
-            "bio": {
-              "type": "string",
-              "x-ms-summary": "User's bio"
-            }
-          }
-        }
-      }
-    },
-    "ErrorResponse": {
+    "ErrorResponseSchema": {
       "type": "object",
       "x-ms-summary": "Represents an error response from the Apify API",
       "properties": {
         "error": {
           "type": "object",
-          "x-ms-summary": "Error Details",
+          "x-ms-summary": "Error details",
           "properties": {
             "type": {
               "type": "string",
-              "description": "Error Type",
-              "x-ms-summary": "Error Type"
+              "description": "Error type.",
+              "x-ms-summary": "Error type"
             },
             "message": {
               "type": "string",
-              "description": "Error message",
-              "x-ms-summary": "Error Message"
+              "description": "Error message.",
+              "x-ms-summary": "Error message"
             }
           }
         }
       }
     },
-    "ActorRunResponse": {
+    "ActorRunResponseSchema": {
       "type": "object",
+      "x-ms-summary": "Actor run response",
+      "description": "Complete information about an executed Actor run.",
       "properties": {
         "id": {
           "type": "string",
-          "x-ms-summary": "Actor Run ID",
+          "x-ms-summary": "Actor run ID",
           "description": "Unique identifier of the Actor run."
         },
         "actId": {
@@ -1406,19 +1405,19 @@
         },
         "actorTaskId": {
           "type": "string",
-          "x-ms-summary": "Actor Task ID",
+          "x-ms-summary": "Actor task ID",
           "description": "Unique identifier of the Actor task (if the run was started from a task)."
         },
         "startedAt": {
           "type": "string",
           "format": "date-time",
-          "x-ms-summary": "Started At",
+          "x-ms-summary": "Started at",
           "description": "Timestamp when the Actor run started."
         },
         "finishedAt": {
           "type": "string",
           "format": "date-time",
-          "x-ms-summary": "Finished At",
+          "x-ms-summary": "Finished at",
           "description": "Timestamp when the Actor run finished."
         },
         "status": {
@@ -1428,38 +1427,43 @@
         },
         "statusMessage": {
           "type": "string",
-          "x-ms-summary": "Status Message",
+          "x-ms-summary": "Status message",
           "description": "Detailed status message from the Actor run, including processing summary and results."
         },
         "isStatusMessageTerminal": {
           "type": "boolean",
-          "x-ms-summary": "Is Status Message Terminal",
+          "x-ms-summary": "Is status message terminal",
           "description": "Whether the status message is terminal (final) or may change during the run."
         },
         "meta": {
           "type": "object",
           "x-ms-summary": "Metadata",
-          "description": "Additional metadata about the Actor run, including origin and user agent information."
+          "description": "Additional metadata about the Actor run, including origin and user agent information.",
+          "additionalProperties": true
         },
         "pricingInfo": {
           "type": "object",
-          "x-ms-summary": "Pricing Info",
-          "description": "Detailed pricing information including pricing model, events, and cost breakdown."
+          "x-ms-summary": "Pricing info",
+          "description": "Detailed pricing information including pricing model, events, and cost breakdown.",
+          "additionalProperties": true
         },
         "stats": {
           "type": "object",
           "x-ms-summary": "Stats",
-          "description": "Performance statistics including runtime, memory usage, CPU usage, and network traffic."
+          "description": "Performance statistics including runtime, memory usage, CPU usage, and network traffic.",
+          "additionalProperties": true
         },
-        "chargedEventCount": {
+        "chargedEventCounts": {
           "type": "object",
-          "x-ms-summary": "Charged Event Count",
-          "description": "Count of billable events that occurred during the Actor run."
+          "x-ms-summary": "Charged event counts",
+          "description": "Count of billable events that occurred during the Actor run.",
+          "additionalProperties": true
         },
         "options": {
           "type": "object",
           "x-ms-summary": "Options",
-          "description": "Configuration options used for the Actor run (memory, timeout, build version, etc.)."
+          "description": "Configuration options used for the Actor run (memory, timeout, build version, etc.).",
+          "additionalProperties": true
         },
         "buildId": {
           "type": "string",
@@ -1468,22 +1472,22 @@
         },
         "exitCode": {
           "type": "number",
-          "x-ms-summary": "Exit Code",
+          "x-ms-summary": "Exit code",
           "description": "Exit code returned by the Actor process (0 indicates success)."
         },
         "defaultKeyValueStoreId": {
           "type": "string",
-          "x-ms-summary": "Default KV Store ID",
+          "x-ms-summary": "Default key-value store ID",
           "description": "Unique identifier of the default key-value store associated with this run."
         },
         "defaultDatasetId": {
           "type": "string",
-          "x-ms-summary": "Default Dataset ID",
+          "x-ms-summary": "Default dataset ID",
           "description": "Unique identifier of the default dataset where the Actor stored its results."
         },
         "defaultRequestQueueId": {
           "type": "string",
-          "x-ms-summary": "Default Request Queue ID",
+          "x-ms-summary": "Default request queue ID",
           "description": "Unique identifier of the default request queue used by the Actor."
         },
         "platformUsageBillingModel": {
@@ -1503,7 +1507,7 @@
         },
         "buildNumber": {
           "type": "string",
-          "x-ms-summary": "Build Number",
+          "x-ms-summary": "Build number",
           "description": "Build number of the Actor version used for this run."
         },
         "containerUrl": {
@@ -1513,39 +1517,38 @@
         },
         "isContainerServerReady": {
           "type": "boolean",
-          "x-ms-summary": "Is Container Server Ready",
+          "x-ms-summary": "Is container server ready",
           "description": "Whether the container server is ready and accessible."
         },
         "gitBranchName": {
           "type": "string",
-          "x-ms-summary": "Git Branch Name",
+          "x-ms-summary": "Git branch name",
           "description": "Name of the Git branch used for this Actor run (if applicable)."
-        },
-        "usage": {
-          "type": "object",
-          "x-ms-summary": "Usage",
-          "description": "Detailed usage information including compute units and resource consumption."
         },
         "usageTotalUsd": {
           "type": "number",
-          "x-ms-summary": "Usage Total USD",
+          "x-ms-summary": "Usage total USD",
           "description": "Total cost of the Actor run in USD."
-        },
-        "usageUsd": {
-          "type": "object",
-          "x-ms-summary": "Usage USD",
-          "description": "Usage cost breakdown in USD by resource type (compute units, datasets, key-value stores, etc.)."
         }
       }
     },
-    "WebhookPayload": {
+    "WebhookPayloadSchema": {
       "type": "object",
+      "x-ms-summary": "Webhook payload",
+      "description": "Event payload sent by webhook when an Actor run finishes.",
       "properties": {
-        "userId": { "type": "string", "description": "ID of the user who owns the resource associated with the event." },
-        "createdAt": { "type": "string", "format": "date-time", "description": "The timestamp when the event occurred." },
-        "eventType": { 
-          "type": "string", 
-          "description": "The type of the event that triggered the webhook. (e.g., ACTOR.RUN.SUCCEEDED)",
+        "userId": {
+          "type": "string",
+          "description": "ID of the user who owns the resource associated with the event."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The timestamp when the event occurred."
+        },
+        "eventType": {
+          "type": "string",
+          "description": "The type of the event that triggered the webhook (e.g., ACTOR.RUN.SUCCEEDED).",
           "enum": [
             "ACTOR.RUN.SUCCEEDED",
             "ACTOR.RUN.FAILED",
@@ -1557,27 +1560,19 @@
           "type": "object",
           "description": "An object containing event-specific data.",
           "properties": {
-            "actorId": { "type": "string", "description": "ID of the triggering Actor." },
-            "actorRunId": { "type": "string", "description": "ID of the specific Actor run that triggered the event." }
+            "actorId": {
+              "type": "string",
+              "description": "ID of the triggering Actor."
+            },
+            "actorRunId": {
+              "type": "string",
+              "description": "ID of the specific Actor run that triggered the event."
+            }
           },
           "additionalProperties": true
         },
         "resource": {
-          "description": "Detailed information about the Actor run resource.",
-          "$ref": "#/definitions/ActorRunResponse"
-        }
-      },
-      "additionalProperties": true
-    },
-    "WebhookCreateResponse": {
-      "type": "object",
-      "properties": {
-        "data": {
-          "type": "object",
-          "properties": {
-            "id": { "type": "string" }
-          },
-          "additionalProperties": true
+          "$ref": "#/definitions/ActorRunResponseSchema"
         }
       },
       "additionalProperties": true
@@ -1590,54 +1585,610 @@
       "required": true,
       "type": "string",
       "default": "microsoft-power-automate",
-      "description": "Integration platform identifier",
+      "description": "Integration platform identifier.",
       "x-ms-visibility": "internal"
+    },
+    "StoreIdParameter": {
+      "name": "storeId",
+      "in": "path",
+      "required": true,
+      "type": "string",
+      "x-ms-summary": "Store",
+      "description": "Select the key-value store from which to retrieve the record."
+    },
+    "TimeoutParameter": {
+      "name": "timeout",
+      "in": "query",
+      "required": false,
+      "type": "integer",
+      "x-ms-summary": "Timeout",
+      "description": "Timeout for the run in seconds."
+    },
+    "BuildOrTagParameter": {
+      "name": "build",
+      "in": "query",
+      "required": false,
+      "type": "string",
+      "x-ms-summary": "Build",
+      "description": "Actor build to run (tag or build number). Default is latest."
+    },
+    "ActorScopeParameter": {
+      "name": "actorScope",
+      "in": "query",
+      "required": false,
+      "type": "string",
+      "enum": [
+        "RecentActors",
+        "StoreActors"
+      ],
+      "description": "Only used by the connector UI to trigger list refresh when scope changes.",
+      "x-ms-visibility": "internal"
+    },
+    "WaitForFinishParameter": {
+      "name": "waitForFinish",
+      "in": "query",
+      "required": false,
+      "type": "integer",
+      "x-ms-summary": "Wait for finish",
+      "description": "Wait for the run to finish in seconds (0\u201360).",
+      "maximum": 60,
+      "default": 0
+    },
+    "MemoryParameter": {
+      "name": "memory",
+      "in": "query",
+      "required": false,
+      "type": "integer",
+      "x-ms-summary": "Memory",
+      "description": "Memory limit in MB (power of 2, min 128).",
+      "enum": [
+        128,
+        256,
+        512,
+        1024,
+        2048,
+        4096,
+        8192,
+        16384,
+        32768
+      ],
+      "x-ms-enum-values": [
+        {
+          "value": 128,
+          "displayName": "1) 128 MB"
+        },
+        {
+          "value": 256,
+          "displayName": "2) 256 MB"
+        },
+        {
+          "value": 512,
+          "displayName": "3) 512 MB"
+        },
+        {
+          "value": 1024,
+          "displayName": "4) 1024 MB (1 GB)"
+        },
+        {
+          "value": 2048,
+          "displayName": "5) 2048 MB (2 GB)"
+        },
+        {
+          "value": 4096,
+          "displayName": "6) 4096 MB (4 GB)"
+        },
+        {
+          "value": 8192,
+          "displayName": "7) 8192 MB (8 GB)"
+        },
+        {
+          "value": 16384,
+          "displayName": "8) 16384 MB (16 GB)"
+        },
+        {
+          "value": 32768,
+          "displayName": "9) 32768 MB (32 GB)"
+        }
+      ]
+    },
+    "LimitDropdownParameter": {
+      "name": "limit",
+      "in": "query",
+      "type": "integer",
+      "required": false,
+      "default": 1000,
+      "x-ms-summary": "Limit",
+      "description": "Maximum number of Actors to return."
     }
   },
   "responses": {
-    "WebhookCreated": {
-      "description": "Webhook created",
+    "UserResponse": {
+      "description": "User information retrieved successfully.",
+      "schema": {
+        "type": "object",
+        "x-ms-summary": "Represents information about the authenticated Apify user.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "x-ms-summary": "User ID"
+          },
+          "username": {
+            "type": "string",
+            "x-ms-summary": "Username"
+          },
+          "email": {
+            "type": "string",
+            "x-ms-summary": "Email"
+          },
+          "name": {
+            "type": "string",
+            "x-ms-summary": "Full name"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "x-ms-summary": "Created at"
+          },
+          "subscription": {
+            "type": "object",
+            "x-ms-summary": "Subscription",
+            "properties": {
+              "plan": {
+                "type": "string",
+                "x-ms-summary": "Plan"
+              },
+              "planId": {
+                "type": "string",
+                "x-ms-summary": "Plan ID"
+              },
+              "isActive": {
+                "type": "boolean",
+                "x-ms-summary": "Is active"
+              }
+            }
+          },
+          "profile": {
+            "type": "object",
+            "x-ms-summary": "User profile",
+            "description": "User's profile information.",
+            "properties": {
+              "pictureUrl": {
+                "type": "string",
+                "x-ms-summary": "Profile picture URL",
+                "description": "URL to the user's profile picture."
+              },
+              "githubUsername": {
+                "type": "string",
+                "x-ms-summary": "GitHub username",
+                "description": "User's GitHub username."
+              },
+              "websiteUrl": {
+                "type": "string",
+                "x-ms-summary": "Website URL",
+                "description": "URL to the user's personal website."
+              },
+              "bio": {
+                "type": "string",
+                "x-ms-summary": "User's bio",
+                "description": "User's biographical information."
+              }
+            }
+          }
+        }
+      }
+    },
+    "DatasetListResponse": {
+      "description": "List of datasets retrieved successfully.",
+      "schema": {
+        "type": "object",
+        "x-ms-summary": "Dataset list response",
+        "description": "Response containing a list of datasets with pagination information.",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "total": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "count": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "offset": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "limit": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "desc": {
+                "type": "boolean"
+              },
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "type": "string"
+                    },
+                    "modifiedAt": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "itemCount": {
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "cleanItemCount": {
+                      "type": "integer",
+                      "format": "int32"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "RecordKeysListResponse": {
+      "description": "List of record keys retrieved successfully.",
+      "schema": {
+        "type": "object",
+        "x-ms-summary": "Record keys list response",
+        "description": "Response containing a list of record keys from a key-value store.",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "key": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            },
+            "required": [
+              "items"
+            ]
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "KeyValueStoresListResponse": {
+      "description": "List of key-value stores retrieved successfully.",
+      "schema": {
+        "type": "object",
+        "x-ms-summary": "Key-value stores list response",
+        "description": "Response containing a list of key-value stores.",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            },
+            "required": [
+              "items"
+            ]
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "TasksListResponse": {
+      "description": "List of Actor tasks retrieved successfully.",
+      "schema": {
+        "type": "object",
+        "x-ms-summary": "Tasks list response",
+        "description": "Response containing a list of Actor tasks.",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "actName": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "ActorsDropdownResponse": {
+      "description": "List of Actors for dropdown retrieved successfully.",
+      "schema": {
+        "type": "object",
+        "x-ms-summary": "Actors dropdown response",
+        "description": "Response containing a list of Actors for dropdown selection.",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "StoreActorsListResponse": {
+      "description": "List of Actors from Apify store retrieved successfully.",
+      "schema": {
+        "type": "object",
+        "x-ms-summary": "Store Actors list response",
+        "description": "Response containing a list of Actors from the Apify store.",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "username": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "RecentlyUsedActorsListResponse": {
+      "description": "List of recently used Actors retrieved successfully.",
+      "schema": {
+        "type": "object",
+        "x-ms-summary": "Recently used Actors list response",
+        "description": "Response containing a list of recently used Actors with pagination information.",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "total": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "count": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "offset": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "limit": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "desc": {
+                "type": "boolean"
+              },
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "type": "string"
+                    },
+                    "modifiedAt": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "username": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "stats": {
+                      "type": "object",
+                      "properties": {
+                        "totalRuns": {
+                          "type": "integer",
+                          "format": "int32"
+                        },
+                        "lastRunStartedAt": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "WebhookCreatedResponse": {
+      "description": "Webhook created.",
       "headers": {
         "Location": {
           "type": "string",
-          "description": "New webhook URL"
+          "description": "New webhook URL."
         }
       },
       "schema": {
-        "$ref": "#/definitions/WebhookCreateResponse"
+        "type": "object",
+        "x-ms-summary": "Webhook create response",
+        "description": "Response from webhook creation containing the webhook ID.",
+        "properties": {
+          "data": {
+            "type": "object",
+            "x-ms-summary": "Webhook data",
+            "description": "Webhook creation response data.",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Unique identifier of the created webhook."
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "additionalProperties": true
       }
     },
-    "ErrorResponse": {
-      "description": "Error response",
+    "ActorRunCreatedResponse": {
+      "description": "Actor run created.",
       "schema": {
-        "$ref": "#/definitions/ErrorResponse"
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/definitions/ActorRunResponseSchema"
+          }
+        }
+      }
+    },
+    "ScrapeStartedResponse": {
+      "description": "Scrape started successfully.",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/definitions/ActorRunResponseSchema"
+          }
+        }
+      }
+    },
+    "ErrorResponse400": {
+      "description": "Invalid request error.",
+      "schema": {
+        "$ref": "#/definitions/ErrorResponseSchema"
+      }
+    },
+    "ErrorResponse404": {
+      "description": "Record not found error.",
+      "schema": {
+        "$ref": "#/definitions/ErrorResponseSchema"
+      }
+    },
+    "ErrorResponse401": {
+      "description": "Unauthorized error.",
+      "schema": {
+        "$ref": "#/definitions/ErrorResponseSchema"
+      }
+    },
+    "ErrorResponse429": {
+      "description": "Rate limit exceeded error.",
+      "schema": {
+        "$ref": "#/definitions/ErrorResponseSchema"
+      }
+    },
+    "ErrorResponse405": {
+      "description": "Method not allowed error.",
+      "schema": {
+        "$ref": "#/definitions/ErrorResponseSchema"
+      }
+    },
+    "ErrorResponse500": {
+      "description": "Server error.",
+      "schema": {
+        "$ref": "#/definitions/ErrorResponseSchema"
       }
     }
   },
   "tags": [
     {
       "name": "Users",
-      "description": "Operations related to Apify Users"
+      "description": "Operations related to Apify users."
     },
     {
       "name": "Actors",
-      "description": "Operations related to Apify Actors"
+      "description": "Operations related to Apify Actors."
     },
     {
       "name": "Tasks",
-      "description": "Operations related to Apify Tasks"
+      "description": "Operations related to Apify tasks."
     },
     {
       "name": "Datasets",
-      "description": "Operations related to Apify Datasets"
+      "description": "Operations related to Apify datasets."
     },
     {
       "name": "KeyValueStores",
-      "description": "Operations related to Apify Key-Value Stores"
+      "description": "Operations related to Apify key-value stores."
     },
     {
       "name": "Scraping",
-      "description": "Operations related to web scraping"
+      "description": "Operations related to web scraping."
+    },
+    {
+      "name": "Webhooks",
+      "description": "Operations related to webhooks."
     }
   ]
 }
