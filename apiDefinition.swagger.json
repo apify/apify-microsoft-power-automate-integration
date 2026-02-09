@@ -154,10 +154,10 @@
     },
     "/store": {
       "get": {
-        "summary": "List store Actors (for dropdown)",
+        "summary": "List Store Actors (for dropdown)",
         "description": "Fetches a list of Actors from the Apify store.",
         "operationId": "ListStoreActors",
-        "x-ms-summary": "List store Actors (for dropdown)",
+        "x-ms-summary": "List Store Actors (for dropdown)",
         "x-ms-visibility": "internal",
         "tags": [
           "Actors"
@@ -225,7 +225,7 @@
               },
               {
                 "value": "StoreActors",
-                "displayName": "Apify store Actors"
+                "displayName": "Apify Store Actors"
               }
             ],
             "description": "Please select the source to search Actors from.",
@@ -296,7 +296,7 @@
               },
               {
                 "value": "StoreActors",
-                "displayName": "Apify store Actors"
+                "displayName": "Apify Store Actors"
               }
             ]
           },
@@ -1042,7 +1042,7 @@
               },
               {
                 "value": "StoreActors",
-                "displayName": "Apify store Actors"
+                "displayName": "Apify Store Actors"
               }
             ]
           },

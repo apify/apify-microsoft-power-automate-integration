@@ -162,7 +162,7 @@ public class Script : ScriptBase {
   /// An <see cref="HttpResponseMessage"/> representing the HTTP response message with formatted actor titles.
   /// </returns>
   private async Task<HttpResponseMessage> HandleListActorsDropdown() {
-    return await HandleFormattedResponse(BuildActorRequest, items => FormatItems(items, FormatActorTitle)).ConfigureAwait(false);
+    return await HandleFormattedResponse(BuildActorRequest, items => FormatItems(items, FormatActorTitle, "title")).ConfigureAwait(false);
   }
 
   /// <summary>
@@ -252,21 +252,58 @@ public class Script : ScriptBase {
   /// An <see cref="HttpResponseMessage"/> representing the HTTP response message with formatted task names.
   /// </returns>
   private async Task<HttpResponseMessage> HandleListTasks() {
-    return await HandleFormattedResponse(() => Context.Request, items => FormatItems(items, FormatTaskTitle)).ConfigureAwait(false);
+    return await HandleFormattedResponse(() => Context.Request, items => FormatItems(items, FormatTaskTitle, "name")).ConfigureAwait(false);
+  }
+
+  /// <summary>
+  /// Returns a zero-padded numerical prefix for a given index in a list.
+  /// The prefix length is determined by the total number of items so that
+  /// each item gets a unique prefix that sorts lexicographically.
+  /// E.g., for 100 items (3-digit prefix): index 0 → "001", index 8 → "009", index 99 → "100".
+  /// </summary>
+  /// <param name="totalItems">Total number of items in the list</param>
+  /// <param name="index">Index of the item</param>
+  /// <returns>A numerical prefix string</returns>
+  private static string GetNumericalPrefix(int totalItems, int index) {
+    if (totalItems <= 0) return string.Empty;
+    if (index < 0 || index >= totalItems) return string.Empty;
+
+    // Determine how many digits are needed: smallest n where 10^n > totalItems
+    int prefixLength = 1;
+    long capacity = 10;
+    while (capacity <= totalItems) {
+      capacity *= 10;
+      prefixLength++;
+    }
+
+    // Convert index to decimal digits
+    int value = index + 1;
+    char[] prefix = new char[prefixLength];
+    for (int i = prefixLength - 1; i >= 0; i--) {
+      prefix[i] = (char)('0' + (value % 10));
+      value /= 10;
+    }
+
+    return new string(prefix);
   }
 
   /// <summary>
   /// Generic method to format items in a JArray by applying a formatting function to each valid item.
+  /// After formatting, a numerical prefix is applied to the display field to preserve sort order
+  /// in Power Automate dropdowns.
   /// </summary>
   /// <param name="items">The JArray of items to format</param>
   /// <param name="formatter">Function to apply formatting to each JObject item</param>
-  private void FormatItems(JArray items, Action<JObject> formatter) {
+  /// <param name="displayField">The JSON field name to prepend the numerical prefix to</param>
+  private void FormatItems(JArray items, Action<JObject> formatter, string displayField) {
     if (items == null || items.Count == 0) return;
 
     for (int i = 0; i < items.Count; i++) {
       var item = items[i] as JObject;
       if (item == null) continue;
       formatter(item);
+      var prefix = GetNumericalPrefix(items.Count, i);
+      item[displayField] = $"{prefix}) {item[displayField]}";
     }
   }
 
@@ -283,7 +320,6 @@ public class Script : ScriptBase {
     if (!string.IsNullOrEmpty(title) && 
         !string.IsNullOrEmpty(name) && 
         !string.IsNullOrEmpty(username)) {
-      // Update the title field with formatted string
       item["title"] = $"{title} ({username}/{name})";
     }
   }
@@ -298,7 +334,6 @@ public class Script : ScriptBase {
 
     // Only format if we have all required fields
     if (!string.IsNullOrEmpty(name) && !string.IsNullOrEmpty(actName)) {
-      // Update the name field with formatted string: "name / (actName)"
       item["name"] = $"{name} / ({actName})";
     }
   }
