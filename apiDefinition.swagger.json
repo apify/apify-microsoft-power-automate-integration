@@ -306,7 +306,7 @@
             "required": true,
             "type": "string",
             "x-ms-summary": "Actor",
-            "description": "Actor identifier to run. Supply Actor ID or Actor name.",
+            "description": "Actor identifier to run. Supply Actor ID.",
             "x-ms-dynamic-values": {
               "operationId": "ListActorsDropdown",
               "value-collection": "data/items",
@@ -1062,7 +1062,7 @@
                 },
                 "eventTypes": {
                   "type": "array",
-                  "x-ms-visibility": "important",
+                  "x-ms-visibility": "internal",
                   "x-ms-summary": "Statuses",
                   "description": "Actor run statuses to trigger on.",
                   "items": {
@@ -1082,7 +1082,7 @@
                       "type": "string",
                       "x-ms-visibility": "important",
                       "x-ms-summary": "Actor",
-                      "description": "Actor identifier to monitor. Supply Actor ID or Actor name.",
+                      "description": "Actor identifier to monitor. Supply Actor ID.",
                       "x-ms-dynamic-values": {
                         "operationId": "ListActorsDropdown",
                         "value-collection": "data/items",
@@ -1096,7 +1096,10 @@
                         }
                       }
                     }
-                  }
+                  },
+                  "required": [
+                    "actorId"
+                  ]
                 },
                 "idempotencyKey": {
                   "type": "string",
@@ -1113,10 +1116,21 @@
               },
               "required": [
                 "requestUrl",
-                "eventTypes",
                 "condition"
               ]
             }
+          },
+          {
+            "$ref": "#/parameters/OnRunSucceededParameter"
+          },
+          {
+            "$ref": "#/parameters/OnRunFailedParameter"
+          },
+          {
+            "$ref": "#/parameters/OnRunTimedOutParameter"
+          },
+          {
+            "$ref": "#/parameters/OnRunAbortedParameter"
           }
         ],
         "responses": {
@@ -1232,7 +1246,7 @@
                 },
                 "eventTypes": {
                   "type": "array",
-                  "x-ms-visibility": "important",
+                  "x-ms-visibility": "internal",
                   "x-ms-summary": "Statuses",
                   "description": "Actor run statuses to trigger on.",
                   "items": {
@@ -1260,7 +1274,10 @@
                         "value-title": "name"
                       }
                     }
-                  }
+                  },
+                  "required": [
+                    "actorTaskId"
+                  ]
                 },
                 "idempotencyKey": {
                   "type": "string",
@@ -1277,10 +1294,21 @@
               },
               "required": [
                 "requestUrl",
-                "eventTypes",
                 "condition"
               ]
             }
+          },
+          {
+            "$ref": "#/parameters/OnRunSucceededParameter"
+          },
+          {
+            "$ref": "#/parameters/OnRunFailedParameter"
+          },
+          {
+            "$ref": "#/parameters/OnRunTimedOutParameter"
+          },
+          {
+            "$ref": "#/parameters/OnRunAbortedParameter"
           }
         ],
         "responses": {
@@ -1683,6 +1711,46 @@
       "default": 1000,
       "x-ms-summary": "Limit",
       "description": "Maximum number of Actors to return."
+    },
+    "OnRunSucceededParameter": {
+      "name": "onRunSucceeded",
+      "x-ms-summary": "Trigger On Run Succeeded",
+      "description": "Trigger when an Actor run succeeds.",
+      "in": "query",
+      "required": true,
+      "type": "boolean",
+      "default": true,
+      "x-ms-visibility": "important"
+    },
+    "OnRunFailedParameter": {
+      "name": "onRunFailed",
+      "x-ms-summary": "Trigger On Run Failed",
+      "description": "Trigger when an Actor run fails.",
+      "in": "query",
+      "required": true,
+      "type": "boolean",
+      "default": false,
+      "x-ms-visibility": "important"
+    },
+    "OnRunTimedOutParameter": {
+      "name": "onRunTimedOut",
+      "x-ms-summary": "Trigger On Run Timed Out",
+      "description": "Trigger when an Actor run times out.",
+      "in": "query",
+      "required": true,
+      "type": "boolean",
+      "default": false,
+      "x-ms-visibility": "important"
+    },
+    "OnRunAbortedParameter": {
+      "name": "onRunAborted",
+      "x-ms-summary": "Trigger On Run Aborted",
+      "description": "Trigger when an Actor run is aborted.",
+      "in": "query",
+      "required": true,
+      "type": "boolean",
+      "default": false,
+      "x-ms-visibility": "important"
     }
   },
   "responses": {

@@ -16,6 +16,16 @@ public class Script : ScriptBase {
   private const int MAX_WAIT_FOR_FINISH = 60;
 
   /// <summary>
+  /// Maps webhook trigger boolean query parameter names to their corresponding Apify webhook event type strings.
+  /// </summary>
+  private static readonly Dictionary<string, string> StatusParamToEventType = new Dictionary<string, string> {
+    { "onRunSucceeded", "ACTOR.RUN.SUCCEEDED" },
+    { "onRunFailed", "ACTOR.RUN.FAILED" },
+    { "onRunTimedOut", "ACTOR.RUN.TIMED_OUT" },
+    { "onRunAborted", "ACTOR.RUN.ABORTED" }
+  };
+
+  /// <summary>
   /// Main entry point for the Power Automate custom connector script.
   /// Routes incoming requests to appropriate handlers based on the operation ID.
   /// </summary>
@@ -523,6 +533,68 @@ public class Script : ScriptBase {
   }
 
   /// <summary>
+  /// Reads boolean status query parameters and converts them to Apify event type strings.
+  /// Removes the boolean parameters from the query collection so they are not forwarded to the API.
+  /// </summary>
+  /// <param name="queryParams">The query parameters collection to read from and clean up.</param>
+  /// <returns>A list of event type strings for statuses set to true.</returns>
+  private static List<string> BuildEventTypesFromQuery(System.Collections.Specialized.NameValueCollection queryParams) {
+    var eventTypes = new List<string>();
+
+    foreach (var entry in StatusParamToEventType) {
+      var value = queryParams[entry.Key];
+      if (string.Equals(value, "true", StringComparison.OrdinalIgnoreCase)) {
+        eventTypes.Add(entry.Value);
+      }
+      queryParams.Remove(entry.Key);
+    }
+
+    return eventTypes;
+  }
+
+  /// <summary>
+  /// Injects the event types array into the request body JSON.
+  /// Reads the existing body, sets the "eventTypes" property, and replaces the request content.
+  /// </summary>
+  /// <param name="request">The HTTP request whose body will be modified.</param>
+  /// <param name="eventTypes">The list of event type strings to inject.</param>
+  private static async Task InjectEventTypesIntoBody(HttpRequestMessage request, List<string> eventTypes) {
+    if (request.Content == null) return;
+    var bodyString = await request.Content.ReadAsStringAsync().ConfigureAwait(false);
+    var body = JObject.Parse(bodyString);
+    body["eventTypes"] = new JArray(eventTypes.ToArray());
+    request.Content = new StringContent(body.ToString(Newtonsoft.Json.Formatting.None), Encoding.UTF8, "application/json");
+  }
+
+  /// <summary>
+  /// Parses boolean status query parameters, removes them and any extra helper params from the query string,
+  /// rebuilds the request URI, and injects the resulting event types into the request body.
+  /// Returns null on success or an error response if no event types are selected.
+  /// </summary>
+  /// <param name="extraParamsToRemove">Additional query parameter names to strip before forwarding.</param>
+  /// <returns>An error <see cref="HttpResponseMessage"/> if validation fails, or null on success.</returns>
+  private async Task<HttpResponseMessage> PrepareWebhookRequest(params string[] extraParamsToRemove) {
+    var originalUri = Context.Request.RequestUri;
+    var queryParams = System.Web.HttpUtility.ParseQueryString(originalUri.Query);
+
+    var eventTypes = BuildEventTypesFromQuery(queryParams);
+    // If no event types are selected, return a bad request error
+    if (eventTypes.Count == 0) {
+      var errorResponse = new HttpResponseMessage(HttpStatusCode.BadRequest);
+      errorResponse.Content = CreateJsonContent("At least one trigger status must be enabled.");
+      return errorResponse;
+    }
+
+    foreach (var param in extraParamsToRemove) {
+      queryParams.Remove(param);
+    }
+    Context.Request.RequestUri = new UriBuilder(originalUri) { Query = queryParams.ToString() }.Uri;
+
+    await InjectEventTypesIntoBody(Context.Request, eventTypes).ConfigureAwait(false);
+    return null;
+  }
+
+  /// <summary>
   /// Handles the creation of webhooks for Power Automate triggers.
   /// Location header is provided by Apify API.
   /// Removes the helper actorScope parameter and forwards the request to Apify API.  
@@ -531,12 +603,8 @@ public class Script : ScriptBase {
   /// An <see cref="HttpResponseMessage"/> representing the HTTP response message with proper Location header for webhook deletion.
   /// </returns>
   private async Task<HttpResponseMessage> HandleCreateWebhook() {
-    var originalUri = Context.Request.RequestUri;
-    var queryParams = System.Web.HttpUtility.ParseQueryString(originalUri.Query);
-
-    // Remove helper parameter from query string
-    queryParams.Remove("actorScope");
-    Context.Request.RequestUri = new UriBuilder(originalUri) { Query = queryParams.ToString() }.Uri;
+    var error = await PrepareWebhookRequest("actorScope").ConfigureAwait(false);
+    if (error != null) return error;
 
     // Forward request to Apify API
     return await Context.SendAsync(Context.Request, CancellationToken).ConfigureAwait(false);
@@ -562,6 +630,9 @@ public class Script : ScriptBase {
   /// Routes /webhooks/task to /webhooks and applies robust deletion handling.
   /// </summary>
   private async Task<HttpResponseMessage> HandleActorTaskFinishedTrigger() {
+    var error = await PrepareWebhookRequest().ConfigureAwait(false);
+    if (error != null) return error;
+
     // Update path from /webhooks/task to /webhooks
     ModifyRequestPath("/webhooks/task", "/webhooks");
 
