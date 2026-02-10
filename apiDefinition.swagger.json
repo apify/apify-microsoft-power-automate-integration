@@ -1024,29 +1024,6 @@
             "$ref": "#/parameters/IntegrationPlatformHeader"
           },
           {
-            "name": "actorScope",
-            "x-ms-summary": "Select Actor from",
-            "description": "Please select the source to search Actors from.",
-            "default": "RecentActors",
-            "in": "query",
-            "required": true,
-            "type": "string",
-            "enum": [
-              "RecentActors",
-              "StoreActors"
-            ],
-            "x-ms-enum-values": [
-              {
-                "value": "RecentActors",
-                "displayName": "Recently used Actors"
-              },
-              {
-                "value": "StoreActors",
-                "displayName": "Apify Store Actors"
-              }
-            ]
-          },
-          {
             "name": "body",
             "in": "body",
             "required": true,
@@ -1119,6 +1096,29 @@
                 "condition"
               ]
             }
+          },
+          {
+            "name": "actorScope",
+            "x-ms-summary": "Select Actor from",
+            "description": "Please select the source to search Actors from.",
+            "default": "RecentActors",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "enum": [
+              "RecentActors",
+              "StoreActors"
+            ],
+            "x-ms-enum-values": [
+              {
+                "value": "RecentActors",
+                "displayName": "Recently used Actors"
+              },
+              {
+                "value": "StoreActors",
+                "displayName": "Apify Store Actors"
+              }
+            ]
           },
           {
             "$ref": "#/parameters/OnRunSucceededParameter"
@@ -1715,9 +1715,9 @@
     "OnRunSucceededParameter": {
       "name": "onRunSucceeded",
       "x-ms-summary": "Trigger On Run Succeeded",
-      "description": "Trigger when an Actor run succeeds.",
+      "description": "Trigger when an Actor run succeeds. Defaults to false if not set.",
       "in": "query",
-      "required": true,
+      "required": false,
       "type": "boolean",
       "default": true,
       "x-ms-visibility": "important"
@@ -1725,9 +1725,9 @@
     "OnRunFailedParameter": {
       "name": "onRunFailed",
       "x-ms-summary": "Trigger On Run Failed",
-      "description": "Trigger when an Actor run fails.",
+      "description": "Trigger when an Actor run fails. Defaults to false if not set.",
       "in": "query",
-      "required": true,
+      "required": false,
       "type": "boolean",
       "default": false,
       "x-ms-visibility": "important"
@@ -1735,9 +1735,9 @@
     "OnRunTimedOutParameter": {
       "name": "onRunTimedOut",
       "x-ms-summary": "Trigger On Run Timed Out",
-      "description": "Trigger when an Actor run times out.",
+      "description": "Trigger when an Actor run times out. Defaults to false if not set.",
       "in": "query",
-      "required": true,
+      "required": false,
       "type": "boolean",
       "default": false,
       "x-ms-visibility": "important"
@@ -1745,9 +1745,9 @@
     "OnRunAbortedParameter": {
       "name": "onRunAborted",
       "x-ms-summary": "Trigger On Run Aborted",
-      "description": "Trigger when an Actor run is aborted.",
+      "description": "Trigger when an Actor run is aborted. Defaults to false if not set.",
       "in": "query",
-      "required": true,
+      "required": false,
       "type": "boolean",
       "default": false,
       "x-ms-visibility": "important"

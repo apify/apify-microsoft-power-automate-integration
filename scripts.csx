@@ -275,26 +275,9 @@ public class Script : ScriptBase {
   /// <param name="index">Index of the item</param>
   /// <returns>A numerical prefix string</returns>
   private static string GetNumericalPrefix(int totalItems, int index) {
-    if (totalItems <= 0) return string.Empty;
-    if (index < 0 || index >= totalItems) return string.Empty;
-
-    // Determine how many digits are needed: smallest n where 10^n > totalItems
-    int prefixLength = 1;
-    long capacity = 10;
-    while (capacity <= totalItems) {
-      capacity *= 10;
-      prefixLength++;
-    }
-
-    // Convert index to decimal digits
-    int value = index + 1;
-    char[] prefix = new char[prefixLength];
-    for (int i = prefixLength - 1; i >= 0; i--) {
-      prefix[i] = (char)('0' + (value % 10));
-      value /= 10;
-    }
-
-    return new string(prefix);
+    if (totalItems <= 0 || index < 0 || index >= totalItems) return string.Empty;
+    int width = totalItems.ToString().Length;
+    return (index + 1).ToString().PadLeft(width, '0');
   }
 
   /// <summary>
@@ -305,7 +288,7 @@ public class Script : ScriptBase {
   /// <param name="items">The JArray of items to format</param>
   /// <param name="formatter">Function to apply formatting to each JObject item</param>
   /// <param name="displayField">The JSON field name to prepend the numerical prefix to</param>
-  private void FormatItems(JArray items, Action<JObject> formatter, string displayField) {
+  private static void FormatItems(JArray items, Action<JObject> formatter, string displayField) {
     if (items == null || items.Count == 0) return;
 
     for (int i = 0; i < items.Count; i++) {
@@ -321,7 +304,7 @@ public class Script : ScriptBase {
   /// Formats actor titles by combining title, username, and name for better user experience.
   /// </summary>
   /// <param name="item">The JObject representing an actor item</param>
-  private void FormatActorTitle(JObject item) {
+  private static void FormatActorTitle(JObject item) {
     var title = item["title"]?.Value<string>();
     var name = item["name"]?.Value<string>();
     var username = item["username"]?.Value<string>();
@@ -338,7 +321,7 @@ public class Script : ScriptBase {
   /// Formats task names by combining name and actName for better user experience.
   /// </summary>
   /// <param name="item">The JObject representing a task item</param>
-  private void FormatTaskTitle(JObject item) {
+  private static void FormatTaskTitle(JObject item) {
     var name = item["name"]?.Value<string>();
     var actName = item["actName"]?.Value<string>();
 
