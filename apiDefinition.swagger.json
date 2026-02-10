@@ -1024,6 +1024,29 @@
             "$ref": "#/parameters/IntegrationPlatformHeader"
           },
           {
+            "name": "actorScope",
+            "x-ms-summary": "Select Actor from",
+            "description": "Please select the source to search Actors from.",
+            "default": "RecentActors",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "enum": [
+              "RecentActors",
+              "StoreActors"
+            ],
+            "x-ms-enum-values": [
+              {
+                "value": "RecentActors",
+                "displayName": "Recently used Actors"
+              },
+              {
+                "value": "StoreActors",
+                "displayName": "Apify Store Actors"
+              }
+            ]
+          },
+          {
             "name": "body",
             "in": "body",
             "required": true,
@@ -1096,29 +1119,6 @@
                 "condition"
               ]
             }
-          },
-          {
-            "name": "actorScope",
-            "x-ms-summary": "Select Actor from",
-            "description": "Please select the source to search Actors from.",
-            "default": "RecentActors",
-            "in": "query",
-            "required": true,
-            "type": "string",
-            "enum": [
-              "RecentActors",
-              "StoreActors"
-            ],
-            "x-ms-enum-values": [
-              {
-                "value": "RecentActors",
-                "displayName": "Recently used Actors"
-              },
-              {
-                "value": "StoreActors",
-                "displayName": "Apify Store Actors"
-              }
-            ]
           },
           {
             "$ref": "#/parameters/OnRunSucceededParameter"
