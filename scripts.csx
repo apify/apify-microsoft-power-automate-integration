@@ -227,7 +227,7 @@ public class Script : ScriptBase {
   /// <returns>A new HttpResponseMessage with the formatted content</returns>
   private async Task<HttpResponseMessage> FormatApiResponse(HttpResponseMessage response, Action<JArray> formatAction) {
     if (!response.IsSuccessStatusCode) {
-      return response; // Return error responses as-is
+      return response;
     }
 
     // Read and parse the JSON response
