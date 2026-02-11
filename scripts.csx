@@ -536,17 +536,33 @@ public class Script : ScriptBase {
   }
 
   /// <summary>
-  /// Injects the event types array into the request body JSON.
-  /// Reads the existing body, sets the "eventTypes" property, and replaces the request content.
+  /// Adds or replaces "eventTypes" in the request JSON body. Returns a 400 error if the body isn't valid JSON.
   /// </summary>
   /// <param name="request">The HTTP request whose body will be modified.</param>
   /// <param name="eventTypes">The list of event type strings to inject.</param>
-  private static async Task InjectEventTypesIntoBody(HttpRequestMessage request, List<string> eventTypes) {
-    if (request.Content == null) return;
-    var bodyString = await request.Content.ReadAsStringAsync().ConfigureAwait(false);
-    var body = JObject.Parse(bodyString);
+  /// <returns>An error <see cref="HttpResponseMessage"/> if the body is invalid JSON, or null on success.</returns>
+  private async Task<HttpResponseMessage> InjectEventTypesIntoBody(HttpRequestMessage request, List<string> eventTypes) {
+    JObject body;
+    if (request.Content == null) {
+      body = new JObject();
+    } else {
+      var bodyString = await request.Content.ReadAsStringAsync().ConfigureAwait(false);
+      if (string.IsNullOrWhiteSpace(bodyString)) {
+        body = new JObject();
+      } else {
+        try {
+          body = JObject.Parse(bodyString);
+        } catch (JsonReaderException) {
+          var errorResponse = new HttpResponseMessage(HttpStatusCode.BadRequest);
+          errorResponse.Content = CreateJsonContent("Request body must be a valid JSON object.");
+          return errorResponse;
+        }
+      }
+    }
+
     body["eventTypes"] = new JArray(eventTypes.ToArray());
     request.Content = new StringContent(body.ToString(Newtonsoft.Json.Formatting.None), Encoding.UTF8, "application/json");
+    return null;
   }
 
   /// <summary>
@@ -573,7 +589,8 @@ public class Script : ScriptBase {
     }
     Context.Request.RequestUri = new UriBuilder(originalUri) { Query = queryParams.ToString() }.Uri;
 
-    await InjectEventTypesIntoBody(Context.Request, eventTypes).ConfigureAwait(false);
+    var injectError = await InjectEventTypesIntoBody(Context.Request, eventTypes).ConfigureAwait(false);
+    if (injectError != null) return injectError;
     return null;
   }
 
