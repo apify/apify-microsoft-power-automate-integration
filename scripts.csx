@@ -641,10 +641,10 @@ public class Script : ScriptBase {
 
   /// <summary>
   /// Handles task webhook deletion by routing to standard webhooks endpoint.
-  /// Routes /webhooks/task/{webhookId} to /webhooks/{webhookId} and applies robust deletion handling.
+  /// Routes /webhooks/task/ to /webhooks/ and converts 204 to 200.
   /// </summary>
   private async Task<HttpResponseMessage> HandleDeleteTaskWebhook() {
-    ModifyRequestPath("/webhooks/task/{webhookId}", "/webhooks/{webhookId}");
+    ModifyRequestPath("/webhooks/task/", "/webhooks/");
 
     return await HandleDeleteWebhook().ConfigureAwait(false);
   }
