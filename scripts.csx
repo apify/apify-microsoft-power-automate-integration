@@ -26,6 +26,11 @@ public class Script : ScriptBase {
   };
 
   /// <summary>
+  /// Cached validation rules, lazily initialized on first access.
+  /// </summary>
+  private Dictionary<string, Dictionary<string, ParameterValidator>> _validationRules;
+
+  /// <summary>
   /// Main entry point for the Power Automate custom connector script.
   /// Routes incoming requests to appropriate handlers based on the operation ID.
   /// </summary>
@@ -225,34 +230,42 @@ public class Script : ScriptBase {
       return response; // Return error responses as-is
     }
 
-    try {
-      // Read and parse the JSON response
-      var jsonContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-      var jsonObject = JObject.Parse(jsonContent);
+    // Read and parse the JSON response
+    var jsonContent = response.Content != null
+      ? await response.Content.ReadAsStringAsync().ConfigureAwait(false)
+      : null;
 
-      // Apply formatting to items array if it exists
-      var items = jsonObject["data"]?["items"] as JArray;
-      if (items != null) {
-        formatAction(items);
-      }
-
-      // Create new response with formatted content
-      var formattedContent = jsonObject.ToString(Newtonsoft.Json.Formatting.None);
-      var newResponse = new HttpResponseMessage(response.StatusCode) {
-        Content = new StringContent(formattedContent, Encoding.UTF8, "application/json")
-      };
-
-      // Copy headers from original response
-      foreach (var header in response.Headers) {
-        newResponse.Headers.TryAddWithoutValidation(header.Key, header.Value);
-      }
-
-      return newResponse;
-    }
-    catch (Exception ex) {
-      // Return original response on any formatting error
+    // If the content is empty, return the original response
+    if (string.IsNullOrWhiteSpace(jsonContent)) {
       return response;
     }
+
+    // Parse the JSON content into a JObject
+    JObject jsonObject;
+    try {
+      jsonObject = JObject.Parse(jsonContent);
+    } catch (JsonReaderException) {
+      return response;
+    }
+
+    // Apply formatting to items array if it exists
+    var items = jsonObject["data"]?["items"] as JArray;
+    if (items != null) {
+      formatAction(items);
+    }
+
+    // Create new response with formatted content
+    var formattedContent = jsonObject.ToString(Newtonsoft.Json.Formatting.None);
+    var newResponse = new HttpResponseMessage(response.StatusCode) {
+      Content = new StringContent(formattedContent, Encoding.UTF8, "application/json")
+    };
+
+    // Copy headers from original response
+    foreach (var header in response.Headers) {
+      newResponse.Headers.TryAddWithoutValidation(header.Key, header.Value);
+    }
+
+    return newResponse;
   }
 
   /// <summary>
@@ -775,10 +788,13 @@ public class Script : ScriptBase {
   /// <summary>
   /// Returns validation rules for each operation that requires query parameter validation.
   /// Maps operation IDs to their parameter validation rules.
+  /// The dictionary is lazily built once per instance and cached.
   /// </summary>
   /// <returns>Dictionary mapping operation IDs to parameter validators.</returns>
   private Dictionary<string, Dictionary<string, ParameterValidator>> GetValidationRules() {
-    return new Dictionary<string, Dictionary<string, ParameterValidator>> {
+    if (_validationRules != null) return _validationRules;
+
+    _validationRules = new Dictionary<string, Dictionary<string, ParameterValidator>> {
       [OP_RUN_ACTOR_ID] = new Dictionary<string, ParameterValidator> {
         ["waitForFinish"] = ValidateWaitForFinish,
         ["timeout"] = ValidateNonNegativeInteger
@@ -795,6 +811,7 @@ public class Script : ScriptBase {
         ["offset"] = ValidateNonNegativeInteger
       }
     };
+    return _validationRules;
   }
 
   /// <summary>
