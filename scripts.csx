@@ -566,9 +566,9 @@ public class Script : ScriptBase {
         try {
           body = JObject.Parse(bodyString);
         } catch (JsonReaderException) {
-          var errorResponse = new HttpResponseMessage(HttpStatusCode.BadRequest);
-          errorResponse.Content = CreateJsonContent("Request body must be a valid JSON object.");
-          return errorResponse;
+          var validation = new ValidationResult();
+          validation.AddError("Request body must be a valid JSON object.");
+          return CreateValidationErrorResponse(validation);
         }
       }
     }
@@ -590,11 +590,9 @@ public class Script : ScriptBase {
     var queryParams = System.Web.HttpUtility.ParseQueryString(originalUri.Query);
 
     var eventTypes = BuildEventTypesFromQuery(queryParams);
-    // If no event types are selected, return a bad request error
+    // If no event types are selected, default to all event types
     if (eventTypes.Count == 0) {
-      var errorResponse = new HttpResponseMessage(HttpStatusCode.BadRequest);
-      errorResponse.Content = CreateJsonContent("At least one trigger status must be enabled.");
-      return errorResponse;
+      eventTypes.AddRange(StatusParamToEventType.Values);
     }
 
     foreach (var param in extraParamsToRemove) {

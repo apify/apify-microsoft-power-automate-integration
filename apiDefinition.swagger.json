@@ -1011,7 +1011,7 @@
       },
       "post": {
         "summary": "Actor run finished",
-        "description": "Creates a webhook to subscribe to Actor run events. Triggers when the selected Actor run finishes with a specific status. See docs: https://docs.apify.com/api/v2/webhooks-post.",
+        "description": "Creates a webhook to subscribe to Actor run events. Triggers when the selected Actor run finishes with a specific status. If no statuses are selected, all statuses are enabled by default. See docs: https://docs.apify.com/api/v2/webhooks-post.",
         "operationId": "ActorRunFinishedTrigger",
         "x-ms-summary": "Actor run finished",
         "x-ms-visibility": "important",
@@ -1218,7 +1218,7 @@
       },
       "post": {
         "summary": "Actor task finished",
-        "description": "Creates a webhook to subscribe to Actor task run events. Triggers when the selected Actor task run finishes with a specific status. See docs: https://docs.apify.com/api/v2/webhooks-post.",
+        "description": "Creates a webhook to subscribe to Actor task run events. Triggers when the selected Actor task run finishes with a specific status. If no statuses are selected, all statuses are enabled by default. See docs: https://docs.apify.com/api/v2/webhooks-post.",
         "operationId": "ActorTaskFinishedTrigger",
         "x-ms-summary": "Actor task finished",
         "x-ms-visibility": "important",
