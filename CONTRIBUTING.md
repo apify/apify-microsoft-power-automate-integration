@@ -6,7 +6,7 @@ For developers contributing to or deploying this connector.
 
 - [Apify account](https://apify.com)
 - [Power Automate environment](https://make.powerautomate.com/)
-- [Python](https://www.python.org/downloads) 3.5 or later
+- [Python](https://www.python.org/downloads) 3.9 or later
 
 ## Getting Started
 
@@ -88,18 +88,31 @@ These definitions are stored locally and pushed to the Power Platform environmen
 
 ## Creating and Updating the Connector
 
+> **Secret handling:** Do not pass `--secret <oauth-client-secret>` on the command line. Secrets in shell commands can leak through shell history, process listings, and logs. Instead, omit the `--secret` flag and re-enter the OAuth credentials manually in Power Automate after each create or update (see below). Keep this in mind every time you push the connector.
+
+### Re-entering OAuth credentials after deploy
+
+Each time you create or update the connector without `--secret`, you need to re-configure the OAuth credentials in Power Automate:
+
+1. Go to **Custom Connectors** in Power Automate.
+2. Click **Edit** on the connector.
+3. Navigate to the **Security** tab.
+4. Under **OAuth 2.0**, click **Edit**.
+5. Fill in the **Client ID** and **Client Secret**.
+6. Save the connector.
+
 ### Create (First Time)
 
 If the connector does not yet exist in your Power Automate environment, create it once:
 
 ```bash
-paconn create --settings settings.json --secret <oauth-client-secret>
+paconn create --settings settings.json
 ```
 
 Or explicitly without settings:
 
 ```bash
-paconn create -e <ENV_ID> --api-prop apiProperties.json --api-def apiDefinition.swagger.json --icon icon.png --script scripts.csx --secret <oauth-client-secret>
+paconn create -e <ENV_ID> --api-prop apiProperties.json --api-def apiDefinition.swagger.json --icon icon.png --script scripts.csx
 ```
 
 After creation, paconn prints the `connector ID`. Save this value in your `settings.json` for future updates.
@@ -109,13 +122,13 @@ After creation, paconn prints the `connector ID`. Save this value in your `setti
 Once the connector is created and you are modifying its definition locally, use the update command:
 
 ```bash
-paconn update --settings settings.json --secret <oauth-client-secret>
+paconn update --settings settings.json
 ```
 
 Or explicitly:
 
 ```bash
-paconn update -e <ENV_ID> -c <CONNECTOR_ID> --api-prop apiProperties.json --api-def apiDefinition.swagger.json --icon icon.png --script scripts.csx --secret <oauth-client-secret>
+paconn update -e <ENV_ID> -c <CONNECTOR_ID> --api-prop apiProperties.json --api-def apiDefinition.swagger.json --icon icon.png --script scripts.csx
 ```
 
 ## Development Cycle
@@ -127,16 +140,19 @@ paconn update -e <ENV_ID> -c <CONNECTOR_ID> --api-prop apiProperties.json --api-
    Push changes:
 
    ```bash
-   paconn update --settings settings.json --secret <oauth-client-secret>
+   paconn update --settings settings.json
    ```
 
-3. **Check for Errors**
+3. **Re-enter OAuth credentials**
+   After each update, go to **Custom Connectors → Edit → Security → OAuth 2.0 → Edit** and fill in the Client ID and Client Secret, then save.
+
+4. **Check for Errors**
    Go to custom connector edit mode in Power Automate and try saving the connector. If there are errors, check the error message, fix them locally and repeat.
 
-4. **Test Changes**
+5. **Test Changes**
    Run flows using your connector's actions and triggers to verify behavior.
 
-5. **Repeat**
+6. **Repeat**
    Fix issues locally, then update and test again.
 
 ## Troubleshooting
