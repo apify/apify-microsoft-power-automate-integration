@@ -1715,41 +1715,37 @@
     "OnRunSucceededParameter": {
       "name": "onRunSucceeded",
       "x-ms-summary": "Trigger On Run Succeeded",
-      "description": "Trigger when an Actor run succeeds. Defaults to false if not set.",
+      "description": "Trigger when an Actor run succeeds. Defaults to true if not set.",
       "in": "query",
       "required": false,
       "type": "boolean",
-      "default": true,
       "x-ms-visibility": "important"
     },
     "OnRunFailedParameter": {
       "name": "onRunFailed",
       "x-ms-summary": "Trigger On Run Failed",
-      "description": "Trigger when an Actor run fails. Defaults to false if not set.",
+      "description": "Trigger when an Actor run fails. Defaults to true if not set.",
       "in": "query",
       "required": false,
       "type": "boolean",
-      "default": false,
       "x-ms-visibility": "important"
     },
     "OnRunTimedOutParameter": {
       "name": "onRunTimedOut",
       "x-ms-summary": "Trigger On Run Timed Out",
-      "description": "Trigger when an Actor run times out. Defaults to false if not set.",
+      "description": "Trigger when an Actor run times out. Defaults to true if not set.",
       "in": "query",
       "required": false,
       "type": "boolean",
-      "default": false,
       "x-ms-visibility": "important"
     },
     "OnRunAbortedParameter": {
       "name": "onRunAborted",
       "x-ms-summary": "Trigger On Run Aborted",
-      "description": "Trigger when an Actor run is aborted. Defaults to false if not set.",
+      "description": "Trigger when an Actor run is aborted. Defaults to true if not set.",
       "in": "query",
       "required": false,
       "type": "boolean",
-      "default": false,
       "x-ms-visibility": "important"
     }
   },

@@ -533,13 +533,13 @@ public class Script : ScriptBase {
   /// Removes the boolean parameters from the query collection so they are not forwarded to the API.
   /// </summary>
   /// <param name="queryParams">The query parameters collection to read from and clean up.</param>
-  /// <returns>A list of event type strings for statuses set to true.</returns>
+  /// <returns>A list of event type strings for statuses not explicitly set to false.</returns>
   private static List<string> BuildEventTypesFromQuery(System.Collections.Specialized.NameValueCollection queryParams) {
     var eventTypes = new List<string>();
 
     foreach (var entry in StatusParamToEventType) {
       var value = queryParams[entry.Key];
-      if (string.Equals(value, "true", StringComparison.OrdinalIgnoreCase)) {
+      if (!string.Equals(value, "false", StringComparison.OrdinalIgnoreCase)) {
         eventTypes.Add(entry.Value);
       }
       queryParams.Remove(entry.Key);
@@ -581,7 +581,7 @@ public class Script : ScriptBase {
   /// <summary>
   /// Parses boolean status query parameters, removes them and any extra helper params from the query string,
   /// rebuilds the request URI, and injects the resulting event types into the request body.
-  /// Returns null on success or an error response if no event types are selected.
+  /// Returns null on success or an error response if the request body is invalid.
   /// </summary>
   /// <param name="extraParamsToRemove">Additional query parameter names to strip before forwarding.</param>
   /// <returns>An error <see cref="HttpResponseMessage"/> if validation fails, or null on success.</returns>
@@ -590,9 +590,10 @@ public class Script : ScriptBase {
     var queryParams = System.Web.HttpUtility.ParseQueryString(originalUri.Query);
 
     var eventTypes = BuildEventTypesFromQuery(queryParams);
-    // If no event types are selected, default to all event types
     if (eventTypes.Count == 0) {
-      eventTypes.AddRange(StatusParamToEventType.Values);
+      var validation = new ValidationResult();
+      validation.AddError("At least one event type must be selected.");
+      return CreateValidationErrorResponse(validation);
     }
 
     foreach (var param in extraParamsToRemove) {
