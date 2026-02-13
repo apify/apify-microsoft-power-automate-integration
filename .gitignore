@@ -2,6 +2,9 @@
 .env
 .env.local
 
+# Python virtual environment
+.venv/
+
 # IDE and editor files
 .idea/
 .vscode/*
