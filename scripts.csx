@@ -16,6 +16,21 @@ public class Script : ScriptBase {
   private const int MAX_WAIT_FOR_FINISH = 60;
 
   /// <summary>
+  /// Maps webhook trigger boolean query parameter names to their corresponding Apify webhook event type strings.
+  /// </summary>
+  private static readonly Dictionary<string, string> StatusParamToEventType = new Dictionary<string, string> {
+    { "onRunSucceeded", "ACTOR.RUN.SUCCEEDED" },
+    { "onRunFailed", "ACTOR.RUN.FAILED" },
+    { "onRunTimedOut", "ACTOR.RUN.TIMED_OUT" },
+    { "onRunAborted", "ACTOR.RUN.ABORTED" }
+  };
+
+  /// <summary>
+  /// Cached validation rules, lazily initialized on first access.
+  /// </summary>
+  private Dictionary<string, Dictionary<string, ParameterValidator>> _validationRules;
+
+  /// <summary>
   /// Main entry point for the Power Automate custom connector script.
   /// Routes incoming requests to appropriate handlers based on the operation ID.
   /// </summary>
@@ -162,7 +177,7 @@ public class Script : ScriptBase {
   /// An <see cref="HttpResponseMessage"/> representing the HTTP response message with formatted actor titles.
   /// </returns>
   private async Task<HttpResponseMessage> HandleListActorsDropdown() {
-    return await HandleFormattedResponse(BuildActorRequest, items => FormatItems(items, FormatActorTitle)).ConfigureAwait(false);
+    return await HandleFormattedResponse(BuildActorRequest, items => FormatItems(items, FormatActorTitle, "title")).ConfigureAwait(false);
   }
 
   /// <summary>
@@ -212,37 +227,45 @@ public class Script : ScriptBase {
   /// <returns>A new HttpResponseMessage with the formatted content</returns>
   private async Task<HttpResponseMessage> FormatApiResponse(HttpResponseMessage response, Action<JArray> formatAction) {
     if (!response.IsSuccessStatusCode) {
-      return response; // Return error responses as-is
-    }
-
-    try {
-      // Read and parse the JSON response
-      var jsonContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-      var jsonObject = JObject.Parse(jsonContent);
-
-      // Apply formatting to items array if it exists
-      var items = jsonObject["data"]?["items"] as JArray;
-      if (items != null) {
-        formatAction(items);
-      }
-
-      // Create new response with formatted content
-      var formattedContent = jsonObject.ToString(Newtonsoft.Json.Formatting.None);
-      var newResponse = new HttpResponseMessage(response.StatusCode) {
-        Content = new StringContent(formattedContent, Encoding.UTF8, "application/json")
-      };
-
-      // Copy headers from original response
-      foreach (var header in response.Headers) {
-        newResponse.Headers.TryAddWithoutValidation(header.Key, header.Value);
-      }
-
-      return newResponse;
-    }
-    catch (Exception ex) {
-      // Return original response on any formatting error
       return response;
     }
+
+    // Read and parse the JSON response
+    var jsonContent = response.Content != null
+      ? await response.Content.ReadAsStringAsync().ConfigureAwait(false)
+      : null;
+
+    // If the content is empty, return the original response
+    if (string.IsNullOrWhiteSpace(jsonContent)) {
+      return response;
+    }
+
+    // Parse the JSON content into a JObject
+    JObject jsonObject;
+    try {
+      jsonObject = JObject.Parse(jsonContent);
+    } catch (JsonReaderException) {
+      return response;
+    }
+
+    // Apply formatting to items array if it exists
+    var items = jsonObject["data"]?["items"] as JArray;
+    if (items != null) {
+      formatAction(items);
+    }
+
+    // Create new response with formatted content
+    var formattedContent = jsonObject.ToString(Newtonsoft.Json.Formatting.None);
+    var newResponse = new HttpResponseMessage(response.StatusCode) {
+      Content = new StringContent(formattedContent, Encoding.UTF8, "application/json")
+    };
+
+    // Copy headers from original response
+    foreach (var header in response.Headers) {
+      newResponse.Headers.TryAddWithoutValidation(header.Key, header.Value);
+    }
+
+    return newResponse;
   }
 
   /// <summary>
@@ -252,21 +275,41 @@ public class Script : ScriptBase {
   /// An <see cref="HttpResponseMessage"/> representing the HTTP response message with formatted task names.
   /// </returns>
   private async Task<HttpResponseMessage> HandleListTasks() {
-    return await HandleFormattedResponse(() => Context.Request, items => FormatItems(items, FormatTaskTitle)).ConfigureAwait(false);
+    return await HandleFormattedResponse(() => Context.Request, items => FormatItems(items, FormatTaskTitle, "name")).ConfigureAwait(false);
+  }
+
+  /// <summary>
+  /// Returns a zero-padded numerical prefix for a given index in a list.
+  /// The prefix length is determined by the total number of items so that
+  /// each item gets a unique prefix that sorts lexicographically.
+  /// E.g., for 100 items (3-digit prefix): index 0 → "001", index 8 → "009", index 99 → "100".
+  /// </summary>
+  /// <param name="totalItems">Total number of items in the list</param>
+  /// <param name="index">Index of the item</param>
+  /// <returns>A numerical prefix string</returns>
+  private static string GetNumericalPrefix(int totalItems, int index) {
+    if (totalItems <= 0 || index < 0 || index >= totalItems) return string.Empty;
+    int width = totalItems.ToString().Length;
+    return (index + 1).ToString().PadLeft(width, '0');
   }
 
   /// <summary>
   /// Generic method to format items in a JArray by applying a formatting function to each valid item.
+  /// After formatting, a numerical prefix is applied to the display field to preserve sort order
+  /// in Power Automate dropdowns.
   /// </summary>
   /// <param name="items">The JArray of items to format</param>
   /// <param name="formatter">Function to apply formatting to each JObject item</param>
-  private void FormatItems(JArray items, Action<JObject> formatter) {
+  /// <param name="displayField">The JSON field name to prepend the numerical prefix to</param>
+  private static void FormatItems(JArray items, Action<JObject> formatter, string displayField) {
     if (items == null || items.Count == 0) return;
 
     for (int i = 0; i < items.Count; i++) {
       var item = items[i] as JObject;
       if (item == null) continue;
       formatter(item);
+      var prefix = GetNumericalPrefix(items.Count, i);
+      item[displayField] = $"{prefix}) {item[displayField]}";
     }
   }
 
@@ -274,7 +317,7 @@ public class Script : ScriptBase {
   /// Formats actor titles by combining title, username, and name for better user experience.
   /// </summary>
   /// <param name="item">The JObject representing an actor item</param>
-  private void FormatActorTitle(JObject item) {
+  private static void FormatActorTitle(JObject item) {
     var title = item["title"]?.Value<string>();
     var name = item["name"]?.Value<string>();
     var username = item["username"]?.Value<string>();
@@ -283,7 +326,6 @@ public class Script : ScriptBase {
     if (!string.IsNullOrEmpty(title) && 
         !string.IsNullOrEmpty(name) && 
         !string.IsNullOrEmpty(username)) {
-      // Update the title field with formatted string
       item["title"] = $"{title} ({username}/{name})";
     }
   }
@@ -292,13 +334,12 @@ public class Script : ScriptBase {
   /// Formats task names by combining name and actName for better user experience.
   /// </summary>
   /// <param name="item">The JObject representing a task item</param>
-  private void FormatTaskTitle(JObject item) {
+  private static void FormatTaskTitle(JObject item) {
     var name = item["name"]?.Value<string>();
     var actName = item["actName"]?.Value<string>();
 
     // Only format if we have all required fields
     if (!string.IsNullOrEmpty(name) && !string.IsNullOrEmpty(actName)) {
-      // Update the name field with formatted string: "name / (actName)"
       item["name"] = $"{name} / ({actName})";
     }
   }
@@ -488,6 +529,84 @@ public class Script : ScriptBase {
   }
 
   /// <summary>
+  /// Reads boolean status query parameters and converts them to Apify event type strings.
+  /// Removes the boolean parameters from the query collection so they are not forwarded to the API.
+  /// </summary>
+  /// <param name="queryParams">The query parameters collection to read from and clean up.</param>
+  /// <returns>A list of event type strings for statuses not explicitly set to false.</returns>
+  private static List<string> BuildEventTypesFromQuery(System.Collections.Specialized.NameValueCollection queryParams) {
+    var eventTypes = new List<string>();
+
+    foreach (var entry in StatusParamToEventType) {
+      var value = queryParams[entry.Key];
+      if (!string.Equals(value, "false", StringComparison.OrdinalIgnoreCase)) {
+        eventTypes.Add(entry.Value);
+      }
+      queryParams.Remove(entry.Key);
+    }
+
+    return eventTypes;
+  }
+
+  /// <summary>
+  /// Adds or replaces "eventTypes" in the request JSON body. Returns a 400 error if the body isn't valid JSON.
+  /// </summary>
+  /// <param name="request">The HTTP request whose body will be modified.</param>
+  /// <param name="eventTypes">The list of event type strings to inject.</param>
+  /// <returns>An error <see cref="HttpResponseMessage"/> if the body is invalid JSON, or null on success.</returns>
+  private async Task<HttpResponseMessage> InjectEventTypesIntoBody(HttpRequestMessage request, List<string> eventTypes) {
+    JObject body;
+    if (request.Content == null) {
+      body = new JObject();
+    } else {
+      var bodyString = await request.Content.ReadAsStringAsync().ConfigureAwait(false);
+      if (string.IsNullOrWhiteSpace(bodyString)) {
+        body = new JObject();
+      } else {
+        try {
+          body = JObject.Parse(bodyString);
+        } catch (JsonReaderException) {
+          var validation = new ValidationResult();
+          validation.AddError("Request body must be a valid JSON object.");
+          return CreateValidationErrorResponse(validation);
+        }
+      }
+    }
+
+    body["eventTypes"] = new JArray(eventTypes.ToArray());
+    request.Content = new StringContent(body.ToString(Newtonsoft.Json.Formatting.None), Encoding.UTF8, "application/json");
+    return null;
+  }
+
+  /// <summary>
+  /// Parses boolean status query parameters, removes them and any extra helper params from the query string,
+  /// rebuilds the request URI, and injects the resulting event types into the request body.
+  /// Returns null on success or an error response if the request body is invalid.
+  /// </summary>
+  /// <param name="extraParamsToRemove">Additional query parameter names to strip before forwarding.</param>
+  /// <returns>An error <see cref="HttpResponseMessage"/> if validation fails, or null on success.</returns>
+  private async Task<HttpResponseMessage> PrepareWebhookRequest(params string[] extraParamsToRemove) {
+    var originalUri = Context.Request.RequestUri;
+    var queryParams = System.Web.HttpUtility.ParseQueryString(originalUri.Query);
+
+    var eventTypes = BuildEventTypesFromQuery(queryParams);
+    if (eventTypes.Count == 0) {
+      var validation = new ValidationResult();
+      validation.AddError("At least one event type must be selected.");
+      return CreateValidationErrorResponse(validation);
+    }
+
+    foreach (var param in extraParamsToRemove) {
+      queryParams.Remove(param);
+    }
+    Context.Request.RequestUri = new UriBuilder(originalUri) { Query = queryParams.ToString() }.Uri;
+
+    var injectError = await InjectEventTypesIntoBody(Context.Request, eventTypes).ConfigureAwait(false);
+    if (injectError != null) return injectError;
+    return null;
+  }
+
+  /// <summary>
   /// Handles the creation of webhooks for Power Automate triggers.
   /// Location header is provided by Apify API.
   /// Removes the helper actorScope parameter and forwards the request to Apify API.  
@@ -496,12 +615,8 @@ public class Script : ScriptBase {
   /// An <see cref="HttpResponseMessage"/> representing the HTTP response message with proper Location header for webhook deletion.
   /// </returns>
   private async Task<HttpResponseMessage> HandleCreateWebhook() {
-    var originalUri = Context.Request.RequestUri;
-    var queryParams = System.Web.HttpUtility.ParseQueryString(originalUri.Query);
-
-    // Remove helper parameter from query string
-    queryParams.Remove("actorScope");
-    Context.Request.RequestUri = new UriBuilder(originalUri) { Query = queryParams.ToString() }.Uri;
+    var error = await PrepareWebhookRequest("actorScope").ConfigureAwait(false);
+    if (error != null) return error;
 
     // Add idempotency key based on requestUrl and actorId
     await SetWebhookIdempotencyKey("actorId").ConfigureAwait(false);
@@ -530,6 +645,9 @@ public class Script : ScriptBase {
   /// Routes /webhooks/task to /webhooks and applies robust deletion handling.
   /// </summary>
   private async Task<HttpResponseMessage> HandleActorTaskFinishedTrigger() {
+    var error = await PrepareWebhookRequest().ConfigureAwait(false);
+    if (error != null) return error;
+
     // Update path from /webhooks/task to /webhooks
     ModifyRequestPath("/webhooks/task", "/webhooks");
 
@@ -589,10 +707,10 @@ public class Script : ScriptBase {
 
   /// <summary>
   /// Handles task webhook deletion by routing to standard webhooks endpoint.
-  /// Routes /webhooks/task/{webhookId} to /webhooks/{webhookId} and applies robust deletion handling.
+  /// Routes /webhooks/task/ to /webhooks/ and converts 204 to 200.
   /// </summary>
   private async Task<HttpResponseMessage> HandleDeleteTaskWebhook() {
-    ModifyRequestPath("/webhooks/task/{webhookId}", "/webhooks/{webhookId}");
+    ModifyRequestPath("/webhooks/task/", "/webhooks/");
 
     return await HandleDeleteWebhook().ConfigureAwait(false);
   }
@@ -723,10 +841,13 @@ public class Script : ScriptBase {
   /// <summary>
   /// Returns validation rules for each operation that requires query parameter validation.
   /// Maps operation IDs to their parameter validation rules.
+  /// The dictionary is lazily built once per instance and cached.
   /// </summary>
   /// <returns>Dictionary mapping operation IDs to parameter validators.</returns>
   private Dictionary<string, Dictionary<string, ParameterValidator>> GetValidationRules() {
-    return new Dictionary<string, Dictionary<string, ParameterValidator>> {
+    if (_validationRules != null) return _validationRules;
+
+    _validationRules = new Dictionary<string, Dictionary<string, ParameterValidator>> {
       [OP_RUN_ACTOR_ID] = new Dictionary<string, ParameterValidator> {
         ["waitForFinish"] = ValidateWaitForFinish,
         ["timeout"] = ValidateNonNegativeInteger
@@ -743,6 +864,7 @@ public class Script : ScriptBase {
         ["offset"] = ValidateNonNegativeInteger
       }
     };
+    return _validationRules;
   }
 
   /// <summary>
