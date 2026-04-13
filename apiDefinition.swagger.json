@@ -1193,7 +1193,12 @@
         ],
         "responses": {
           "200": {
-            "description": "Webhook deleted successfully."
+            "description": "Webhook deleted successfully.",
+            "schema": {
+              "type": "object",
+              "properties": {},
+              "description": "Empty response body."
+            }
           },
           "204": {
             "description": "Webhook deleted successfully."
@@ -1372,7 +1377,12 @@
         ],
         "responses": {
           "200": {
-            "description": "Task webhook deleted successfully."
+            "description": "Task webhook deleted successfully.",
+            "schema": {
+              "type": "object",
+              "properties": {},
+              "description": "Empty response body."
+            }
           },
           "204": {
             "description": "Task webhook deleted successfully."
