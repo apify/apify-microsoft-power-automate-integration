@@ -339,7 +339,7 @@
             "name": "inputBody",
             "in": "body",
             "required": true,
-            "x-ms-summary": "Input body (JSON)",
+            "x-ms-summary": "Input Body (JSON)",
             "description": "Raw JSON object passed as INPUT to the Actor.",
             "x-ms-textarea": true,
             "schema": {
@@ -459,7 +459,7 @@
             "name": "inputOverride",
             "in": "body",
             "required": false,
-            "x-ms-summary": "Input override (JSON)",
+            "x-ms-summary": "Input Override (JSON)",
             "description": "A raw JSON object to override the task's default input.",
             "x-ms-textarea": true,
             "schema": {
@@ -698,7 +698,7 @@
             "required": true,
             "type": "string",
             "pattern": "^https?://[^\\s]+$",
-            "x-ms-summary": "URL to scrape",
+            "x-ms-summary": "URL to Scrape",
             "description": "The full URL of the single page to be scraped. Must be a valid URL format (e.g., https://example.com)."
           },
           {
@@ -706,7 +706,7 @@
             "in": "query",
             "required": true,
             "type": "string",
-            "x-ms-summary": "Crawler type",
+            "x-ms-summary": "Crawler Type",
             "description": "Select the crawling engine to use for scraping the page.",
             "default": "playwright:adaptive",
             "enum": [
@@ -1656,7 +1656,7 @@
       "in": "query",
       "required": false,
       "type": "integer",
-      "x-ms-summary": "Wait for finish (0\u201360 seconds)",
+      "x-ms-summary": "Wait for Finish (0\u201360 Seconds)",
       "description": "Wait for the run to finish in seconds (0\u201360).",
       "default": 0
     },
