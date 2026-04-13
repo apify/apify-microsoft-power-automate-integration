@@ -307,6 +307,7 @@
             "type": "string",
             "x-ms-summary": "Actor",
             "description": "Actor identifier to run. Supply Actor ID.",
+            "x-ms-url-encoding": "single",
             "x-ms-dynamic-values": {
               "operationId": "ListActorsDropdown",
               "value-collection": "data/items",
@@ -432,6 +433,7 @@
             "type": "string",
             "x-ms-summary": "Task",
             "description": "Task identifier to run.",
+            "x-ms-url-encoding": "single",
             "x-ms-dynamic-values": {
               "operationId": "ListTasks",
               "value-collection": "data/items",
@@ -550,7 +552,8 @@
             "required": true,
             "type": "string",
             "x-ms-summary": "Dataset ID",
-            "description": "Dataset ID."
+            "description": "Dataset ID.",
+            "x-ms-url-encoding": "single"
           },
           {
             "name": "limit",
@@ -612,6 +615,7 @@
             "type": "string",
             "x-ms-summary": "Dataset",
             "description": "Select the dataset from which to retrieve items.",
+            "x-ms-url-encoding": "single",
             "x-ms-dynamic-values": {
               "operationId": "ListDatasets",
               "value-collection": "data/items",
@@ -865,7 +869,8 @@
             "required": true,
             "type": "string",
             "x-ms-summary": "Key",
-            "description": "Select the key from which to retrieve the record."
+            "description": "Select the key from which to retrieve the record.",
+            "x-ms-url-encoding": "single"
           }
         ],
         "responses": {
@@ -921,6 +926,7 @@
             "type": "string",
             "x-ms-summary": "Store",
             "description": "Select the key-value store from which to retrieve the record.",
+            "x-ms-url-encoding": "single",
             "x-ms-dynamic-values": {
               "operationId": "ListKeyValueStores",
               "value-collection": "data/items",
@@ -935,6 +941,7 @@
             "type": "string",
             "x-ms-summary": "Key",
             "description": "Select the key from which to retrieve the record.",
+            "x-ms-url-encoding": "single",
             "x-ms-dynamic-values": {
               "operationId": "ListRecordKeys",
               "value-collection": "data/items",
@@ -1607,7 +1614,8 @@
       "required": true,
       "type": "string",
       "x-ms-summary": "Store",
-      "description": "Select the key-value store from which to retrieve the record."
+      "description": "Select the key-value store from which to retrieve the record.",
+      "x-ms-url-encoding": "single"
     },
     "TimeoutParameter": {
       "name": "timeout",
