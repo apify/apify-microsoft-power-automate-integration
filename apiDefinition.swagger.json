@@ -229,6 +229,7 @@
               }
             ],
             "description": "Please select the source to search Actors from.",
+            "x-ms-summary": "Actor Scope",
             "x-ms-visibility": "internal"
           },
           {
@@ -562,6 +563,7 @@
             "x-ms-visibility": "internal",
             "default": 1,
             "type": "integer",
+            "x-ms-summary": "Limit",
             "description": "Set limit to 1 for schema inference."
           }
         ],
@@ -1185,6 +1187,7 @@
             "required": true,
             "type": "string",
             "description": "The ID of the webhook to delete.",
+            "x-ms-summary": "Webhook ID",
             "x-ms-url-encoding": "single"
           }
         ],
@@ -1363,6 +1366,7 @@
             "required": true,
             "type": "string",
             "description": "The ID of the task webhook to delete.",
+            "x-ms-summary": "Webhook ID",
             "x-ms-url-encoding": "single"
           }
         ],
@@ -1606,6 +1610,7 @@
       "type": "string",
       "default": "microsoft-power-automate",
       "description": "Integration platform identifier.",
+      "x-ms-summary": "Integration Platform",
       "x-ms-visibility": "internal"
     },
     "StoreIdParameter": {
@@ -1643,6 +1648,7 @@
         "StoreActors"
       ],
       "description": "Only used by the connector UI to trigger list refresh when scope changes.",
+      "x-ms-summary": "Actor Scope",
       "x-ms-visibility": "internal"
     },
     "WaitForFinishParameter": {
