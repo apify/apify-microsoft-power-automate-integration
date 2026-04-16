@@ -229,6 +229,7 @@
               }
             ],
             "description": "Please select the source to search Actors from.",
+            "x-ms-summary": "Actor Scope",
             "x-ms-visibility": "internal"
           },
           {
@@ -267,7 +268,7 @@
       "post": {
         "summary": "Run Actor",
         "x-ms-summary": "Run Actor",
-        "description": "Runs an Actor and immediately returns without waiting for the run to finish. To wait for the run to finish, use the waitForFinish query parameter. See docs: https://docs.apify.com/api/v2/act-runs-post.",
+        "description": "Runs an Actor and immediately returns without waiting for the run to finish. To wait for the run to finish, use the waitForFinish query parameter.",
         "operationId": "RunActor",
         "x-ms-visibility": "important",
         "tags": [
@@ -307,6 +308,7 @@
             "type": "string",
             "x-ms-summary": "Actor",
             "description": "Actor identifier to run. Supply Actor ID.",
+            "x-ms-url-encoding": "single",
             "x-ms-dynamic-values": {
               "operationId": "ListActorsDropdown",
               "value-collection": "data/items",
@@ -337,7 +339,7 @@
             "name": "inputBody",
             "in": "body",
             "required": true,
-            "x-ms-summary": "Input body (JSON)",
+            "x-ms-summary": "Input Body (JSON)",
             "description": "Raw JSON object passed as INPUT to the Actor.",
             "x-ms-textarea": true,
             "schema": {
@@ -415,7 +417,7 @@
       "post": {
         "summary": "Run task",
         "x-ms-summary": "Run task",
-        "description": "Runs an Actor task and immediately returns without waiting for the run to finish. To wait for the run to finish, use the waitForFinish query parameter. See docs: https://docs.apify.com/api/v2/actor-task-runs-post.",
+        "description": "Runs an Actor task and immediately returns without waiting for the run to finish. To wait for the run to finish, use the waitForFinish query parameter.",
         "operationId": "RunTask",
         "x-ms-visibility": "important",
         "tags": [
@@ -432,6 +434,7 @@
             "type": "string",
             "x-ms-summary": "Task",
             "description": "Task identifier to run.",
+            "x-ms-url-encoding": "single",
             "x-ms-dynamic-values": {
               "operationId": "ListTasks",
               "value-collection": "data/items",
@@ -456,7 +459,7 @@
             "name": "inputOverride",
             "in": "body",
             "required": false,
-            "x-ms-summary": "Input override (JSON)",
+            "x-ms-summary": "Input Override (JSON)",
             "description": "A raw JSON object to override the task's default input.",
             "x-ms-textarea": true,
             "schema": {
@@ -550,7 +553,8 @@
             "required": true,
             "type": "string",
             "x-ms-summary": "Dataset ID",
-            "description": "Dataset ID."
+            "description": "Dataset ID.",
+            "x-ms-url-encoding": "single"
           },
           {
             "name": "limit",
@@ -559,6 +563,7 @@
             "x-ms-visibility": "internal",
             "default": 1,
             "type": "integer",
+            "x-ms-summary": "Limit",
             "description": "Set limit to 1 for schema inference."
           }
         ],
@@ -612,6 +617,7 @@
             "type": "string",
             "x-ms-summary": "Dataset",
             "description": "Select the dataset from which to retrieve items.",
+            "x-ms-url-encoding": "single",
             "x-ms-dynamic-values": {
               "operationId": "ListDatasets",
               "value-collection": "data/items",
@@ -672,7 +678,7 @@
         }
       }
     },
-    "/acts/aYG0l9s7dbB7j3gbS/runs": {
+    "/acts/apify~website-content-crawler/runs": {
       "post": {
         "summary": "Scrape single URL",
         "x-ms-summary": "Scrape single URL",
@@ -692,7 +698,7 @@
             "required": true,
             "type": "string",
             "pattern": "^https?://[^\\s]+$",
-            "x-ms-summary": "URL to scrape",
+            "x-ms-summary": "URL to Scrape",
             "description": "The full URL of the single page to be scraped. Must be a valid URL format (e.g., https://example.com)."
           },
           {
@@ -700,7 +706,7 @@
             "in": "query",
             "required": true,
             "type": "string",
-            "x-ms-summary": "Crawler type",
+            "x-ms-summary": "Crawler Type",
             "description": "Select the crawling engine to use for scraping the page.",
             "default": "playwright:adaptive",
             "enum": [
@@ -865,7 +871,8 @@
             "required": true,
             "type": "string",
             "x-ms-summary": "Key",
-            "description": "Select the key from which to retrieve the record."
+            "description": "Select the key from which to retrieve the record.",
+            "x-ms-url-encoding": "single"
           }
         ],
         "responses": {
@@ -921,6 +928,7 @@
             "type": "string",
             "x-ms-summary": "Store",
             "description": "Select the key-value store from which to retrieve the record.",
+            "x-ms-url-encoding": "single",
             "x-ms-dynamic-values": {
               "operationId": "ListKeyValueStores",
               "value-collection": "data/items",
@@ -935,6 +943,7 @@
             "type": "string",
             "x-ms-summary": "Key",
             "description": "Select the key from which to retrieve the record.",
+            "x-ms-url-encoding": "single",
             "x-ms-dynamic-values": {
               "operationId": "ListRecordKeys",
               "value-collection": "data/items",
@@ -1011,7 +1020,7 @@
       },
       "post": {
         "summary": "Actor run finished",
-        "description": "Creates a webhook to subscribe to Actor run events. Triggers when the selected Actor run finishes with a specific status. All statuses are enabled by default; only statuses explicitly set to false are excluded. At least one status must remain enabled. See docs: https://docs.apify.com/api/v2/webhooks-post.",
+        "description": "Creates a webhook to subscribe to Actor run events. Triggers when the selected Actor run finishes with a specific status. All statuses are enabled by default; only statuses explicitly set to false are excluded. At least one status must remain enabled.",
         "operationId": "ActorRunFinishedTrigger",
         "x-ms-summary": "Actor run finished",
         "x-ms-visibility": "important",
@@ -1178,12 +1187,18 @@
             "required": true,
             "type": "string",
             "description": "The ID of the webhook to delete.",
+            "x-ms-summary": "Webhook ID",
             "x-ms-url-encoding": "single"
           }
         ],
         "responses": {
           "200": {
-            "description": "Webhook deleted successfully."
+            "description": "Webhook deleted successfully.",
+            "schema": {
+              "type": "object",
+              "properties": {},
+              "description": "Empty response body."
+            }
           },
           "204": {
             "description": "Webhook deleted successfully."
@@ -1218,7 +1233,7 @@
       },
       "post": {
         "summary": "Actor task finished",
-        "description": "Creates a webhook to subscribe to Actor task run events. Triggers when the selected Actor task run finishes with a specific status. All statuses are enabled by default; only statuses explicitly set to false are excluded. At least one status must remain enabled. See docs: https://docs.apify.com/api/v2/webhooks-post.",
+        "description": "Creates a webhook to subscribe to Actor task run events. Triggers when the selected Actor task run finishes with a specific status. All statuses are enabled by default; only statuses explicitly set to false are excluded. At least one status must remain enabled.",
         "operationId": "ActorTaskFinishedTrigger",
         "x-ms-summary": "Actor task finished",
         "x-ms-visibility": "important",
@@ -1356,12 +1371,18 @@
             "required": true,
             "type": "string",
             "description": "The ID of the task webhook to delete.",
+            "x-ms-summary": "Webhook ID",
             "x-ms-url-encoding": "single"
           }
         ],
         "responses": {
           "200": {
-            "description": "Task webhook deleted successfully."
+            "description": "Task webhook deleted successfully.",
+            "schema": {
+              "type": "object",
+              "properties": {},
+              "description": "Empty response body."
+            }
           },
           "204": {
             "description": "Task webhook deleted successfully."
@@ -1599,6 +1620,7 @@
       "type": "string",
       "default": "microsoft-power-automate",
       "description": "Integration platform identifier.",
+      "x-ms-summary": "Integration Platform",
       "x-ms-visibility": "internal"
     },
     "StoreIdParameter": {
@@ -1607,7 +1629,8 @@
       "required": true,
       "type": "string",
       "x-ms-summary": "Store",
-      "description": "Select the key-value store from which to retrieve the record."
+      "description": "Select the key-value store from which to retrieve the record.",
+      "x-ms-url-encoding": "single"
     },
     "TimeoutParameter": {
       "name": "timeout",
@@ -1635,6 +1658,7 @@
         "StoreActors"
       ],
       "description": "Only used by the connector UI to trigger list refresh when scope changes.",
+      "x-ms-summary": "Actor Scope",
       "x-ms-visibility": "internal"
     },
     "WaitForFinishParameter": {
@@ -1642,7 +1666,7 @@
       "in": "query",
       "required": false,
       "type": "integer",
-      "x-ms-summary": "Wait for finish (0\u201360 seconds)",
+      "x-ms-summary": "Wait for Finish (0\u201360 Seconds)",
       "description": "Wait for the run to finish in seconds (0\u201360).",
       "default": 0
     },

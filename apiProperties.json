@@ -39,7 +39,7 @@
         }
       }
     },
-    "iconBrandColor": "#0098FF",
+    "iconBrandColor": "#246dff",
     "policyTemplateInstances": [
       {
         "templateId": "setheader",
