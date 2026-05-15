@@ -1189,31 +1189,26 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "Webhook deleted successfully.",
-            "schema": {
-              "type": "object",
-              "properties": {},
-              "description": "Empty response body."
-            }
-          },
           "204": {
             "description": "Webhook deleted successfully."
           },
           "400": {
             "$ref": "#/responses/ErrorResponse400"
           },
-          "404": {
-            "$ref": "#/responses/ErrorResponse404"
-          },
           "401": {
             "$ref": "#/responses/ErrorResponse401"
           },
-          "429": {
-            "$ref": "#/responses/ErrorResponse429"
+          "403": {
+            "$ref": "#/responses/ErrorResponse403"
+          },
+          "404": {
+            "$ref": "#/responses/ErrorResponse404"
           },
           "405": {
             "$ref": "#/responses/ErrorResponse405"
+          },
+          "429": {
+            "$ref": "#/responses/ErrorResponse429"
           },
           "500": {
             "$ref": "#/responses/ErrorResponse500"
@@ -1373,31 +1368,26 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "Task webhook deleted successfully.",
-            "schema": {
-              "type": "object",
-              "properties": {},
-              "description": "Empty response body."
-            }
-          },
           "204": {
             "description": "Task webhook deleted successfully."
           },
           "400": {
             "$ref": "#/responses/ErrorResponse400"
           },
-          "404": {
-            "$ref": "#/responses/ErrorResponse404"
-          },
           "401": {
             "$ref": "#/responses/ErrorResponse401"
           },
-          "429": {
-            "$ref": "#/responses/ErrorResponse429"
+          "403": {
+            "$ref": "#/responses/ErrorResponse403"
+          },
+          "404": {
+            "$ref": "#/responses/ErrorResponse404"
           },
           "405": {
             "$ref": "#/responses/ErrorResponse405"
+          },
+          "429": {
+            "$ref": "#/responses/ErrorResponse429"
           },
           "500": {
             "$ref": "#/responses/ErrorResponse500"
@@ -2207,6 +2197,12 @@
     },
     "ErrorResponse401": {
       "description": "Unauthorized error.",
+      "schema": {
+        "$ref": "#/definitions/ErrorResponseSchema"
+      }
+    },
+    "ErrorResponse403": {
+      "description": "Forbidden error.",
       "schema": {
         "$ref": "#/definitions/ErrorResponseSchema"
       }
