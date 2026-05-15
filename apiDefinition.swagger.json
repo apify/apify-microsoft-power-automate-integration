@@ -699,7 +699,7 @@
             "type": "string",
             "pattern": "^https?://[^\\s]+$",
             "x-ms-summary": "URL to Scrape",
-            "description": "The full URL of the single page to be scraped. Must be a valid URL format (e.g., https://example.com)."
+            "description": "The full URL of the single page to be scraped. Must be a valid URL format."
           },
           {
             "name": "crawler_type",
