@@ -86,6 +86,10 @@ Apify's custom connector consists of the following core files:
 
 These definitions are stored locally and pushed to the Power Platform environment with paconn commands.
 
+### Updating the icon
+
+The icon must meet Microsoft's certification rules: PNG, 1:1 aspect ratio (≈230×230 px), file size under 1 MB, square background filled with the brand color declared in `iconBrandColor` (`apiProperties.json`), and reasonable padding around the logo. See [Icon guidelines](https://learn.microsoft.com/en-us/connectors/custom-connectors/certification-submission#provide-icon-and-icon-background-color) for the full spec — submissions that violate it fail certification under policy `5000.5.10`.
+
 ## Creating and Updating the Connector
 
 > **Secret handling:** Do not pass `--secret <oauth-client-secret>` on the command line. Secrets in shell commands can leak through shell history, process listings, and logs. Instead, omit the `--secret` flag and re-enter the OAuth credentials manually in Power Automate after each create or update (see below). Keep this in mind every time you push the connector.
@@ -155,6 +159,52 @@ paconn update -e <ENV_ID> -c <CONNECTOR_ID> --api-prop apiProperties.json --api-
 6. **Repeat**
    Fix issues locally, then update and test again.
 
+## Building and Submitting the Certification Package
+
+Microsoft Partner Center accepts a single `ConnectorPackage.zip` per submission. The repo only ships the connector source files — the package itself is built locally each time, as none of the zips, the `ConnectorPackage/` working directory, or Microsoft's validator script are tracked in git.
+
+The submission archive has this nested structure (specified in [Microsoft's submission docs](https://learn.microsoft.com/en-us/connectors/custom-connectors/certification-submission)):
+
+```
+ConnectorPackage.zip
+├── intro.md                   ← tracked in repo
+└── package.zip
+    └── PkgAssets/
+        ├── ConnectorSolution.zip   ← exported from Power Apps
+        └── FlowSolution.zip        ← exported from Power Apps
+```
+
+You will also need:
+- **PowerShell 7+** (`brew install --cask powershell`) to run Microsoft's `ConnectorPackageValidator.ps1`.
+- **`ConnectorPackageValidator.ps1`** itself — supplied by Microsoft to verified publishers during onboarding; not redistributable.
+
+### One-time setup in Power Apps
+
+The two inner zips come from **Power Apps solutions** you create in the same Power Platform environment that backs your Partner Center offer. Set them up once and reuse them for every submission. See [Solutions overview](https://learn.microsoft.com/en-us/power-apps/maker/data-platform/solutions-overview).
+
+In [make.powerapps.com](https://make.powerapps.com) → Solutions → **New solution**:
+
+1. **Connector solution** (e.g. *"Apify Connector"*) — add only the Apify custom connector to it.
+2. **Flow solution** (e.g. *"Apify Sample Flows"*) — add the Apify connector **plus** the sample template flows shown to Partner Center reviewers.
+
+### For each submission
+
+1. **Validate locally** — `paconn validate --api-def apiDefinition.swagger.json` must report clean. Catches most cert blockers ([Swagger Validator rules](https://learn.microsoft.com/en-us/connectors/custom-connectors/certification-swagger-validator-rules)).
+2. **Push the connector** — `paconn update --settings settings.json`. Select the published connector that the Partner Center offer is built on.
+3. **Smoke-test in Power Automate** — quick flow for each user-facing action (Run Actor, Scrape single URL, Get key-value store record, Actor run finished trigger + Delete actor webhook). The submission inherits whatever bugs the live connector has.
+4. **Export both solutions** as **Unmanaged** zips from Power Apps (the connector solution and the flow solution from one-time setup). See [Export solutions](https://learn.microsoft.com/en-us/power-apps/maker/data-platform/export-solutions). Save them locally as `ConnectorSolution.zip` and `FlowSolution.zip`.
+5. **Build the package zips**:
+   ```bash
+   mkdir -p ConnectorPackage/PkgAssets
+   mv /path/to/ConnectorSolution.zip /path/to/FlowSolution.zip ConnectorPackage/PkgAssets/
+   cd ConnectorPackage/PkgAssets && zip -r ../package.zip . && cd ..
+   zip ConnectorPackage.zip package.zip ../intro.md && cd ..
+   ```
+6. **Run Microsoft's package validator** — `pwsh ConnectorPackage/ConnectorPackageValidator.ps1 -PackagePath ConnectorPackage/ConnectorPackage.zip`. Must report clean.
+7. **Submit** through [Partner Center](https://partner.microsoft.com/dashboard) → Marketplace offers → Apify connector. For updates, use **Resubmit** (don't create a new offer). See [Submit a connector for certification](https://learn.microsoft.com/en-us/connectors/custom-connectors/submit-for-certification). In the submission notes, summarize what changed and any previously-failed policy codes addressed (e.g. `5000.2.6.2`).
+
+If a submission fails, the error includes a policy code you can look up in the [policy errors reference](https://learn.microsoft.com/en-us/connectors/custom-connectors/certification-policy-errors).
+
 ## Troubleshooting
 
 **paconn command not found?**
@@ -185,3 +235,7 @@ The repository includes GitHub Actions workflows:
 - [Microsoft Power Automate Documentation](https://docs.microsoft.com/en-us/power-automate/)
 - [Power Platform Connectors Documentation](https://docs.microsoft.com/en-us/connectors/custom-connectors/)
 - [Power Platform Connectors CLI Documentation](https://learn.microsoft.com/en-us/connectors/custom-connectors/paconn-cli)
+- [Submit a connector for certification (verified publisher)](https://learn.microsoft.com/en-us/connectors/custom-connectors/submit-for-certification)
+- [Certification policy errors](https://learn.microsoft.com/en-us/connectors/custom-connectors/certification-policy-errors) — `5000.x` error code reference
+- [Swagger Validator rules](https://learn.microsoft.com/en-us/connectors/custom-connectors/certification-swagger-validator-rules) — the rule names paconn reports
+- [Policy templates reference](https://learn.microsoft.com/en-us/connectors/custom-connectors/policy-templates) — `setheader`, `routerequesttoendpoint`, etc.
