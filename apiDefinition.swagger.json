@@ -914,9 +914,6 @@
         "tags": [
           "KeyValueStores"
         ],
-        "produces": [
-          "*/*"
-        ],
         "parameters": [
           {
             "$ref": "#/parameters/IntegrationPlatformHeader"
