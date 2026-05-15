@@ -678,7 +678,7 @@
         }
       }
     },
-    "/acts/apify~website-content-crawler/runs": {
+    "/scrape-single-url": {
       "post": {
         "summary": "Scrape single URL",
         "x-ms-summary": "Scrape single URL",
