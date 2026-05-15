@@ -1653,8 +1653,8 @@
       "in": "query",
       "required": false,
       "type": "integer",
-      "x-ms-summary": "Wait for Finish (0\u201360 Seconds)",
-      "description": "Wait for the run to finish in seconds (0\u201360).",
+      "x-ms-summary": "Wait for Finish (0-60 Seconds)",
+      "description": "Wait for the run to finish in seconds (0-60).",
       "default": 0
     },
     "MemoryParameter": {
