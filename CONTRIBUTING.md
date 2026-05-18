@@ -248,7 +248,6 @@ If a submission fails, the error includes a policy code you can look up in the [
 
 **Connector update fails?**
 - Ensure the environment ID provided with the `-e` argument is correct. You can find your environment ID in the URL: https://make.powerautomate.com/environments/<environment_id>
-- Check that the OAuth client secret is correct and not expired
 
 **Changes not appearing in Power Automate?**
 - Clear your browser cache or use incognito mode
