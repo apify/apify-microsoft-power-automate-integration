@@ -128,8 +128,10 @@ Once the connector is created and you are modifying its definition locally, use 
 
 ```bash
 # Push local changes to the existing connector
-paconn update -e <ENV_ID> --api-prop apiProperties.json --api-def apiDefinition.swagger.json --icon icon.png --script scripts.csx
+paconn update -e <ENV_ID> --api-prop apiProperties.json --api-def apiDefinition.swagger.json --script scripts.csx
 ```
+
+Add `--icon icon.png` only when the icon has changed — it doesn't need to be re-uploaded every time.
 
 ## Development Cycle
 
@@ -150,8 +152,8 @@ paconn update -e <ENV_ID> --api-prop apiProperties.json --api-def apiDefinition.
    Push changes:
 
    ```bash
-   # Deploy to Power Platform environment
-   paconn update -e <ENV_ID> --api-prop apiProperties.json --api-def apiDefinition.swagger.json --icon icon.png --script scripts.csx
+   # Deploy to Power Platform environment (add --icon icon.png only if the icon changed)
+   paconn update -e <ENV_ID> --api-prop apiProperties.json --api-def apiDefinition.swagger.json --script scripts.csx
    ```
 
 4. **Re-enter OAuth credentials**
@@ -198,7 +200,7 @@ In [make.powerautomate.com](https://make.powerautomate.com/) → Solutions → *
 ### For each submission
 
 1. **Validate locally** - `paconn validate --api-def apiDefinition.swagger.json` must report clean. Catches most cert blockers ([Swagger Validator rules](https://learn.microsoft.com/en-us/connectors/custom-connectors/certification-swagger-validator-rules)).
-2. **Push the connector** - `paconn update -e <ENV_ID> --api-prop apiProperties.json --api-def apiDefinition.swagger.json --icon icon.png --script scripts.csx`. Use the published connector that the Partner Center offer is built on.
+2. **Push the connector** — `paconn update -e <ENV_ID> --api-prop apiProperties.json --api-def apiDefinition.swagger.json --script scripts.csx` (add `--icon icon.png` only if the icon changed). Use the published connector that the Partner Center offer is built on.
 3. **Smoke-test in Power Automate** - quick flow for each user-facing action (Run Actor, Scrape single URL, Get key-value store record, Actor run finished trigger + Delete actor webhook). The submission inherits whatever bugs the live connector has.
 4. **Export both solutions** from Power Automate:
    1. In [make.powerautomate.com](https://make.powerautomate.com) → Solutions, open one of the two solutions you set up.
@@ -236,16 +238,16 @@ If a submission fails, the error includes a policy code you can look up in the [
 ## Troubleshooting
 
 **paconn command not found?**
-- Ensure Python is installed and `pip install paconn` completed successfully
-- Check that your virtual environment is activated (`source .venv/bin/activate`)
 - Check that your Python scripts directory is in your PATH
+- Check that your virtual environment is activated (`source .venv/bin/activate`)
+- Ensure Python is installed and `pip install paconn` completed successfully
 
 **Authentication issues with paconn?**
 - Run `paconn logout` then `paconn login` to refresh credentials
 - Ensure you have the correct permissions in your Power Platform environment
 
 **Connector update fails?**
-- Verify the connector ID (`-c` argument) matches your environment
+- Ensure the environment ID provided with the `-e` argument is correct. You can find your environment ID in the URL: https://make.powerautomate.com/environments/<environment_id>
 - Check that the OAuth client secret is correct and not expired
 
 **Changes not appearing in Power Automate?**
