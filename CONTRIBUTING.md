@@ -151,7 +151,7 @@ paconn update -e <ENV_ID> --api-prop apiProperties.json --api-def apiDefinition.
 
    ```bash
    # Deploy to Power Platform environment
-   paconn update -e <ENV_ID> -c <CONNECTOR_ID> --api-prop apiProperties.json --api-def apiDefinition.swagger.json --icon icon.png --script scripts.csx
+   paconn update -e <ENV_ID> --api-prop apiProperties.json --api-def apiDefinition.swagger.json --icon icon.png --script scripts.csx
    ```
 
 4. **Re-enter OAuth credentials**
@@ -190,7 +190,7 @@ You will also need:
 
 The two inner zips come from **Power Apps solutions** you create in the same Power Platform environment that backs your Partner Center offer. Set them up once and reuse them for every submission. See [Solutions overview](https://learn.microsoft.com/en-us/power-apps/maker/data-platform/solutions-overview).
 
-In [make.powerapps.com](https://make.powerapps.com) → Solutions → **New solution**:
+In [make.powerautomate.com](https://make.powerautomate.com/) → Solutions → **New solution**:
 
 1. **Connector solution** (e.g. *"Apify Connector"*) - add only the Apify custom connector to it.
 2. **Flow solution** (e.g. *"Apify Sample Flows"*) - add the Apify connector **plus** the sample template flows shown to Partner Center reviewers.
@@ -198,10 +198,10 @@ In [make.powerapps.com](https://make.powerapps.com) → Solutions → **New solu
 ### For each submission
 
 1. **Validate locally** - `paconn validate --api-def apiDefinition.swagger.json` must report clean. Catches most cert blockers ([Swagger Validator rules](https://learn.microsoft.com/en-us/connectors/custom-connectors/certification-swagger-validator-rules)).
-2. **Push the connector** - `paconn update -e <ENV_ID> -c <CONNECTOR_ID> --api-prop apiProperties.json --api-def apiDefinition.swagger.json --icon icon.png --script scripts.csx`. Use the published connector that the Partner Center offer is built on.
+2. **Push the connector** - `paconn update -e <ENV_ID> --api-prop apiProperties.json --api-def apiDefinition.swagger.json --icon icon.png --script scripts.csx`. Use the published connector that the Partner Center offer is built on.
 3. **Smoke-test in Power Automate** - quick flow for each user-facing action (Run Actor, Scrape single URL, Get key-value store record, Actor run finished trigger + Delete actor webhook). The submission inherits whatever bugs the live connector has.
 4. **Export both solutions** from Power Apps:
-   1. In [make.powerapps.com](https://make.powerapps.com) → Solutions, open one of the two solutions you set up.
+   1. In [make.powerautomate.com](https://make.powerautomate.com) → Solutions, open one of the two solutions you set up.
    2. Click **Export solution** in the toolbar. Power Apps prompts you to **Publish all customizations** first - do it, or the export ships stale data.
    3. After publishing, the export dialog opens. Version auto-increments (`1.0.0.N`); leave it. Pick **Unmanaged** (Microsoft's cert team requires it; "Managed (recommended)" is for production deploys, not submissions). Tick **Run solution checker on export** - Microsoft runs this server-side anyway, so failing early saves time.
    4. Click **Export**. A banner appears at the top of the page with a download link once the export and solution check complete (takes a couple of minutes).
@@ -237,6 +237,7 @@ If a submission fails, the error includes a policy code you can look up in the [
 
 **paconn command not found?**
 - Ensure Python is installed and `pip install paconn` completed successfully
+- Check that your virtual environment is activated (`source .venv/bin/activate`)
 - Check that your Python scripts directory is in your PATH
 
 **Authentication issues with paconn?**
@@ -270,3 +271,8 @@ The repository runs a GitHub Actions workflow (`.github/workflows/validate.yml`)
 - [Certification policy errors](https://learn.microsoft.com/en-us/connectors/custom-connectors/certification-policy-errors) - `5000.x` error code reference
 - [Swagger Validator rules](https://learn.microsoft.com/en-us/connectors/custom-connectors/certification-swagger-validator-rules) - the rule names paconn reports
 - [Policy templates reference](https://learn.microsoft.com/en-us/connectors/custom-connectors/policy-templates) - `setheader`, `routerequesttoendpoint`, etc.
+
+---
+
+**Maintained by:** Apify Team
+**Support:** [GitHub Issues](https://github.com/apify/apify-microsoft-power-automate-integration/issues)
