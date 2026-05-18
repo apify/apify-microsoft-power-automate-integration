@@ -13,6 +13,7 @@ public class Script : ScriptBase {
   private const string OP_RUN_TASK_ID = "RunTask";
   private const string OP_SCRAPE_SINGLE_URL_ID = "ScrapeSingleUrl";
   private const string OP_GET_DATASET_ITEMS_ID = "GetDatasetItems";
+  private const string SCRAPE_SINGLE_URL_ACTOR_PATH = "/v2/acts/apify~website-content-crawler/runs";
   private const int MAX_WAIT_FOR_FINISH = 60;
 
   /// <summary>
@@ -143,7 +144,13 @@ public class Script : ScriptBase {
       var jsonBody = JsonConvert.SerializeObject(inputBody);
       request.Content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
 
-      // Use HandlePassthrough to send the modified request
+      // Rewrite the virtual swagger path /v2/scrape-single-url to the real Apify Actor endpoint.
+      // The virtual path avoids a partial-duplicate path collision with RunActor (/v2/acts/{actorId}/runs)
+      // that would otherwise fail Microsoft's certification validator (PartialDuplicateOperationPath).
+      request.RequestUri = new UriBuilder(request.RequestUri) {
+        Path = SCRAPE_SINGLE_URL_ACTOR_PATH
+      }.Uri;
+
       return await HandlePassthrough().ConfigureAwait(false);
     }
     catch (Exception ex) {
@@ -627,17 +634,9 @@ public class Script : ScriptBase {
 
   /// <summary>
   /// Handles webhook deletion by forwarding the delete request to the Apify API.
-  /// Converts 204 No Content responses to 200 OK.
   /// </summary>
   private async Task<HttpResponseMessage> HandleDeleteWebhook() {
-    var response = await Context.SendAsync(Context.Request, CancellationToken).ConfigureAwait(false);
-
-    // Convert 204 No Content to 200 OK (for Power Automate compatibility)
-    if (response.StatusCode == HttpStatusCode.NoContent) {
-      response.StatusCode = HttpStatusCode.OK;
-    }
-
-    return response;
+    return await Context.SendAsync(Context.Request, CancellationToken).ConfigureAwait(false);
   }
 
   /// <summary>

@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "title": "Apify",
-    "description": "Use Apify to run web scrapers and AI agents, manage Actors and tasks, schedule and monitor runs, retrieve datasets and results, and trigger flows from webhooks. Enable end-to-end data collection, enrichment, and automation in your workflows.",
+    "description": "Apify runs web scrapers and AI agents, manages Actors and tasks, schedules and monitors runs, retrieves datasets and results, and triggers flows from webhooks. It enables end-to-end data collection, enrichment, and automation in workflows.",
     "version": "1.0.0",
     "contact": {
       "name": "Apify support",
@@ -678,7 +678,7 @@
         }
       }
     },
-    "/acts/apify~website-content-crawler/runs": {
+    "/scrape-single-url": {
       "post": {
         "summary": "Scrape single URL",
         "x-ms-summary": "Scrape single URL",
@@ -699,7 +699,7 @@
             "type": "string",
             "pattern": "^https?://[^\\s]+$",
             "x-ms-summary": "URL to Scrape",
-            "description": "The full URL of the single page to be scraped. Must be a valid URL format (e.g., https://example.com)."
+            "description": "The full URL of the single page to be scraped. Must be a valid URL format."
           },
           {
             "name": "crawler_type",
@@ -913,9 +913,6 @@
         "x-ms-visibility": "important",
         "tags": [
           "KeyValueStores"
-        ],
-        "produces": [
-          "*/*"
         ],
         "parameters": [
           {
@@ -1192,31 +1189,26 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "Webhook deleted successfully.",
-            "schema": {
-              "type": "object",
-              "properties": {},
-              "description": "Empty response body."
-            }
-          },
           "204": {
             "description": "Webhook deleted successfully."
           },
           "400": {
             "$ref": "#/responses/ErrorResponse400"
           },
-          "404": {
-            "$ref": "#/responses/ErrorResponse404"
-          },
           "401": {
             "$ref": "#/responses/ErrorResponse401"
           },
-          "429": {
-            "$ref": "#/responses/ErrorResponse429"
+          "403": {
+            "$ref": "#/responses/ErrorResponse403"
+          },
+          "404": {
+            "$ref": "#/responses/ErrorResponse404"
           },
           "405": {
             "$ref": "#/responses/ErrorResponse405"
+          },
+          "429": {
+            "$ref": "#/responses/ErrorResponse429"
           },
           "500": {
             "$ref": "#/responses/ErrorResponse500"
@@ -1376,31 +1368,26 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "Task webhook deleted successfully.",
-            "schema": {
-              "type": "object",
-              "properties": {},
-              "description": "Empty response body."
-            }
-          },
           "204": {
             "description": "Task webhook deleted successfully."
           },
           "400": {
             "$ref": "#/responses/ErrorResponse400"
           },
-          "404": {
-            "$ref": "#/responses/ErrorResponse404"
-          },
           "401": {
             "$ref": "#/responses/ErrorResponse401"
           },
-          "429": {
-            "$ref": "#/responses/ErrorResponse429"
+          "403": {
+            "$ref": "#/responses/ErrorResponse403"
+          },
+          "404": {
+            "$ref": "#/responses/ErrorResponse404"
           },
           "405": {
             "$ref": "#/responses/ErrorResponse405"
+          },
+          "429": {
+            "$ref": "#/responses/ErrorResponse429"
           },
           "500": {
             "$ref": "#/responses/ErrorResponse500"
@@ -1412,7 +1399,7 @@
   "definitions": {
     "ErrorResponseSchema": {
       "type": "object",
-      "x-ms-summary": "Represents an error response from the Apify API",
+      "x-ms-summary": "Error response",
       "properties": {
         "error": {
           "type": "object",
@@ -1666,8 +1653,8 @@
       "in": "query",
       "required": false,
       "type": "integer",
-      "x-ms-summary": "Wait for Finish (0\u201360 Seconds)",
-      "description": "Wait for the run to finish in seconds (0\u201360).",
+      "x-ms-summary": "Wait for Finish (0-60 Seconds)",
+      "description": "Wait for the run to finish in seconds (0-60).",
       "default": 0
     },
     "MemoryParameter": {
@@ -1778,7 +1765,7 @@
       "description": "User information retrieved successfully.",
       "schema": {
         "type": "object",
-        "x-ms-summary": "Represents information about the authenticated Apify user.",
+        "x-ms-summary": "Apify user information",
         "properties": {
           "id": {
             "type": "string",
@@ -2210,6 +2197,12 @@
     },
     "ErrorResponse401": {
       "description": "Unauthorized error.",
+      "schema": {
+        "$ref": "#/definitions/ErrorResponseSchema"
+      }
+    },
+    "ErrorResponse403": {
+      "description": "Forbidden error.",
       "schema": {
         "$ref": "#/definitions/ErrorResponseSchema"
       }
