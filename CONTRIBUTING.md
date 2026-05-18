@@ -27,12 +27,12 @@ cd apify-microsoft-power-automate-integration
 
    ```bash
    # Check that Python 3.9+ is available
-   python --version
+   python3 --version
    ```
 2. *(optional)* Create and activate a Python virtual environment:
    ```bash
    # Create a virtual environment
-   python -m venv .venv
+   python3 -m venv .venv
    # Activate it
    source .venv/bin/activate
    ```
@@ -51,8 +51,6 @@ cd apify-microsoft-power-automate-integration
    paconn
    ```
 
-   You should see usage help output, confirming the CLI is installed.
-
 ### Authentication
 
 Authenticate with your Power Platform environment using device code login:
@@ -69,19 +67,6 @@ To logout:
 ```bash
 # Clear stored credentials
 paconn logout
-```
-
-### Using `settings.json`
-
-You can use a `settings.json` file in this project root to store arguments for paconn commands. This simplifies repeated operations because the CLI reads environment, connector ID, file paths, and other parameters from this file when provided.
-
-This makes subsequent commands shorter:
-
-```bash
-# Create a new connector
-paconn create --settings settings.json
-# Update an existing connector
-paconn update --settings settings.json
 ```
 
 ## Connector Files
@@ -111,7 +96,7 @@ See [Design an icon for your connector](https://learn.microsoft.com/en-us/connec
 
 ## Creating and Updating the Connector
 
-> **Secret handling:** Never pass `--secret` on the command line, it leaks into shell history and process listings. Instead, re-enter OAuth credentials in Power Automate after each deploy (see below).
+> **Secret handling:** Never pass `--secret` on the command line - it leaks into shell history and process listings. Re-enter OAuth credentials in Power Automate after each deploy (see below).
 
 ### Re-entering OAuth credentials after deploy
 
@@ -129,18 +114,13 @@ Each time you create or update the connector without `--secret`, you need to re-
 If the connector does not yet exist in your Power Automate environment, create it once:
 
 ```bash
-# Create the connector using settings.json
-paconn create --settings settings.json
-```
-
-Or explicitly without settings:
-
-```bash
-# Create with all arguments specified inline
+# Create the connector in your environment
 paconn create -e <ENV_ID> --api-prop apiProperties.json --api-def apiDefinition.swagger.json --icon icon.png --script scripts.csx
 ```
 
-After creation, paconn prints the `connector ID`. Save this value in your `settings.json` for future updates.
+After creation, paconn prints the `connector ID`. Save this value for future updates.
+
+> **Tip:** You can also use a [`settings.json`](https://learn.microsoft.com/en-us/connectors/custom-connectors/paconn-cli#settings-file) file to avoid repeating arguments on every command.
 
 ### Update (Subsequent Changes)
 
@@ -148,13 +128,6 @@ Once the connector is created and you are modifying its definition locally, use 
 
 ```bash
 # Push local changes to the existing connector
-paconn update --settings settings.json
-```
-
-Or explicitly:
-
-```bash
-# Update with all arguments specified inline
 paconn update -e <ENV_ID> -c <CONNECTOR_ID> --api-prop apiProperties.json --api-def apiDefinition.swagger.json --icon icon.png --script scripts.csx
 ```
 
@@ -164,7 +137,7 @@ paconn update -e <ENV_ID> -c <CONNECTOR_ID> --api-prop apiProperties.json --api-
    Update `apiDefinition.swagger.json`, `apiProperties.json`, and `scripts.csx` in your IDE.
 
 2. **Validate**
-   Run before pushing - catches most issues `paconn update` would silently accept:
+   Run before pushing - catches most issues `paconn update` would silently accept. Both must report clean; `paconn validate` is a thin client over Microsoft's certification Swagger Validator, so any warning here is a likely cert blocker.
 
    ```bash
    # Run local validation checks
@@ -173,14 +146,12 @@ paconn update -e <ENV_ID> -c <CONNECTOR_ID> --api-prop apiProperties.json --api-
    paconn validate --api-def apiDefinition.swagger.json
    ```
 
-   Both must report clean. `paconn validate` is a thin client over Microsoft's certification Swagger Validator, so any warning here is a likely cert blocker.
-
 3. **Deploy Updates**
    Push changes:
 
    ```bash
    # Deploy to Power Platform environment
-   paconn update --settings settings.json
+   paconn update -e <ENV_ID> -c <CONNECTOR_ID> --api-prop apiProperties.json --api-def apiDefinition.swagger.json --icon icon.png --script scripts.csx
    ```
 
 4. **Re-enter OAuth credentials**
@@ -197,7 +168,7 @@ paconn update -e <ENV_ID> -c <CONNECTOR_ID> --api-prop apiProperties.json --api-
 
 ## Building and Submitting the Certification Package
 
-Microsoft Partner Center accepts a single `ConnectorPackage.zip` per submission. The repo only ships the connector source files - the package itself is built locally each time, as none of the zips, the `ConnectorPackage/` working directory, or Microsoft's validator script are tracked in git.
+Microsoft Partner Center accepts a single `ConnectorPackage.zip` per submission. The repo only ships the connector source files - the package itself is built locally each time, as none of the zips or the `ConnectorPackage/` working directory are tracked in git.
 
 The submission archive has this nested structure (specified in [Microsoft's submission docs](https://learn.microsoft.com/en-us/connectors/custom-connectors/certification-submission)):
 
@@ -213,10 +184,11 @@ ConnectorPackage.zip
 You will also need:
 - **PowerShell 7+** (`brew install --cask powershell` on macOS) to run the package validator script.
 - **`ConnectorPackageValidator.ps1`** - download from Microsoft's repo: [github.com/microsoft/PowerPlatformConnectors/blob/dev/scripts/ConnectorPackageValidator.ps1](https://github.com/microsoft/PowerPlatformConnectors/blob/dev/scripts/ConnectorPackageValidator.ps1).
+- **An Azure Storage account** - Partner Center requires a SAS URI pointing to the uploaded package blob (not a direct file upload). Upload `ConnectorPackage.zip` to a container and generate a SAS URL valid for at least 15 days. See [Grant limited access with SAS](https://learn.microsoft.com/en-us/azure/storage/common/storage-sas-overview).
 
-### One-time setup in Power Automate
+### One-time setup in Power Apps
 
-The two inner zips come from **Power Automate solutions** you create in the same Power Platform environment that backs your Partner Center offer. Set them up once and reuse them for every submission. See [Solutions overview](https://learn.microsoft.com/en-us/power-apps/maker/data-platform/solutions-overview).
+The two inner zips come from **Power Apps solutions** you create in the same Power Platform environment that backs your Partner Center offer. Set them up once and reuse them for every submission. See [Solutions overview](https://learn.microsoft.com/en-us/power-apps/maker/data-platform/solutions-overview).
 
 In [make.powerapps.com](https://make.powerapps.com) → Solutions → **New solution**:
 
@@ -226,9 +198,17 @@ In [make.powerapps.com](https://make.powerapps.com) → Solutions → **New solu
 ### For each submission
 
 1. **Validate locally** - `paconn validate --api-def apiDefinition.swagger.json` must report clean. Catches most cert blockers ([Swagger Validator rules](https://learn.microsoft.com/en-us/connectors/custom-connectors/certification-swagger-validator-rules)).
-2. **Push the connector** - `paconn update --settings settings.json`. Select the published connector that the Partner Center offer is built on.
+2. **Push the connector** - `paconn update -e <ENV_ID> -c <CONNECTOR_ID> --api-prop apiProperties.json --api-def apiDefinition.swagger.json --icon icon.png --script scripts.csx`. Use the published connector that the Partner Center offer is built on.
 3. **Smoke-test in Power Automate** - quick flow for each user-facing action (Run Actor, Scrape single URL, Get key-value store record, Actor run finished trigger + Delete actor webhook). The submission inherits whatever bugs the live connector has.
-4. **Export both solutions** as **Unmanaged** zips from Power Automate (the connector solution and the flow solution from one-time setup). See [Export solutions](https://learn.microsoft.com/en-us/power-apps/maker/data-platform/export-solutions). Save them locally as `ConnectorSolution.zip` and `FlowSolution.zip`.
+4. **Export both solutions** from Power Apps:
+   1. In [make.powerapps.com](https://make.powerapps.com) → Solutions, open one of the two solutions you set up.
+   2. Click **Export solution** in the toolbar. Power Apps prompts you to **Publish all customizations** first - do it, or the export ships stale data.
+   3. After publishing, the export dialog opens. Version auto-increments (`1.0.0.N`); leave it. Pick **Unmanaged** (Microsoft's cert team requires it; "Managed (recommended)" is for production deploys, not submissions). Tick **Run solution checker on export** - Microsoft runs this server-side anyway, so failing early saves time.
+   4. Click **Export**. A banner appears at the top of the page with a download link once the export and solution check complete (takes a couple of minutes).
+   5. Save the downloaded zip as `ConnectorSolution.zip` (or `FlowSolution.zip` for the other solution).
+   6. Repeat for the second solution.
+
+   See [Export solutions](https://learn.microsoft.com/en-us/power-apps/maker/data-platform/export-solutions) for the full reference.
 5. **Build the package zips**:
    ```bash
    # Create the package directory structure
@@ -240,9 +220,16 @@ In [make.powerapps.com](https://make.powerapps.com) → Solutions → **New solu
    # Copy intro.md alongside package.zip and assemble the final submission archive
    cp ../intro.md . && zip ConnectorPackage.zip package.zip intro.md && cd ..
    ```
-6. **Run the package validator** - `pwsh ConnectorPackageValidator.ps1 <path-to-ConnectorPackage.zip>`. Must report clean.
-7. **Upload to Azure blob storage** and generate a SAS URL valid ≥15 days. The SAS URL is what gets submitted, not the file itself.
-8. **Submit via Partner Center** - [partner.microsoft.com/dashboard](https://partner.microsoft.com/dashboard) → Marketplace offers → Apify connector. For updates, use **Resubmit** (don't create a new offer). See [Submit a connector for certification](https://learn.microsoft.com/en-us/connectors/custom-connectors/submit-for-certification). In the submission notes, summarize what changed and any previously-failed policy codes addressed.
+6. **Run the package validator**:
+
+   ```bash
+   # Note: needs absolute zip path; the second arg is isPluginEnabled (y/n) - use n for a connector
+   pwsh -File ConnectorPackage/ConnectorPackageValidator.ps1 "$(pwd)/ConnectorPackage/ConnectorPackage.zip" n
+   ```
+
+   Expected output: `Validation successful: The package structure is correct.`
+7. **Upload to Azure blob storage** and generate a SAS URL (valid ≥15 days) - see the [Azure Storage prerequisite](#building-and-submitting-the-certification-package) above.
+8. **Submit via Partner Center** - [partner.microsoft.com/dashboard](https://partner.microsoft.com/dashboard) → Marketplace offers → Apify connector. On the **Packages** tab, paste the SAS URI. For updates, use **Resubmit** (don't create a new offer). See [Submit a connector for certification](https://learn.microsoft.com/en-us/connectors/custom-connectors/submit-for-certification). In the submission notes, summarize what changed and any previously-failed policy codes addressed.
 
 If a submission fails, the error includes a policy code you can look up in the [policy errors reference](https://learn.microsoft.com/en-us/connectors/custom-connectors/certification-policy-errors). For unclear failures, Microsoft holds [Office Hours](https://learn.microsoft.com/en-us/connectors/custom-connectors/certification-submission#for-queries-regarding-certification) every Tuesday 15:30–16:30 UTC where engineers can read the validator's activity log directly.
 
@@ -257,7 +244,7 @@ If a submission fails, the error includes a policy code you can look up in the [
 - Ensure you have the correct permissions in your Power Platform environment
 
 **Connector update fails?**
-- Verify the `connector ID` in `settings.json` matches your environment
+- Verify the connector ID (`-c` argument) matches your environment
 - Check that the OAuth client secret is correct and not expired
 
 **Changes not appearing in Power Automate?**
@@ -266,15 +253,18 @@ If a submission fails, the error includes a policy code you can look up in the [
 
 ## CI/CD Integration
 
-The repository includes GitHub Actions workflows:
+The repository runs a GitHub Actions workflow (`.github/workflows/validate.yml`) on every push. It executes `./scripts/validate.sh` which checks connector file structure and required fields. To run the same checks locally:
 
-- **Validation:** Validates connector files on pull requests
+```bash
+# Run the same validation CI uses
+./scripts/validate.sh
+```
 
 ## Resources
 
 - [Apify API Documentation](https://docs.apify.com/api/v2)
-- [Microsoft Power Automate Documentation](https://docs.microsoft.com/en-us/power-automate/)
-- [Power Platform Connectors Documentation](https://docs.microsoft.com/en-us/connectors/custom-connectors/)
+- [Microsoft Power Automate Documentation](https://learn.microsoft.com/en-us/power-automate/)
+- [Power Platform Connectors Documentation](https://learn.microsoft.com/en-us/connectors/custom-connectors/)
 - [Power Platform Connectors CLI Documentation](https://learn.microsoft.com/en-us/connectors/custom-connectors/paconn-cli)
 - [Submit a connector for certification (verified publisher)](https://learn.microsoft.com/en-us/connectors/custom-connectors/submit-for-certification)
 - [Certification policy errors](https://learn.microsoft.com/en-us/connectors/custom-connectors/certification-policy-errors) - `5000.x` error code reference
