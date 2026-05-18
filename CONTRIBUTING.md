@@ -118,7 +118,7 @@ If the connector does not yet exist in your Power Automate environment, create i
 paconn create -e <ENV_ID> --api-prop apiProperties.json --api-def apiDefinition.swagger.json --icon icon.png --script scripts.csx
 ```
 
-After creation, paconn prints the `connector ID`. Save this value for future updates.
+After creation, paconn prints the `connector ID`. You can pass it explicitly with `-c` in future commands, or omit it and paconn will prompt you to select the connector interactively.
 
 > **Tip:** You can also use a [`settings.json`](https://learn.microsoft.com/en-us/connectors/custom-connectors/paconn-cli#settings-file) file to avoid repeating arguments on every command.
 
@@ -128,7 +128,7 @@ Once the connector is created and you are modifying its definition locally, use 
 
 ```bash
 # Push local changes to the existing connector
-paconn update -e <ENV_ID> -c <CONNECTOR_ID> --api-prop apiProperties.json --api-def apiDefinition.swagger.json --icon icon.png --script scripts.csx
+paconn update -e <ENV_ID> --api-prop apiProperties.json --api-def apiDefinition.swagger.json --icon icon.png --script scripts.csx
 ```
 
 ## Development Cycle
