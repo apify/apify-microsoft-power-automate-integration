@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "title": "Apify",
-    "description": "Use Apify to run web scrapers and AI agents, manage Actors and tasks, schedule and monitor runs, retrieve datasets and results, and trigger flows from webhooks. Enable end-to-end data collection, enrichment, and automation in your workflows.",
+    "description": "Apify runs web scrapers and AI agents, manages Actors and tasks, schedules and monitors runs, retrieves datasets and results, and triggers flows from webhooks. It enables end-to-end data collection, enrichment, and automation in workflows.",
     "version": "1.0.0",
     "contact": {
       "name": "Apify support",
@@ -1399,7 +1399,7 @@
   "definitions": {
     "ErrorResponseSchema": {
       "type": "object",
-      "x-ms-summary": "Represents an error response from the Apify API",
+      "x-ms-summary": "Error response",
       "properties": {
         "error": {
           "type": "object",
@@ -1765,7 +1765,7 @@
       "description": "User information retrieved successfully.",
       "schema": {
         "type": "object",
-        "x-ms-summary": "Represents information about the authenticated Apify user.",
+        "x-ms-summary": "Apify user information",
         "properties": {
           "id": {
             "type": "string",
