@@ -168,7 +168,7 @@ paconn update -e <ENV_ID> --api-prop apiProperties.json --api-def apiDefinition.
 
 ## Building and Submitting the Certification Package
 
-Microsoft Partner Center accepts a single `ConnectorPackage.zip` per submission. The repo only ships the connector source files - the package itself is built locally each time, as none of the zips or the `ConnectorPackage/` working directory are tracked in git.
+Microsoft Partner Center accepts a single `ConnectorPackage.zip` per submission. This package includes solution exports from Power Apps (connector + sample flows) that can't be generated from the terminal - they must be exported through the Power Apps UI, tested in Power Automate, and then assembled locally by the developer before each release.
 
 The submission archive has this nested structure (specified in [Microsoft's submission docs](https://learn.microsoft.com/en-us/connectors/custom-connectors/certification-submission)):
 
@@ -177,8 +177,8 @@ ConnectorPackage.zip
 ├── intro.md                   ← tracked in repo
 └── package.zip
     └── PkgAssets/
-        ├── ConnectorSolution.zip   ← exported from Power Automate
-        └── FlowSolution.zip        ← exported from Power Automate
+        ├── ConnectorSolution.zip   ← exported from make.powerautomate.com
+        └── FlowSolution.zip        ← exported from make.powerautomate.com
 ```
 
 You will also need:
@@ -186,9 +186,9 @@ You will also need:
 - **`ConnectorPackageValidator.ps1`** - download from Microsoft's repo: [github.com/microsoft/PowerPlatformConnectors/blob/dev/scripts/ConnectorPackageValidator.ps1](https://github.com/microsoft/PowerPlatformConnectors/blob/dev/scripts/ConnectorPackageValidator.ps1).
 - **An Azure Storage account** - Partner Center requires a SAS URI pointing to the uploaded package blob (not a direct file upload). Upload `ConnectorPackage.zip` to a container and generate a SAS URL valid for at least 15 days. See [Grant limited access with SAS](https://learn.microsoft.com/en-us/azure/storage/common/storage-sas-overview).
 
-### One-time setup in Power Apps
+### One-time setup in Power Automate
 
-The two inner zips come from **Power Apps solutions** you create in the same Power Platform environment that backs your Partner Center offer. Set them up once and reuse them for every submission. See [Solutions overview](https://learn.microsoft.com/en-us/power-apps/maker/data-platform/solutions-overview).
+The two inner zips come from **Power Automate solutions** you create in the same Power Platform environment that backs your Partner Center offer. Set them up once and reuse them for every submission. See [Solutions overview](https://learn.microsoft.com/en-us/power-apps/maker/data-platform/solutions-overview).
 
 In [make.powerautomate.com](https://make.powerautomate.com/) → Solutions → **New solution**:
 
@@ -200,9 +200,9 @@ In [make.powerautomate.com](https://make.powerautomate.com/) → Solutions → *
 1. **Validate locally** - `paconn validate --api-def apiDefinition.swagger.json` must report clean. Catches most cert blockers ([Swagger Validator rules](https://learn.microsoft.com/en-us/connectors/custom-connectors/certification-swagger-validator-rules)).
 2. **Push the connector** - `paconn update -e <ENV_ID> --api-prop apiProperties.json --api-def apiDefinition.swagger.json --icon icon.png --script scripts.csx`. Use the published connector that the Partner Center offer is built on.
 3. **Smoke-test in Power Automate** - quick flow for each user-facing action (Run Actor, Scrape single URL, Get key-value store record, Actor run finished trigger + Delete actor webhook). The submission inherits whatever bugs the live connector has.
-4. **Export both solutions** from Power Apps:
+4. **Export both solutions** from Power Automate:
    1. In [make.powerautomate.com](https://make.powerautomate.com) → Solutions, open one of the two solutions you set up.
-   2. Click **Export solution** in the toolbar. Power Apps prompts you to **Publish all customizations** first - do it, or the export ships stale data.
+   2. Click **Export solution** in the toolbar. Power Automate prompts you to **Publish all customizations** first - do it, or the export ships stale data.
    3. After publishing, the export dialog opens. Version auto-increments (`1.0.0.N`); leave it. Pick **Unmanaged** (Microsoft's cert team requires it; "Managed (recommended)" is for production deploys, not submissions). Tick **Run solution checker on export** - Microsoft runs this server-side anyway, so failing early saves time.
    4. Click **Export**. A banner appears at the top of the page with a download link once the export and solution check complete (takes a couple of minutes).
    5. Save the downloaded zip as `ConnectorSolution.zip` (or `FlowSolution.zip` for the other solution).
