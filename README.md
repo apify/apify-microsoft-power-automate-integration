@@ -224,9 +224,9 @@ The connector is free. Apify charges for compute (runtime, memory, proxies). The
 
 ## Contributing
 
-For developers contributing to or customizing this connector, see the Developer Guide.
+For developers contributing to or customizing this connector, see the [Developer Guide](CONTRIBUTING.md).
 
 ---
 
 **Maintained by:** Apify Team
-**Support:** GitHub Issues
+**Support:** [GitHub Issues](https://github.com/apify/apify-microsoft-power-automate-integration/issues)
