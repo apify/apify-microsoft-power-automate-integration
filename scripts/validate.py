@@ -320,6 +320,26 @@ def main() -> int:
     else:
         fail("5000.2.6.10", f"Empty uiDefinition.description on: {empty_desc}")
 
+    # Connection-parameter UI constraints must use STRING booleans ("true"/"false"), not JSON
+    # booleans. Microsoft certification rejected the connector specifically because
+    # uiDefinition.constraints.hidden was the JSON boolean `false` instead of the string "false"
+    # (MS feedback: 'change the hidden property to "false" rather than false'). None of the
+    # structural validators (paconn, ConnectorPackageValidator.ps1) catch this, and the cert
+    # report only shows a generic policy code, so enforce it locally.
+    bad_constraints: list[str] = []
+    for pname, pval in conn_params.items():
+        constraints = pval.get("uiDefinition", {}).get("constraints", {}) or {}
+        for ckey in ("required", "hidden"):
+            if ckey in constraints and isinstance(constraints[ckey], bool):
+                bad_constraints.append(f'{pname}.constraints.{ckey} = {str(constraints[ckey]).lower()}')
+    if not bad_constraints:
+        ok("constraints", 'uiDefinition.constraints use string booleans ("true"/"false")')
+    else:
+        fail("constraints",
+             "uiDefinition.constraints must use STRING booleans, not JSON booleans "
+             f'(offending: {bad_constraints}). Change to quoted strings, e.g. "hidden": "false" '
+             'not "hidden": false. Microsoft certification rejects the boolean form.')
+
     # =============================================================
     section("Network security (5000.3.1.6)")
     http_hits: list[str] = []
@@ -527,6 +547,40 @@ def check_solution(name: str, sol_dir: Path) -> None:
             fail("managed",
                  f"{name} is not Unmanaged ({val}). Cert team rejects Managed exports. "
                  "Re-export with 'Unmanaged' selected.")
+
+        # Publisher-prefix ownership (HEURISTIC, not a documented policy). Microsoft's
+        # certification docs prescribe no rule about the connector logical/schema name or
+        # publisher prefix, so this is an advisory only: a default "new_" prefix means the
+        # connector was authored under the default Dataverse publisher rather than the Apify
+        # publisher. Re-authoring under the apify publisher is recommended for clean ALM and
+        # is the same re-author that fixes the documented duplication issue below, but a
+        # "new_" prefix is NOT a confirmed cert blocker. Reported as a warning, never fails.
+        prefix_m = re.search(r"<CustomizationPrefix>([^<]+)</CustomizationPrefix>", text)
+        prefix = prefix_m.group(1).strip() if prefix_m else ""
+        cust_path = sol_dir / "customizations.xml"
+        conn_name = ""
+        if cust_path.exists():
+            nm = re.search(r"<Connector>.*?<name>([^<]+)</name>", cust_path.read_text(), re.S)
+            conn_name = nm.group(1).strip() if nm else ""
+        if conn_name and prefix:
+            if conn_name.startswith(prefix + "_"):
+                ok("prefix", f"{name} connector '{conn_name}' uses publisher prefix '{prefix}_'")
+            else:
+                skip("prefix",
+                     f"{name} connector '{conn_name}' uses the default 'new_' prefix, not the "
+                     f"'{prefix}' publisher prefix. Advisory only (no documented cert rule): "
+                     f"consider re-authoring under the '{prefix}' publisher for clean ALM.")
+
+        # Connector component presence (5000.1.1.8). RootComponent type 372 is the custom
+        # connector. Per Microsoft's documented package structure, BOTH solutions legitimately
+        # carry a Connector folder: ConnectorSolution holds the connector, and FlowSolution
+        # also includes it as a dependency of the sample flows. So presence in both is correct,
+        # not a duplication error. We only assert the connector is present where expected.
+        has_connector = bool(re.search(r'<RootComponent\s+type="372"', text))
+        if has_connector:
+            ok("5000.1.1.8", f"{name} contains the connector component (type 372)")
+        elif name == "ConnectorSolution":
+            fail("5000.1.1.8", "ConnectorSolution is missing the connector component (type 372)")
 
     conn_dir = sol_dir / "Connector"
     if not conn_dir.is_dir():
