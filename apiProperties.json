@@ -9,7 +9,7 @@
           "tooltip": "Authenticate with Apify using Sign in with Apify",
           "constraints": {
             "required": "true",
-            "hidden": false
+            "hidden": "false"
           }
         },
         "oAuthSettings": {
