@@ -20,6 +20,7 @@ import struct
 import sys
 import tempfile
 import zipfile
+from collections import Counter
 from pathlib import Path
 from typing import Any, Iterable
 
@@ -251,20 +252,60 @@ def main() -> int:
 
     # =============================================================
     section("Operation responses (5000.2.4.x)")
-    empty_ops: list[str] = []
-    default_with_schema: list[str] = []
+    # Single pass over every operation, collecting both the response findings (5000.2.4.x) and
+    # the swagger operation pre-checks reported further below, so paths are walked only once.
+    shared_params = swagger.get("parameters", {})
+    if not isinstance(shared_params, dict):
+        shared_params = {}
+
+    def resolve_param(p: Any) -> dict:
+        # Resolves only local shared-parameter refs (#/parameters/Foo). Any other $ref shape
+        # (for example into #/definitions) returns {}, so that parameter is skipped rather than
+        # flagged. Acceptable here: path params are defined inline or as shared parameters.
+        if isinstance(p, dict) and "$ref" in p:
+            return shared_params.get(p["$ref"].split("/")[-1], {})
+        return p if isinstance(p, dict) else {}
+
+    empty_ops: list[str] = []            # no responses at all (5000.2.4.5)
+    default_with_schema: list[str] = []  # 'default' response carrying a schema (5000.2.4.2)
+    op_ids: list[str] = []
+    missing_opid: list[str] = []
+    connid_ops: list[str] = []
+    path_no_encoding: list[str] = []
+    long_summaries: list[str] = []
+    no_2xx: list[str] = []               # has responses but none is 2xx (complements empty_ops)
     for path, methods in swagger.get("paths", {}).items():
         if not isinstance(methods, dict):
             continue
+        path_level = methods.get("parameters", [])
+        path_level = path_level if isinstance(path_level, list) else []
         for verb, op in methods.items():
             if verb in ("parameters", "x-ms-notification-content") or not isinstance(op, dict):
                 continue
-            responses = op.get("responses", {})
+            oid = op.get("operationId")
+            label = oid or f"{path} {verb}"
+            if oid:
+                op_ids.append(oid)
+            else:
+                missing_opid.append(label)
+            if len(op.get("summary", "")) > 80:
+                long_summaries.append(f"{label} ({len(op['summary'])} chars)")
+            responses = op.get("responses", {}) or {}
             if not responses:
                 empty_ops.append(f"{path} {verb}")
+            elif not any(str(c).startswith("2") for c in responses):
+                no_2xx.append(label)
             for code, resp in responses.items():
                 if code == "default" and isinstance(resp, dict) and "schema" in resp:
-                    default_with_schema.append(op.get("operationId", "?"))
+                    default_with_schema.append(oid or "?")
+            op_params = op.get("parameters", [])
+            op_params = op_params if isinstance(op_params, list) else []
+            for p in path_level + op_params:
+                rp = resolve_param(p)
+                if rp.get("name") == "connectionId":
+                    connid_ops.append(label)
+                if rp.get("in") == "path" and rp.get("x-ms-url-encoding") != "single":
+                    path_no_encoding.append(f"{label}:{rp.get('name')}")
 
     if not empty_ops:
         ok("5000.2.4.5", "All operations define responses")
@@ -294,6 +335,45 @@ def main() -> int:
         fail("5000.2.4.4/6", f"Empty schemas at: {empty_schemas}")
 
     # =============================================================
+    # Swagger operation pre-checks, reported from the single pass above. `paconn validate` is the
+    # authoritative swagger validator (see certification-swagger-validator-rules); these duplicate
+    # only the highest-value rules so they surface offline without a paconn login, and cover
+    # issues this connector has historically needed (path-parameter encoding, operationId).
+    section("Swagger operations (pre-checks)")
+    if not missing_opid:
+        ok("operationId", "Every operation has an operationId")
+    else:
+        fail("operationId", f"Operations missing operationId: {missing_opid}")
+
+    dupes = sorted(oid for oid, n in Counter(op_ids).items() if n > 1)
+    if not dupes:
+        ok("operationId", "All operationIds are unique")
+    else:
+        fail("operationId", f"Duplicate operationIds: {dupes}")
+
+    if not connid_ops:
+        ok("connectionId", "No parameter is named 'connectionId' (reserved by Microsoft)")
+    else:
+        fail("connectionId", f"Reserved parameter name 'connectionId' used in: {sorted(set(connid_ops))}")
+
+    if not path_no_encoding:
+        ok("url-encoding", 'All path parameters set "x-ms-url-encoding": "single"')
+    else:
+        fail("url-encoding",
+             'Path parameters missing "x-ms-url-encoding": "single" '
+             f"(add it to: {sorted(set(path_no_encoding))})")
+
+    if not long_summaries:
+        ok("summary", "All operation summaries are <= 80 chars")
+    else:
+        fail("summary", f"Operation summaries over 80 chars: {long_summaries}")
+
+    if not no_2xx:
+        ok("2xx-response", "Every operation defines a 2xx response")
+    else:
+        fail("2xx-response", f"Operations with no 2xx (200/201) response: {no_2xx}")
+
+    # =============================================================
     section("Swagger structure (5000.2.6.x)")
     ver = swagger.get("swagger", "")
     if ver == "2.0":
@@ -306,6 +386,15 @@ def main() -> int:
         fail("5000.2.6.3", "OpenAPI 3.0 keywords present")
     else:
         ok("5000.2.6.3", "No OpenAPI 3.0 keywords")
+
+    # Host must be a production URL. Staging, dev, and test hosts are rejected (5000.2.6.4).
+    host = swagger.get("host", "")
+    if not host:
+        fail("5000.2.6.4", "host is missing")
+    elif re.search(r"\b(staging|dev|test|sandbox|localhost)\b|127\.0\.0\.1", host, re.I):
+        fail("5000.2.6.4", f"host '{host}' looks non-production (staging/dev/test not allowed)")
+    else:
+        ok("5000.2.6.4", f"host '{host}' is production")
 
     conn_params = props.get("properties", {}).get("connectionParameters", {})
     empty_ui = [k for k, v in conn_params.items() if not v.get("uiDefinition")]
@@ -339,6 +428,30 @@ def main() -> int:
              "uiDefinition.constraints must use STRING booleans, not JSON booleans "
              f'(offending: {bad_constraints}). Change to quoted strings, e.g. "hidden": "false" '
              'not "hidden": false. Microsoft certification rejects the boolean form.')
+
+    # =============================================================
+    # Agent-readiness advisories (5000.4.2.x). Microsoft states "all connectors are agent ready";
+    # x-ms-keywords aids plugin identification and openai-enabled enables Copilot AI actions.
+    # Advisory only (skip, never fails): not required for a non-AI connector to certify.
+    section("Agent-readiness (advisory)")
+
+    def has_key(node: Any, target: str) -> bool:
+        # True if `target` appears anywhere as a dict KEY (not a value), so a stray string value
+        # equal to the key name can't produce a false positive.
+        if isinstance(node, dict):
+            return target in node or any(has_key(v, target) for v in node.values())
+        if isinstance(node, list):
+            return any(has_key(v, target) for v in node)
+        return False
+
+    if has_key(swagger, "x-ms-keywords"):
+        ok("5000.4.2.1", "x-ms-keywords present")
+    else:
+        skip("5000.4.2.1", "x-ms-keywords absent (advisory: improves plugin identification for agents)")
+    if has_key(swagger, "openai-enabled"):
+        ok("5000.4.2.4", "openai-enabled present")
+    else:
+        skip("5000.4.2.4", "openai-enabled absent (advisory: enables Copilot AI actions)")
 
     # =============================================================
     section("Network security (5000.3.1.6)")
