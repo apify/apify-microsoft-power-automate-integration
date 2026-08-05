@@ -131,7 +131,7 @@ Once the connector is created and you are modifying its definition locally, use 
 paconn update -e <ENV_ID> --api-prop apiProperties.json --api-def apiDefinition.swagger.json --script scripts.csx
 ```
 
-Add `--icon icon.png` only when the icon has changed — it doesn't need to be re-uploaded every time.
+Add `--icon icon.png` only when the icon has changed - it doesn't need to be re-uploaded every time.
 
 ## Development Cycle
 
@@ -143,7 +143,7 @@ Add `--icon icon.png` only when the icon has changed — it doesn't need to be r
 
    ```bash
    # Run local validation checks
-   ./scripts/validate.sh
+   python3 scripts/validate.py
    # Run Microsoft's certification Swagger Validator
    paconn validate --api-def apiDefinition.swagger.json
    ```
@@ -169,6 +169,10 @@ Add `--icon icon.png` only when the icon has changed — it doesn't need to be r
    Fix issues locally, then update and test again.
 
 ## Building and Submitting the Certification Package
+
+> **Apify is a *verified publisher*, not an independent publisher.** Follow the verified-publisher docs ([submit-for-certification](https://learn.microsoft.com/en-us/connectors/custom-connectors/submit-for-certification), [certification-submission](https://learn.microsoft.com/en-us/connectors/custom-connectors/certification-submission)). The [independent publisher](https://learn.microsoft.com/en-us/connectors/custom-connectors/certification-submission-ip) flow (GitHub PR, verified credentials, no OAuth) does NOT apply to this connector.
+
+> **Critical rule: never hand-edit files inside an exported solution.** Microsoft's submission docs say it directly: "don't manipulate the files inside the solution." If something needs to change, edit the source in this repo (`apiDefinition.swagger.json`, `apiProperties.json`, `scripts.csx`, `icon.png`), push with `paconn update`, and re-export the solution from Power Apps. Hand-editing the zip causes manifest-vs-content mismatches that trigger cert failures (see 5000.1.1.16 below).
 
 Microsoft Partner Center accepts a single `ConnectorPackage.zip` per submission. This package includes solution exports from Power Apps (connector + sample flows) that can't be generated from the terminal - they must be exported through the Power Apps UI, tested in Power Automate, and then assembled locally by the developer before each release.
 
@@ -200,7 +204,7 @@ In [make.powerautomate.com](https://make.powerautomate.com/) → Solutions → *
 ### For each submission
 
 1. **Validate locally** - `paconn validate --api-def apiDefinition.swagger.json` must report clean. Catches most cert blockers ([Swagger Validator rules](https://learn.microsoft.com/en-us/connectors/custom-connectors/certification-swagger-validator-rules)).
-2. **Push the connector** — `paconn update -e <ENV_ID> --api-prop apiProperties.json --api-def apiDefinition.swagger.json --script scripts.csx` (add `--icon icon.png` only if the icon changed). Use the published connector that the Partner Center offer is built on.
+2. **Push the connector** - `paconn update -e <ENV_ID> --api-prop apiProperties.json --api-def apiDefinition.swagger.json --script scripts.csx` (add `--icon icon.png` only if the icon changed). Use the published connector that the Partner Center offer is built on.
 3. **Smoke-test in Power Automate** - quick flow for each user-facing action (Run Actor, Scrape single URL, Get key-value store record, Actor run finished trigger + Delete actor webhook). The submission inherits whatever bugs the live connector has.
 4. **Export both solutions** from Power Automate:
    1. In [make.powerautomate.com](https://make.powerautomate.com) → Solutions, open one of the two solutions you set up.
@@ -233,7 +237,29 @@ In [make.powerautomate.com](https://make.powerautomate.com/) → Solutions → *
 7. **Upload to Azure blob storage** and generate a SAS URL (valid ≥15 days) - see the [Azure Storage prerequisite](#building-and-submitting-the-certification-package) above.
 8. **Submit via Partner Center** - [partner.microsoft.com/dashboard](https://partner.microsoft.com/dashboard) → Marketplace offers → Apify connector. On the **Packages** tab, paste the SAS URI. For updates, use **Resubmit** (don't create a new offer). See [Submit a connector for certification](https://learn.microsoft.com/en-us/connectors/custom-connectors/submit-for-certification). In the submission notes, summarize what changed and any previously-failed policy codes addressed.
 
-If a submission fails, the error includes a policy code you can look up in the [policy errors reference](https://learn.microsoft.com/en-us/connectors/custom-connectors/certification-policy-errors). For unclear failures, Microsoft holds [Office Hours](https://learn.microsoft.com/en-us/connectors/custom-connectors/certification-submission#for-queries-regarding-certification) every Tuesday 15:30–16:30 UTC where engineers can read the validator's activity log directly.
+### After submission: the testing window
+
+When a submission passes initial review (24 to 48 hours), Microsoft deploys the connector to a preview environment and sends an email from `certificationteam@microsoft.com` with a one-time password. **The preview environment expires in 2 business days.** Within that window, the publisher must:
+
+1. Sign in via the **Store Link** in Partner Center, under **Product Overview** > **Publisher Sign off**.
+2. Create at least one flow per action and trigger to confirm everything works against production OAuth credentials.
+3. Click **Go-live** under **Publisher Sign off** to confirm completion.
+
+If the 2-day window expires without sign-off, the offer is rejected and you have to resubmit from scratch. See [Test your connector in certification](https://learn.microsoft.com/en-us/connectors/custom-connectors/certification-testing).
+
+### Policy codes seen during this connector's history
+
+If a submission fails, the error includes a policy code you can look up in the [policy errors reference](https://learn.microsoft.com/en-us/connectors/custom-connectors/certification-policy-errors). The ones already hit during this connector's lifecycle:
+
+| Code | Meaning | Root cause we hit |
+|------|---------|-------------------|
+| **5000.2.6.2** | Swagger JSON not properly structured / not OpenAPI 2.0 compliant | Six swagger issues fixed on `fix/power-automate-certification-5000-2-6-2` (path collision, `produces` MIME, empty schemas, hyphen char, URL in description, redundant policy). Catch these locally with `paconn validate`. |
+| **5000.1.1.16** | "Invalid package. Solution not present at correct path or is invalid solution." | `policyTemplateInstances` removed from `apiProperties.json` made the exported `policytemplateinstances.json` an empty `[]` (2 bytes), while `customizations.xml` still referenced the file. Keep the file populated; the setheader policy is structurally required even when redundant at runtime. |
+| **5000.2.3.6** | URLs / instructional phrases / emojis in descriptions | Example URL `(e.g., https://example.com)` was inside a parameter description. Strip URLs from every `description` field (use the markdown docs in `intro.md` instead). |
+
+Don't confuse 5000.1.1.16 (solution misplaced or invalid contents) with **5000.1.1.11** ("Incorrect placement of files in the package. Package zip file missing from root location"). 5000.1.1.11 fires when the outer ZIP has an unwanted wrapper folder; 5000.1.1.16 fires when the inner solution zip is structurally broken. Different fixes.
+
+For unclear failures, Microsoft holds [Office Hours](https://learn.microsoft.com/en-us/connectors/custom-connectors/certification-submission#for-queries-regarding-certification) every Tuesday 15:30 to 16:30 UTC where engineers can read the validator's activity log directly.
 
 ## Troubleshooting
 
@@ -255,11 +281,11 @@ If a submission fails, the error includes a policy code you can look up in the [
 
 ## CI/CD Integration
 
-The repository runs a GitHub Actions workflow (`.github/workflows/validate.yml`) on every push. It executes `./scripts/validate.sh` which checks connector file structure and required fields. To run the same checks locally:
+The repository runs a GitHub Actions workflow (`.github/workflows/validate.yml`) on every push. It executes `scripts/validate.py` (Python 3.9+, stdlib only) which checks connector file structure, every `5000.x.x.x` policy code we know how to validate offline, and the integrity of the assembled `ConnectorPackage.zip` when present. To run the same checks locally:
 
 ```bash
 # Run the same validation CI uses
-./scripts/validate.sh
+python3 scripts/validate.py
 ```
 
 ## Resources
@@ -269,6 +295,11 @@ The repository runs a GitHub Actions workflow (`.github/workflows/validate.yml`)
 - [Power Platform Connectors Documentation](https://learn.microsoft.com/en-us/connectors/custom-connectors/)
 - [Power Platform Connectors CLI Documentation](https://learn.microsoft.com/en-us/connectors/custom-connectors/paconn-cli)
 - [Submit a connector for certification (verified publisher)](https://learn.microsoft.com/en-us/connectors/custom-connectors/submit-for-certification)
+- [Prepare files for certification](https://learn.microsoft.com/en-us/connectors/custom-connectors/certification-submission) - the canonical packaging spec
+- [Test your connector in certification](https://learn.microsoft.com/en-us/connectors/custom-connectors/certification-testing) - the 2-day preview window
+- [Update your certified connector](https://learn.microsoft.com/en-us/connectors/custom-connectors/certification-updates) - resubmission flow and breaking-change table
+- [Move from preview to GA](https://learn.microsoft.com/en-us/connectors/custom-connectors/certification-to-ga) - usage thresholds and request process
+- [Connector integrity](https://learn.microsoft.com/en-us/connectors/custom-connectors/connector-integrity) - success rate formula, error codes
 - [Certification policy errors](https://learn.microsoft.com/en-us/connectors/custom-connectors/certification-policy-errors) - `5000.x` error code reference
 - [Swagger Validator rules](https://learn.microsoft.com/en-us/connectors/custom-connectors/certification-swagger-validator-rules) - the rule names paconn reports
 - [Policy templates reference](https://learn.microsoft.com/en-us/connectors/custom-connectors/policy-templates) - `setheader`, `routerequesttoendpoint`, etc.
