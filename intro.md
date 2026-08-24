@@ -8,7 +8,7 @@ Apify Technologies s.r.o.
 
 ## Prerequisites
 
-- **An Apify account** - sign up for free at [apify.com](https://apify.com). A free tier with monthly platform credits is included.
+- **An Apify account** - sign up for free in [Apify Console](https://console.apify.com/settings/integrations?utm_source=microsoft-power-automate&utm_medium=integrations). A free tier with monthly platform credits is included.
 - **OAuth 2.0 authorization** - the connector authenticates through Apify's OAuth flow. No API tokens or manual credential setup is needed from end users.
 
 ## How to get credentials
@@ -29,7 +29,7 @@ No manual entry of API tokens, client IDs, or secrets is required from end users
 
 ### For the Microsoft certification review team
 
-To test the connector, you will need an Apify account. You can create one for free at [apify.com](https://apify.com) - no credit card is required. The free tier includes enough platform credits to run test Actors and verify all connector operations. After creating an account, follow steps 1-7 above to authorize the connector.
+To test the connector, you will need an Apify account. You can create one for free in [Apify Console](https://console.apify.com/settings/integrations?utm_source=microsoft-power-automate&utm_medium=integrations) - no credit card is required. The free tier includes enough platform credits to run test Actors and verify all connector operations. After creating an account, follow steps 1-7 above to authorize the connector.
 
 ## Supported operations
 
