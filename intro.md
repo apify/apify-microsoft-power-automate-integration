@@ -17,7 +17,7 @@ The connector uses OAuth 2.0 authentication. When you add the Apify connector to
 
 1. In your Power Automate flow, add any Apify action or trigger.
 2. When prompted to create a connection, click **Sign in**.
-3. You will be redirected to **Apify Console** authorization page at [`console.apify.com`](https://console.apify.com/).
+3. You will be redirected to **Apify Console** authorization page at [`console.apify.com`](https://console.apify.com/?utm_source=microsoft-power-automate&utm_medium=integrations).
 4. If you are not logged in to Apify, enter your Apify account email and password (or use Google/GitHub sign-in).
 5. Review the requested permissions:
     - **profile** - access to your user profile information

@@ -4,7 +4,7 @@ Apify is the largest marketplace of tools for AI. Use this connector to run Apif
 
 ## Quick start
 
-1. **Sign up** for an Apify account at [console.apify.com](https://console.apify.com/)
+1. **Sign up** for an Apify account at [console.apify.com](https://console.apify.com/?utm_source=microsoft-power-automate&utm_medium=integrations)
 2. **Add the connector** to your Power Automate flow
 3. **Authenticate** by selecting *Sign in with Apify* and authorizing access
 4. **Use triggers and actions** to integrate Apify into your workflows
@@ -30,7 +30,7 @@ For detailed instructions, visit the [Apify Microsoft Power Automate documentati
 
 Before using this connector, you need:
 
-- An Apify account. Sign up in [Apify Console](https://console.apify.com/).
+- An Apify account. Sign up in [Apify Console](https://console.apify.com/?utm_source=microsoft-power-automate&utm_medium=integrations).
 
 ## Authentication
 
