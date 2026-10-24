@@ -1,77 +1,126 @@
-# CLAUDE.md
+# AGENTS.md
 
-## Project Purpose
+Guidance for coding agents working in this repository. `CLAUDE.md` is only an `@AGENTS.md` pointer,
+so put instructions here and leave the pointer alone. `.github/workflows/agents-md-maintenance.yml`
+updates this file inside each PR that changes the code.
 
-Source of truth for the **Apify custom connector for Microsoft Power Automate**. The connector lets Power Automate flows run Apify Actors and tasks, read datasets and key-value stores, and start flows when runs finish.
+## Project
 
-Apify is a **verified publisher** (not an independent publisher), so the connector is deployed with `paconn` and submitted to Microsoft Partner Center for certification. There is no application to build here — the repo *is* the connector definition.
+Source of the **Apify custom connector for Microsoft Power Automate**. There is no application to
+build: the repo *is* the connector definition, deployed by hand with Microsoft's `paconn` CLI and
+submitted to Microsoft Partner Center for certification (Apify is a verified publisher).
 
-## Repository Structure
+- `apiDefinition.swagger.json`: the connector surface. Swagger **2.0** only (Power Platform rejects
+  OpenAPI 3), host `api.apify.com`, basePath `/v2`, OAuth 2.0 security (`apify_oauth2_auth`).
+- `scripts.csx`: a C# `Script : ScriptBase` that runs in Power Platform for every operation and
+  rewrites requests/responses where Swagger can't express the behaviour. Uses `Newtonsoft.Json`.
+- `apiProperties.json`: OAuth connection parameters, brand colour, `policyTemplateInstances`.
+- `intro.md` ships inside the certification package; `README.md` is the user-facing docs;
+  `CONTRIBUTING.md` has the full paconn setup, deploy cycle, packaging steps and policy-code history.
 
-| Path | Description |
-|------|-------------|
-| `apiDefinition.swagger.json` | OpenAPI/Swagger **2.0** definition. Host `api.apify.com`, basePath `/v2`. Defines every action, trigger, and internal dropdown/schema operation. |
-| `apiProperties.json` | Connector metadata: OAuth 2.0 connection parameters, `iconBrandColor`, `policyTemplateInstances`, publisher/stackOwner. |
-| `scripts.csx` | C# script (`Script : ScriptBase`) dispatching on `Context.OperationId` for request/response logic Swagger can't express. |
-| `icon.png` | Connector icon; must satisfy Microsoft certification icon rules (see CONTRIBUTING.md). |
-| `settings.json` | `paconn` settings file (placeholder `connectorId` / `environment` — fill in locally, don't commit real IDs). |
-| `intro.md` | Connector documentation shipped **inside** `ConnectorPackage.zip` for certification review. |
-| `scripts/validate.py` | Offline certification validator (Python 3.9+, stdlib only). Run before every push. |
-| `README.md` | User-facing docs: triggers, actions, inputs, troubleshooting, FAQ. |
-| `CONTRIBUTING.md` | Developer guide: paconn setup, deploy cycle, certification packaging, policy-code history. |
-| `.github/workflows/validate.yml` | CI: runs `python3 scripts/validate.py` on every push (Python 3.11). |
-| `.github/workflows/claude-md-maintenance.yml` | Calls reusable workflow `apify/workflows/.github/workflows/claude-md-maintenance.yml@main` on push to `main`/`master` and via `workflow_dispatch`. Distributed centrally from `apify/integrations-team` — **do not hand-edit**. |
+User-facing surface (`x-ms-visibility: important`): actions Run Actor, Run Task, Get Dataset Items,
+Get Key-Value Store Record, Scrape Single URL; triggers Actor run finished, Actor task finished.
+Everything else (dropdown lists, schema helpers, webhook deletes, `GetUserInfo`) is `internal`.
+`GetUserInfo` (`/users/me`) is also the connection test (`x-ms-capabilities.testConnection`).
 
-## Technology Stack
-
-- **OpenAPI/Swagger 2.0** — connector surface (Power Platform does not accept OpenAPI 3.x).
-- **C# script (`.csx`)** on Power Platform's `ScriptBase` runtime, using `Newtonsoft.Json` (`JObject`/`JArray`).
-- **Python 3.9+** — `scripts/validate.py`, stdlib only, no third-party deps.
-- **`paconn`** (Power Platform Connectors CLI, `pip install paconn`) — deploy/validate.
-- **PowerShell 7+** — only for Microsoft's `ConnectorPackageValidator.ps1` during certification packaging.
-- **Apify API v2** — the upstream API; **OAuth 2.0** authorization code flow (`profile`, `full_api_access`).
-
-## Build, Test & Run
-
-There is no build step. Deploy and validate:
+## Commands
 
 ```bash
-# One-time setup
-pip install paconn
-paconn login                        # device-code flow
-
-# Validate before every push (both must be clean)
-python3 scripts/validate.py                              # offline policy checks (what CI runs)
+python3 scripts/validate.py                              # offline cert checks; what CI runs
 paconn validate --api-def apiDefinition.swagger.json     # Microsoft's cert Swagger Validator
-
-# Deploy to a Power Platform environment (add --icon icon.png only when the icon changed)
 paconn update -e <ENV_ID> --api-prop apiProperties.json --api-def apiDefinition.swagger.json --script scripts.csx
 ```
 
-Testing is manual: after `paconn update`, re-enter the OAuth Client ID/Secret in Power Automate (**Custom Connectors → Edit → Security → OAuth 2.0 → Edit**), then run a flow per affected action/trigger. Certification packaging is documented step-by-step in `CONTRIBUTING.md`.
+- `scripts/validate.py` is Python 3.9+, stdlib only; it checks file presence, the `5000.x` policy
+  codes it can verify offline (icon, title, descriptions, responses, Swagger structure, HTTPS, OAuth
+  placeholders) and, if present, `ConnectorPackage/ConnectorPackage.zip`. That zip is git-ignored
+  (`*.zip`), so CI always skips the package checks — a green run never validates the package.
+- CI (`.github/workflows/validate.yml`) runs only the validator, on push, with Python 3.11.
+  Nothing compiles or tests `scripts.csx` locally or in CI; it is only exercised after
+  `paconn update` in a real environment.
+- `paconn` needs `pip install paconn` and `paconn login`. Add `--icon icon.png` to `update` only when
+  the icon changed. **Never pass `--secret`** (leaks into shell history); after every update the
+  OAuth Client ID/Secret must be re-entered in Power Automate (Custom Connectors → Edit → Security).
+- Testing is manual: deploy, then run a flow for each affected action/trigger.
 
-## Conventions
+## Architecture
 
-- **Commits / PRs:** Conventional-commit prefixes (`feat:`, `fix:`, `docs:`) with the PR number appended, e.g. `fix: correct hidden property type in apiProperties.json (#36)`. All changes land on `main` via PR.
-- **Branches:** `<type>/power-automate-<short-description>` (e.g. `feat/power-automate-actions-run-task`, `docs/power-automate-readme-documentation`); certification fixes use the policy code, e.g. `fix/power-automate-certification-5000-2-6-2`.
-- **Operation IDs** are the contract between Swagger and `scripts.csx` — the `switch` in `ExecuteAsync()` keys off them. Renaming one in Swagger requires the matching `case` update.
-- **Visibility:** user-facing operations use `x-ms-visibility: important`; dropdown/schema helpers use `internal`.
-- **No URLs, instructional phrases, or emojis in any `description` field** — triggers policy 5000.2.3.6. Put prose in `intro.md`/`README.md` instead.
-- **Never pass `--secret` to paconn** on the command line; it leaks into shell history. No client IDs or secrets in the repo (`apiProperties.json` keeps `{{ client id }}` / `{{ client secret }}` placeholders).
-- `scripts.csx` uses two-space indentation and XML doc comments (`/// <summary>`) on handlers.
+### `scripts.csx` dispatches on `operationId`
 
-## Key Notes for AI Assistants
+`ExecuteAsync()` is a `switch (Context.OperationId)`. Operations without special logic are listed
+in the passthrough group; **an operationId that is not in the switch returns 400 "Unknown operation
+ID"**, so a new Swagger operation needs a `case` too, and renaming an operationId needs the matching
+`case` renamed.
 
-- **Several Swagger paths are virtual** — they don't exist in the Apify API and are rewritten by `scripts.csx` before forwarding. Don't "fix" them against the Apify API reference:
-  - `/actors/dropdown` → `/v2/acts` or `/v2/store`, chosen from the `actorScope` parameter (`DetermineApiPath`).
-  - `/datasets/{datasetId}/itemsSchemaHelper` → `/items` (schema inferred from a sample).
-  - `/key-value-stores/{storeId}/records/{recordKey}/schemaHelper` → strips `/schemaHelper`.
-  - `/webhooks/task` and `/webhooks/task/{webhookId}` → `/webhooks` and `/webhooks/{webhookId}` (separate paths exist only to give the task trigger its own operation).
-  - `/scrape-single-url` → `POST /v2/acts/apify~website-content-crawler/runs`.
-- **Keep `policyTemplateInstances` in `apiProperties.json` populated.** Removing the `setheader` entry emptied the exported `policytemplateinstances.json` while `customizations.xml` still referenced it, causing certification failure **5000.1.1.16**. It is structurally required even when redundant at runtime.
-- **Swagger must stay OpenAPI 2.0-compliant**: no duplicate/colliding paths, no empty schemas, valid `produces` MIME types. Violations surface as **5000.2.6.2**.
-- **Never hand-edit files inside an exported solution zip.** Change the source in this repo, `paconn update`, then re-export from Power Apps.
-- `scripts/validate.py` skips submission-package checks when `ConnectorPackage/ConnectorPackage.zip` is absent — a clean local run does not mean the package was validated.
-- Query-parameter validation lives in `scripts.csx` (`GetValidationRules`), not Swagger: URL format, non-negative integers, and `waitForFinish` capped at **60** (`MAX_WAIT_FOR_FINISH`).
-- Trigger webhooks are created in the user's Apify account and are **not** cleaned up automatically when a flow is deleted; webhook idempotency is handled via a SHA-256 key (`SetWebhookIdempotencyKey`).
-- `settings.json` ships with placeholder `connectorId`/`environment` values — never commit real ones.
+`HandlePassthrough` runs query-parameter validation from `GetValidationRules()` (keyed by
+operationId) and forwards the request unchanged. Rules today: `waitForFinish` 0–60
+(`MAX_WAIT_FOR_FINISH`) and non-negative `timeout` for RunActor/RunTask, non-negative
+`limit`/`offset` for GetDatasetItems, `url` must be absolute http(s) with a dotted host or IP for
+ScrapeSingleUrl. Failures return 400 with `error.type = VALIDATION_ERROR`. Most custom handlers
+`catch` every exception and fall back to passthrough, so a bug in a rewrite usually surfaces as an
+odd upstream error, not a script error.
+
+### Virtual paths
+
+Several Swagger paths don't exist in the Apify API; the script rewrites them before forwarding.
+Don't "fix" them against the Apify API reference:
+
+- `/actors/dropdown` (`ListActorsDropdown`) → `/v2/store` when `actorScope=StoreActors`, else
+  `/v2/acts` (`DetermineApiPath`); `actorScope` is stripped.
+- `/datasets/{datasetId}/itemsSchemaHelper` → `/items`; `.../records/{recordKey}/schemaHelper` →
+  the record itself. Both fetch real data and infer a Swagger schema from the first item
+  (`InferOpenApiSchemaFromSample`); the dataset one wraps it as `type: array`. These back the
+  `x-ms-dynamic-schema` of Get Dataset Items and Get Key-Value Store Record.
+- `/scrape-single-url` → `POST /v2/acts/apify~website-content-crawler/runs` with a fixed one-page
+  input body built from `url` and `crawler_type`. It is virtual because a path under
+  `/acts/{actorId}/runs` collided with RunActor (`PartialDuplicateOperationPath`, a cert failure).
+- `/webhooks/task` and `/webhooks/task/{webhookId}` → `/webhooks` and `/webhooks/{webhookId}`.
+  They exist only so the task trigger gets its own operation next to `POST /webhooks`.
+
+### Dropdowns
+
+`actorScope` (Recently used Actors / Apify Store Actors) is a UI-only query parameter that feeds
+`x-ms-dynamic-values` on the Actor pickers. `ListActorsDropdown` and `ListTasks` rewrite titles
+(`title (username/name)`, `name / (actName)`) and prefix each with a zero-padded index (`001) `)
+so the dropdown keeps the API's order (`FormatItems`). The
+Memory enum's `displayName`s (`1) 128 MB` …) use the same trick.
+
+### Triggers (webhooks)
+
+Both triggers are `x-ms-trigger: single` and create an Apify webhook whose `requestUrl` is the
+Power Automate callback (`x-ms-notification-url`). The four status toggles (`onRunSucceeded`,
+`onRunFailed`, `onRunTimedOut`, `onRunAborted`) are query parameters that the script removes and
+converts into the body's `eventTypes`; a status counts as on unless explicitly `false`, and turning
+all four off returns 400. The script also sets `idempotencyKey` = SHA-256 of
+`requestUrl:actorId` (or `actorTaskId`) so re-registering the same trigger doesn't create duplicate
+webhooks. README tells users to remove webhooks in Apify Console by hand after deleting a flow;
+don't change that claim without testing it in Power Automate.
+
+### The integration-platform header
+
+Every operation sends `x-apify-integration-platform: microsoft-power-automate`, both as an internal
+Swagger header parameter with that default (`#/parameters/IntegrationPlatformHeader`) and via the
+`setheader` policy in `apiProperties.json` (#32 observed the policy not firing at runtime, so the
+Swagger parameter is the reliable path). Keep the policy even though it looks redundant: removing
+it made the exported `policytemplateinstances.json` empty while `customizations.xml` still
+referenced it, which failed certification with **5000.1.1.16**. `validate.py` checks it.
+
+## Conventions and gotchas
+
+- **Descriptions**: no URLs, emojis or non-ASCII in any `description` (policy 5000.2.3.6, checked
+  by `validate.py`). Put prose and links in `intro.md` / `README.md`.
+- **Swagger hygiene for cert (5000.2.6.2)**: no colliding or partially duplicate paths, no empty
+  object schemas, no schema on `default` responses, every operation has a 2xx response, path
+  parameters set `"x-ms-url-encoding": "single"`, summaries ≤ 80 chars, no parameter named
+  `connectionId`. `validate.py` checks all of these except path collisions, which only `paconn
+  validate` catches (`PartialDuplicateOperationPath`) along with more rules — run both.
+- **Never hand-edit an exported solution zip.** Change the source here, `paconn update`, re-export
+  from Power Apps. Packaging steps and the policy codes hit so far are in `CONTRIBUTING.md`.
+- **No real IDs or secrets in the repo**: `apiProperties.json` keeps `{{ client id }}` /
+  `{{ client secret }}`, and `settings.json` keeps `YOUR-CONNECTOR-ID` / `YOUR-ENVIRONMENT-ID`.
+- `uiDefinition.constraints` in `apiProperties.json` use string booleans (`"true"`/`"false"`); a
+  real boolean there was a bug fixed in #36.
+- `scripts.csx`: two-space indent, `/// <summary>` doc comments on handlers.
+- Commits: conventional prefixes with the PR number, e.g. `fix: correct hidden property type in
+  apiProperties.json (#36)`. Branches: `<type>/power-automate-<description>`; certification fixes
+  name the policy code (`fix/power-automate-certification-5000-2-6-2`).
