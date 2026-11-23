@@ -107,13 +107,12 @@ public class Script : ScriptBase {
   }
 
   /// <summary>
-  /// Handles the ScrapeSingleUrl operation by configuring and executing a web scraping request
-  /// using the Apify Web Scraper actor for a single URL.
-  /// Extracts URL and crawler type from the query string, builds a single-page scrape request, and forwards it.
+  /// Handles the deprecated ScrapeSingleUrl operation, replaced by WebFetch and kept so existing flows keep working.
+  /// Extracts URL and crawler type from the query string, builds a single-page Website Content Crawler input, and forwards it.
   /// </summary>
   /// <returns>
-  /// An <see cref="HttpResponseMessage"/> representing the HTTP response from the Apify Web Scraper actor,
-  /// containing the scraped data and metadata for the specified URL.
+  /// An <see cref="HttpResponseMessage"/> with the created Website Content Crawler run. The run is asynchronous,
+  /// so the scraped content is in its default dataset once the run finishes.
   /// </returns>
   private async Task<HttpResponseMessage> HandleScrapeSingleUrl() {
     try {
@@ -136,7 +135,7 @@ public class Script : ScriptBase {
         return errorResponse;
       }
 
-      // Construct the JSON input body for the Web Scraper actor
+      // Construct the JSON input body for the Website Content Crawler Actor
       var inputBody = new {
         startUrls = new[] { new { url = url } },
         crawlerType = crawlerType,

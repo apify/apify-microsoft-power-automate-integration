@@ -682,9 +682,9 @@
       "post": {
         "summary": "Scrape single URL",
         "x-ms-summary": "Scrape single URL",
-        "description": "Scrapes a single URL using the Web Scraper Actor. This action starts an asynchronous scrape and returns the run details immediately. Use the Actor run finished trigger to process results once the scrape is complete.",
+        "description": "Deprecated: replaced by Web Fetch, which returns the page content in the response. Starts a Website Content Crawler run for a single URL and returns the run details immediately. The scraped content is available in the run's default dataset once the run finishes.",
         "operationId": "ScrapeSingleUrl",
-        "x-ms-visibility": "important",
+        "x-ms-visibility": "internal",
         "tags": [
           "Scraping"
         ],
