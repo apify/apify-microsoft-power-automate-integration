@@ -39,7 +39,8 @@ To test the connector, you will need an Apify account. You can create one for fr
 | --- | --- |
 | **Run Actor** | Runs an Apify Actor with the specified input. You can select from recently used Actors or browse Apify Store. Optionally wait up to 60 seconds for the run to finish. Returns run metadata including status, dataset ID, and key-value store ID. |
 | **Run task** | Runs a pre-configured Actor task. Tasks store default input configurations so you can execute them without specifying input each time. Optionally override the default input with custom values. |
-| **Scrape single URL** | Scrapes a single web page using the Apify Web Scraper Actor. Choose between adaptive (recommended), Firefox headless browser, or Cheerio (raw HTTP) crawling modes. Returns the run metadata for tracking. |
+| **Web Fetch** | Fetches a single web page with the Web Fetch Actor and returns its content in the response, as Markdown, HTML, plain text, links, or raw content. Optional custom headers are sent to the target site. Error pages such as 404 are returned as content, with the page's status in the **HTTP status code** output. |
+| **Scrape single URL** (deprecated) | Replaced by **Web Fetch**. Existing flows keep working, but the action no longer appears in the action picker. It starts a Website Content Crawler run and returns the run metadata, not the page content. |
 | **Get dataset items** | Retrieves items from an Apify dataset. Datasets store structured results from Actor runs. Supports pagination with limit and offset parameters. The response schema is dynamically inferred from the dataset contents. |
 | **Get key-value store record** | Retrieves a record from an Apify key-value store by its key. Key-value stores hold files, configurations, and run state. The response schema is dynamically inferred from the record contents. |
 
@@ -68,19 +69,21 @@ To test the connector, you will need an Apify account. You can create one for fr
 3. Choose which completion statuses should trigger the flow (all enabled by default).
 4. In subsequent steps, use the trigger payload to access run details and retrieve results.
 
-### Quick scrape workflow
+### Quick fetch workflow
 
-1. Add the **Scrape single URL** action.
-2. Enter the URL you want to scrape.
-3. Select a crawler type (Adaptive is recommended for most sites).
-4. Use the **Actor run finished** trigger or poll for completion to get results.
+1. Add the **Web Fetch** action.
+2. Enter the URL of the page.
+3. Select a format. Markdown is the default.
+4. Use the page content from the action's output in the next steps.
 
 ## Known issues and limitations
 
 - The **Wait for Finish** parameter has a maximum of 60 seconds. For long-running Actors, use the **Actor run finished** trigger instead of waiting.
 - Dataset schemas are dynamically inferred from a sample item. They may not capture all possible fields if the dataset contains items with varying structures.
 - Key-value store record schemas are inferred from the record content. Binary records (images, PDFs) are returned as-is without schema inference.
-- The **Scrape single URL** action uses a fixed Actor (Web Scraper). For advanced scraping scenarios, use **Run Actor** with a specialized Actor from Apify Store.
+- **Web Fetch** fetches one page per call and doesn't include content that the page loads with JavaScript after it opens. To crawl several pages, use **Run Actor** with Website Content Crawler.
+- Every **Web Fetch** call is billed. Power Automate retries failed actions by default, and each retry fetches the page again, so set the action's retry policy to **None** to avoid repeated charges.
+- A **Web Fetch** call must finish within 2 minutes.
 - Memory allocation options range from 128 MB to 32 GB. Start with default settings to optimize costs.
 
 ## Common errors and remedies
@@ -92,6 +95,7 @@ To test the connector, you will need an Apify account. You can create one for fr
 | **Dataset is empty after run completes** | Confirm the Actor run finished with SUCCEEDED status. The target website's structure may have changed. |
 | **Flow times out waiting for Actor** | Set "Wait for Finish" to 0 and use the "Actor run finished" trigger to handle long-running Actors asynchronously. |
 | **Webhook trigger not firing** | Verify the Actor or task ID is correct. Check that at least one event status is enabled. |
+| **Web Fetch did not answer in time** | The page took too long to fetch. It may still have been fetched and billed. For slow pages, use **Run Actor** with Website Content Crawler. |
 
 ## FAQ
 
