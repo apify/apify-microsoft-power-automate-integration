@@ -9,7 +9,7 @@ Apify is the largest marketplace of tools for AI. Use this connector to run Apif
 3. **Authenticate** by selecting *Sign in with Apify* and authorizing access
 4. **Use triggers and actions** to integrate Apify into your workflows
 
-For detailed instructions, visit the [Apify Microsoft Power Automate documentation](https://docs.apify.com/platform/integrations/microsoft-power-automate).
+For detailed instructions, visit the [Apify Microsoft Power Automate documentation](https://docs.apify.com/platform/integrations/power-automate).
 
 ## Key capabilities
 
