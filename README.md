@@ -9,7 +9,7 @@ Apify is the largest marketplace of tools for AI. Use this connector to run Apif
 3. **Authenticate** by selecting *Sign in with Apify* and authorizing access
 4. **Use triggers and actions** to integrate Apify into your workflows
 
-For detailed instructions, visit the [Apify Microsoft Power Automate documentation](https://docs.apify.com/platform/integrations/microsoft-power-automate).
+For detailed instructions, visit the [Apify Microsoft Power Automate documentation](https://docs.apify.com/platform/integrations/power-automate).
 
 ## Key capabilities
 
@@ -24,7 +24,7 @@ For detailed instructions, visit the [Apify Microsoft Power Automate documentati
 - **[Run task](#run-task):** Execute a saved Actor task
 - **[Get dataset items](#get-dataset-items):** Retrieve scraped data from datasets
 - **[Get key-value store record](#get-key-value-store-record):** Fetch stored data
-- **[Scrape single URL](#scrape-single-url):** Quick single-page scraping
+- **[Web Fetch](#web-fetch):** Fetch a single page and get its content in the response
 
 ## Prerequisites
 
@@ -120,9 +120,35 @@ Retrieve a record's content from a selected key-value store.
 
 This action calls `GET /v2/key-value-stores/{storeId}/records/{recordKey}` via Apify API proxy.
 
+### Web Fetch
+
+Use the *Web Fetch* action to fetch a single web page and get its content directly in the response.
+
+- **Authentication:** Use *Sign in with Apify* [OAuth 2.0] (scopes: `profile`, `full_api_access`).
+- **Headers:** `x-apify-integration-platform: microsoft-power-automate`.
+- **Inputs:**
+    - `URL`: The full URL of the page, including `http://` or `https://`.
+    - `Format` (optional): `Markdown` (default), `HTML`, `Plain text`, `Links`, or `Raw` (the original content, base64-encoded for binary files). Leave it empty to let Web Fetch pick from the content type.
+    - `Custom Headers (JSON)` (optional, advanced): HTTP headers for the target site as a JSON object, for example `{"Accept-Language": "fr-FR"}`. Values must be text, numbers, or true/false.
+- **Output:** The requested URL, fetch details (final URL, loaded time, HTTP status code, content length, content type), page metadata (title, description, author, keywords, language, Open Graph), and the content in the selected format.
+
+**How it works:**
+
+- The connector sends one `POST https://web-fetch.apify.actor/` request to the Web Fetch Actor's Standby endpoint, with `url`, `formats`, and `headers` in the body.
+- Error pages from the target site, such as 404, are returned as content. Check the *HTTP status code* output.
+- If Web Fetch itself fails, the action fails with `Web Fetch failed with status N` and the reason.
+
+**Tips:**
+
+- Every call is billed. Power Automate retries failed actions by default, and each retry fetches the page again, so set the action's retry policy to **None** to avoid repeated charges.
+- Web Fetch doesn't include content that the page loads with JavaScript after it opens.
+- To crawl several pages, use *Run Actor* with Website Content Crawler.
+
 ### Scrape single URL
 
-Use the *Scrape single URL* action to scrape a single webpage using Apify's Web Scraper Actor.
+> **Deprecated:** Replaced by [Web Fetch](#web-fetch), which returns the page content in the response. Existing flows keep working, but the action no longer appears in the action picker.
+
+The *Scrape single URL* action scrapes a single webpage with Website Content Crawler.
 
 - **Authentication:** Use *Sign in with Apify* [OAuth 2.0] (scopes: `profile`, `full_api_access`).
 - **Headers:** `x-apify-integration-platform: microsoft-power-automate`.
@@ -133,7 +159,7 @@ Use the *Scrape single URL* action to scrape a single webpage using Apify's Web 
         - `playwright:firefox` (Firefox headless browser)
         - `cheerio` (Cheerio - Raw HTTP, fastest)
 
-The connector uses the Apify Web Scraper Actor internally. This action returns the run details immediately. To process results, use the *Actor Run Finished* trigger.
+The connector uses Website Content Crawler internally. This action returns the run details immediately. To process results, use the *Actor Run Finished* trigger.
 
 ### Run Actor
 

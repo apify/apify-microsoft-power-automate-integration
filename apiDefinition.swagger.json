@@ -682,9 +682,9 @@
       "post": {
         "summary": "Scrape single URL",
         "x-ms-summary": "Scrape single URL",
-        "description": "Scrapes a single URL using the Web Scraper Actor. This action starts an asynchronous scrape and returns the run details immediately. Use the Actor run finished trigger to process results once the scrape is complete.",
+        "description": "Deprecated: replaced by Web Fetch, which returns the page content in the response. Starts a Website Content Crawler run for a single URL and returns the run details immediately. The scraped content is available in the run's default dataset once the run finishes.",
         "operationId": "ScrapeSingleUrl",
-        "x-ms-visibility": "important",
+        "x-ms-visibility": "internal",
         "tags": [
           "Scraping"
         ],
@@ -743,6 +743,102 @@
         "responses": {
           "201": {
             "$ref": "#/responses/ScrapeStartedResponse"
+          },
+          "400": {
+            "$ref": "#/responses/ErrorResponse400"
+          },
+          "404": {
+            "$ref": "#/responses/ErrorResponse404"
+          },
+          "401": {
+            "$ref": "#/responses/ErrorResponse401"
+          },
+          "429": {
+            "$ref": "#/responses/ErrorResponse429"
+          },
+          "405": {
+            "$ref": "#/responses/ErrorResponse405"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse500"
+          }
+        }
+      }
+    },
+    "/web-fetch": {
+      "post": {
+        "summary": "Web Fetch",
+        "x-ms-summary": "Web Fetch",
+        "description": "Fetches a single web page with the Web Fetch Actor and returns its content in the response. Error pages from the target site, such as 404, are returned as content together with their status code.",
+        "operationId": "WebFetch",
+        "x-ms-visibility": "important",
+        "tags": [
+          "Scraping"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/IntegrationPlatformHeader"
+          },
+          {
+            "name": "url",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "pattern": "^https?://[^\\s]+$",
+            "x-ms-summary": "URL",
+            "description": "Full URL of the page to fetch, including the http or https scheme."
+          },
+          {
+            "name": "formats",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "default": "markdown",
+            "x-ms-summary": "Format",
+            "description": "Format of the returned page content. Raw returns the original content, base64-encoded for binary files. When empty, Web Fetch picks the format from the content type.",
+            "enum": [
+              "markdown",
+              "html",
+              "text",
+              "links",
+              "raw"
+            ],
+            "x-ms-enum-values": [
+              {
+                "value": "markdown",
+                "displayName": "Markdown"
+              },
+              {
+                "value": "html",
+                "displayName": "HTML"
+              },
+              {
+                "value": "text",
+                "displayName": "Plain text"
+              },
+              {
+                "value": "links",
+                "displayName": "Links"
+              },
+              {
+                "value": "raw",
+                "displayName": "Raw"
+              }
+            ]
+          },
+          {
+            "name": "headers",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-visibility": "advanced",
+            "x-ms-summary": "Custom Headers (JSON)",
+            "description": "HTTP headers sent to the target site, as a JSON object with text values. They are not used to sign in to Apify."
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/WebFetchResponse"
           },
           "400": {
             "$ref": "#/responses/ErrorResponse400"
@@ -1597,6 +1693,136 @@
         }
       },
       "additionalProperties": true
+    },
+    "WebFetchResponseSchema": {
+      "type": "object",
+      "x-ms-summary": "Web Fetch response",
+      "description": "Content and metadata of a fetched web page.",
+      "properties": {
+        "url": {
+          "type": "string",
+          "x-ms-summary": "Requested URL",
+          "description": "URL that was requested."
+        },
+        "fetch": {
+          "type": "object",
+          "x-ms-summary": "Fetch",
+          "description": "Details of the HTTP request to the target page.",
+          "properties": {
+            "loadedUrl": {
+              "type": "string",
+              "x-ms-summary": "Final URL",
+              "description": "URL of the page after any redirects."
+            },
+            "loadedTime": {
+              "type": "string",
+              "format": "date-time",
+              "x-ms-summary": "Loaded time",
+              "description": "Time when the page was loaded."
+            },
+            "httpStatusCode": {
+              "type": "integer",
+              "x-ms-summary": "HTTP status code",
+              "description": "Status code returned by the target page, for example 404 for a missing page."
+            },
+            "contentLengthBytes": {
+              "type": "integer",
+              "x-ms-summary": "Content length (bytes)",
+              "description": "Size of the page content in bytes."
+            },
+            "contentType": {
+              "type": "string",
+              "x-ms-summary": "Content type",
+              "description": "Content type of the page."
+            }
+          }
+        },
+        "metadata": {
+          "type": "object",
+          "x-ms-summary": "Metadata",
+          "description": "Metadata extracted from the page.",
+          "properties": {
+            "canonicalUrl": {
+              "type": "string",
+              "x-ms-summary": "Canonical URL",
+              "description": "Canonical URL declared by the page."
+            },
+            "title": {
+              "type": "string",
+              "x-ms-summary": "Title",
+              "description": "Title of the page."
+            },
+            "description": {
+              "type": "string",
+              "x-ms-summary": "Description",
+              "description": "Description of the page."
+            },
+            "author": {
+              "type": "string",
+              "x-ms-summary": "Author",
+              "description": "Author of the page."
+            },
+            "keywords": {
+              "type": "string",
+              "x-ms-summary": "Keywords",
+              "description": "Keywords of the page."
+            },
+            "languageCode": {
+              "type": "string",
+              "x-ms-summary": "Language code",
+              "description": "Language code of the page."
+            },
+            "openGraph": {
+              "type": "array",
+              "x-ms-summary": "Open Graph",
+              "description": "Open Graph properties of the page.",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "property": {
+                    "type": "string",
+                    "x-ms-summary": "Property",
+                    "description": "Open Graph property name."
+                  },
+                  "content": {
+                    "type": "string",
+                    "x-ms-summary": "Content",
+                    "description": "Open Graph property value."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "markdown": {
+          "type": "string",
+          "x-ms-summary": "Markdown",
+          "description": "Page content as Markdown."
+        },
+        "html": {
+          "type": "string",
+          "x-ms-summary": "HTML",
+          "description": "Page content as HTML."
+        },
+        "text": {
+          "type": "string",
+          "x-ms-summary": "Plain text",
+          "description": "Page content as plain text."
+        },
+        "links": {
+          "type": "array",
+          "x-ms-summary": "Links",
+          "description": "Unique links on the page, in document order.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "raw": {
+          "type": "string",
+          "x-ms-summary": "Raw content",
+          "description": "Original page content, base64-encoded for binary files."
+        }
+      }
     }
   },
   "parameters": {
@@ -2181,6 +2407,12 @@
             "$ref": "#/definitions/ActorRunResponseSchema"
           }
         }
+      }
+    },
+    "WebFetchResponse": {
+      "description": "Page fetched successfully.",
+      "schema": {
+        "$ref": "#/definitions/WebFetchResponseSchema"
       }
     },
     "ErrorResponse400": {

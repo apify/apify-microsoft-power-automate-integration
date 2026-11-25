@@ -13,7 +13,9 @@ public class Script : ScriptBase {
   private const string OP_RUN_TASK_ID = "RunTask";
   private const string OP_SCRAPE_SINGLE_URL_ID = "ScrapeSingleUrl";
   private const string OP_GET_DATASET_ITEMS_ID = "GetDatasetItems";
+  private const string OP_WEB_FETCH_ID = "WebFetch";
   private const string SCRAPE_SINGLE_URL_ACTOR_PATH = "/v2/acts/apify~website-content-crawler/runs";
+  private const string WEB_FETCH_ENDPOINT = "https://web-fetch.apify.actor/";
   private const int MAX_WAIT_FOR_FINISH = 60;
 
   /// <summary>
@@ -25,6 +27,11 @@ public class Script : ScriptBase {
     { "onRunTimedOut", "ACTOR.RUN.TIMED_OUT" },
     { "onRunAborted", "ACTOR.RUN.ABORTED" }
   };
+
+  /// <summary>
+  /// Content formats accepted by the Web Fetch Actor.
+  /// </summary>
+  private static readonly string[] WebFetchFormats = { "markdown", "html", "text", "links", "raw" };
 
   /// <summary>
   /// Cached validation rules, lazily initialized on first access.
@@ -48,6 +55,8 @@ public class Script : ScriptBase {
         return await HandleGetDatasetSchema().ConfigureAwait(false);
       case OP_SCRAPE_SINGLE_URL_ID:
         return await HandleScrapeSingleUrl().ConfigureAwait(false);
+      case OP_WEB_FETCH_ID:
+        return await HandleWebFetch().ConfigureAwait(false);
       case "GetKeyValueStoreRecordSchema":
         return await HandleGetKeyValueStoreRecordSchema().ConfigureAwait(false);
       case "DeleteTaskWebhook":
@@ -98,13 +107,12 @@ public class Script : ScriptBase {
   }
 
   /// <summary>
-  /// Handles the ScrapeSingleUrl operation by configuring and executing a web scraping request
-  /// using the Apify Web Scraper actor for a single URL.
-  /// Extracts URL and crawler type from the query string, builds a single-page scrape request, and forwards it.
+  /// Handles the deprecated ScrapeSingleUrl operation, replaced by WebFetch and kept so existing flows keep working.
+  /// Extracts URL and crawler type from the query string, builds a single-page Website Content Crawler input, and forwards it.
   /// </summary>
   /// <returns>
-  /// An <see cref="HttpResponseMessage"/> representing the HTTP response from the Apify Web Scraper actor,
-  /// containing the scraped data and metadata for the specified URL.
+  /// An <see cref="HttpResponseMessage"/> with the created Website Content Crawler run. The run is asynchronous,
+  /// so the scraped content is in its default dataset once the run finishes.
   /// </returns>
   private async Task<HttpResponseMessage> HandleScrapeSingleUrl() {
     try {
@@ -127,7 +135,7 @@ public class Script : ScriptBase {
         return errorResponse;
       }
 
-      // Construct the JSON input body for the Web Scraper actor
+      // Construct the JSON input body for the Website Content Crawler Actor
       var inputBody = new {
         startUrls = new[] { new { url = url } },
         crawlerType = crawlerType,
@@ -157,6 +165,66 @@ public class Script : ScriptBase {
       // Fallback to passthrough on any error
       return await HandlePassthrough().ConfigureAwait(false);
     }
+  }
+
+  /// <summary>
+  /// Handles the WebFetch operation by sending a single page request to the Web Fetch Actor's Standby endpoint.
+  /// Builds the request body from the url, formats and headers query parameters and returns the page content.
+  /// </summary>
+  /// <returns>
+  /// An <see cref="HttpResponseMessage"/> with the Web Fetch response envelope, or an error in the connector's error shape.
+  /// </returns>
+  private async Task<HttpResponseMessage> HandleWebFetch() {
+    var request = Context.Request;
+    var queryParams = System.Web.HttpUtility.ParseQueryString(request.RequestUri.Query);
+
+    var validation = ValidateQueryParameters(OP_WEB_FETCH_ID, queryParams);
+    if (!validation.IsValid) {
+      return CreateValidationErrorResponse(validation);
+    }
+
+    var url = queryParams["url"];
+    if (string.IsNullOrEmpty(url)) {
+      var errorResponse = new HttpResponseMessage(HttpStatusCode.BadRequest);
+      errorResponse.Content = CreateJsonContent("Missing required parameter: url");
+      return errorResponse;
+    }
+
+    var body = new JObject { ["url"] = url };
+    // Without formats, Web Fetch picks one from the content type.
+    var format = queryParams["formats"];
+    if (!string.IsNullOrWhiteSpace(format)) {
+      body["formats"] = new JArray(format.Trim().ToLowerInvariant());
+    }
+    var headersJson = queryParams["headers"];
+    if (!string.IsNullOrWhiteSpace(headersJson) && TryParseWebFetchHeaders(headersJson, out var headers) && headers.Count > 0) {
+      body["headers"] = headers;
+    }
+
+    request.Content = new StringContent(body.ToString(Newtonsoft.Json.Formatting.None), Encoding.UTF8, "application/json");
+    // Replacing the whole URI also drops the query string, which carries the target site's custom headers.
+    request.RequestUri = new Uri(WEB_FETCH_ENDPOINT);
+
+    // Every call is billed, so send exactly once. Unlike the other handlers there is no passthrough
+    // fallback: it would send a second request, to the virtual /v2/web-fetch path that doesn't exist.
+    HttpResponseMessage response;
+    try {
+      response = await Context.SendAsync(request, CancellationToken).ConfigureAwait(false);
+    }
+    catch (OperationCanceledException) {
+      return CreateErrorResponse(HttpStatusCode.GatewayTimeout, "WEB_FETCH_TIMEOUT",
+        "Web Fetch did not answer in time. The page may still have been fetched and billed.");
+    }
+    catch (HttpRequestException ex) {
+      return CreateErrorResponse(HttpStatusCode.BadGateway, "WEB_FETCH_UNREACHABLE",
+        $"Could not connect to Web Fetch: {ex.Message}");
+    }
+
+    // A target page's own 4xx/5xx arrives as 200 with fetch.httpStatusCode set, so it is content, not an error.
+    if ((int)response.StatusCode < 400) {
+      return response;
+    }
+    return await CreateWebFetchErrorResponse(response).ConfigureAwait(false);
   }
 
   /// <summary>
@@ -838,6 +906,84 @@ public class Script : ScriptBase {
   }
 
   /// <summary>
+  /// Validates that a parameter value is one of the formats Web Fetch accepts. Blank values are valid,
+  /// because Web Fetch then picks the format from the content type.
+  /// </summary>
+  /// <param name="paramName">The name of the parameter being validated.</param>
+  /// <param name="paramValue">The value to validate.</param>
+  /// <returns>ValidationResult indicating success or failure with error message.</returns>
+  private ValidationResult ValidateWebFetchFormat(string paramName, string paramValue) {
+    var result = new ValidationResult();
+
+    if (string.IsNullOrWhiteSpace(paramValue) || WebFetchFormats.Contains(paramValue.Trim().ToLowerInvariant())) {
+      return result;
+    }
+
+    result.AddError($"Parameter '{paramName}' must be one of: {string.Join(", ", WebFetchFormats)}.");
+    return result;
+  }
+
+  /// <summary>
+  /// Validates that a parameter value is a JSON object of custom headers that Web Fetch can send to the target site.
+  /// </summary>
+  /// <param name="paramName">The name of the parameter being validated.</param>
+  /// <param name="paramValue">The value to validate.</param>
+  /// <returns>ValidationResult indicating success or failure with error message.</returns>
+  private ValidationResult ValidateWebFetchHeaders(string paramName, string paramValue) {
+    var result = new ValidationResult();
+
+    if (string.IsNullOrWhiteSpace(paramValue) || TryParseWebFetchHeaders(paramValue, out _)) {
+      return result;
+    }
+
+    result.AddError($"Parameter '{paramName}' must be a JSON object with text, number or true/false values, for example {{\"Accept-Language\": \"fr-FR\"}}.");
+    return result;
+  }
+
+  /// <summary>
+  /// Parses custom headers for Web Fetch. Web Fetch fails the whole fetch on a non-string header value,
+  /// so numbers and true/false are converted to text, and null, arrays and objects are rejected.
+  /// </summary>
+  /// <param name="json">The headers as a JSON object string.</param>
+  /// <param name="headers">The headers with every value as a string, or null when parsing fails.</param>
+  /// <returns>True if the value is a JSON object with supported values, false otherwise.</returns>
+  private static bool TryParseWebFetchHeaders(string json, out JObject headers) {
+    headers = null;
+    JToken parsed;
+    try {
+      // DateParseHandling.None keeps date-like header values as the exact text the user entered.
+      parsed = JsonConvert.DeserializeObject<JToken>(json, new JsonSerializerSettings { DateParseHandling = DateParseHandling.None });
+    }
+    catch (Newtonsoft.Json.JsonException) {
+      return false;
+    }
+
+    if (!(parsed is JObject headerObject)) {
+      return false;
+    }
+
+    var result = new JObject();
+    foreach (var property in headerObject.Properties()) {
+      switch (property.Value.Type) {
+        case JTokenType.String:
+          result[property.Name] = (string)property.Value;
+          break;
+        case JTokenType.Integer:
+        case JTokenType.Float:
+        case JTokenType.Boolean:
+          // JSON formatting gives "true" and invariant-culture numbers, unlike ToString().
+          result[property.Name] = property.Value.ToString(Newtonsoft.Json.Formatting.None);
+          break;
+        default:
+          return false;
+      }
+    }
+
+    headers = result;
+    return true;
+  }
+
+  /// <summary>
   /// Returns validation rules for each operation that requires query parameter validation.
   /// Maps operation IDs to their parameter validation rules.
   /// The dictionary is lazily built once per instance and cached.
@@ -857,6 +1003,11 @@ public class Script : ScriptBase {
       },
       [OP_SCRAPE_SINGLE_URL_ID] = new Dictionary<string, ParameterValidator> {
         ["url"] = ValidateUrl
+      },
+      [OP_WEB_FETCH_ID] = new Dictionary<string, ParameterValidator> {
+        ["url"] = ValidateUrl,
+        ["formats"] = ValidateWebFetchFormat,
+        ["headers"] = ValidateWebFetchHeaders
       },
       [OP_GET_DATASET_ITEMS_ID] = new Dictionary<string, ParameterValidator> {
         ["limit"] = ValidateNonNegativeInteger,
@@ -909,6 +1060,70 @@ public class Script : ScriptBase {
       }
     };
     errorResponse.Content = CreateJsonContent(errorObject.ToString(Newtonsoft.Json.Formatting.None));
+    return errorResponse;
+  }
+
+  /// <summary>
+  /// Creates an error response in the connector's error shape: {"error": {"type", "message"}}.
+  /// </summary>
+  /// <param name="statusCode">The HTTP status code of the response.</param>
+  /// <param name="type">The error type.</param>
+  /// <param name="message">The error message.</param>
+  /// <returns>HttpResponseMessage with the error details.</returns>
+  private HttpResponseMessage CreateErrorResponse(HttpStatusCode statusCode, string type, string message) {
+    var errorObject = new JObject {
+      ["error"] = new JObject {
+        ["type"] = type,
+        ["message"] = message
+      }
+    };
+    return new HttpResponseMessage(statusCode) {
+      Content = CreateJsonContent(errorObject.ToString(Newtonsoft.Json.Formatting.None))
+    };
+  }
+
+  /// <summary>
+  /// Converts a failed Web Fetch response into the connector's error shape, keeping the status code.
+  /// The Actor reports its own errors as {"error": str, "code": str}, the Standby gateway as
+  /// {"error": {"type": str, "message": str}}, and a gateway error page may not be JSON at all.
+  /// </summary>
+  /// <param name="response">The failed response from the Standby endpoint.</param>
+  /// <returns>HttpResponseMessage with the error details.</returns>
+  private async Task<HttpResponseMessage> CreateWebFetchErrorResponse(HttpResponseMessage response) {
+    var body = response.Content == null ? string.Empty : await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+    var type = "WEB_FETCH_ERROR";
+    string detail = null;
+
+    try {
+      var parsed = JObject.Parse(body ?? string.Empty);
+      var error = parsed["error"];
+      if (error?.Type == JTokenType.String) {
+        detail = (string)error;
+        if (parsed["code"]?.Type == JTokenType.String) {
+          type = (string)parsed["code"];
+        }
+      }
+      else if (error is JObject gatewayError) {
+        if (gatewayError["type"]?.Type == JTokenType.String) {
+          type = (string)gatewayError["type"];
+        }
+        if (gatewayError["message"]?.Type == JTokenType.String) {
+          detail = (string)gatewayError["message"];
+        }
+      }
+    }
+    catch (JsonReaderException) {
+      // Not JSON, for example a gateway HTML page: report the status alone.
+    }
+
+    var status = (int)response.StatusCode;
+    var message = string.IsNullOrEmpty(detail)
+      ? $"Web Fetch failed with status {status}"
+      : $"Web Fetch failed with status {status}: {detail}";
+
+    var errorResponse = CreateErrorResponse(response.StatusCode, type, message);
+    // Keep the rate-limit hint so retries honour it.
+    errorResponse.Headers.RetryAfter = response.Headers.RetryAfter;
     return errorResponse;
   }
 }
